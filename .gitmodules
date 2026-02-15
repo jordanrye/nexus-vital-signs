@@ -1,0 +1,12 @@
+[submodule "src/nexus"]
+	path = src/nexus
+	url = git@github.com:RaidcoreGG/RCGG-lib-nexus-api.git
+[submodule "src/mumble"]
+	path = src/mumble
+	url = git@github.com:RaidcoreGG/RCGG-lib-mumble-api.git
+[submodule "src/imgui"]
+	path = src/imgui
+	url = git@github.com:RaidcoreGG/imgui.git
+[submodule "src/interface"]
+	path = src/interface
+	url = git@github.com:TyrianDeveloperCollective/GW2-VitalSigns-Private.git

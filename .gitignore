@@ -1,0 +1,8 @@
+# build artefacts
+build/
+src/version.h
+
+# visual studio
+.vs/
+.vscode/
+*.user
