@@ -4,8 +4,8 @@
 
 struct Size_t
 {
-    int width;
-    int height;
+    int width = 32;
+    int height = 32;
 };
 
 struct Coordinate_t
@@ -25,10 +25,10 @@ struct Position_t
 
 struct GridProperties_t
 {
-    int rowCount = 10;
-    int rowMax;
+    int rowCount = 5;
+    int rowMax; /** NOTE: Not currently used */
     int columnCount = 1;
-    int columnMax;
+    int columnMax; /** NOTE: Not currently used */
     std::string cellDirection = "Left-to-right";
     int cellWidth = 200;
     int cellHeight = 60;
@@ -58,7 +58,9 @@ struct Trigger_t
 {
     std::string category;
     std::string effect;
-    std::string threshold;
+    std::string condition;
+    float threshold = 0.0f;
+    float thresholdMax = 0.0f;
 };
 
 struct Icon_t

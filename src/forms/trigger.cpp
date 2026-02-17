@@ -22,7 +22,7 @@ void form_Trigger(Trigger_t& trigger)
         "Resolution",
         "Stability",
         "Swiftness",
-        "Vigor"
+        "Vigor",
     };
     static const char* triggerConditionsEffectOptions[] {
         "Bleeding",
@@ -38,7 +38,7 @@ void form_Trigger(Trigger_t& trigger)
         "Taunt",
         "Torment",
         "Vulnerability",
-        "Weakness"
+        "Weakness",
     };
     static const char* triggerAurasEffectOptions[] {
         "Chaos Aura",
@@ -47,21 +47,20 @@ void form_Trigger(Trigger_t& trigger)
         "Frost Aura",
         "Light Aura",
         "Magnetic Aura",
-        "Shocking Aura"
+        "Shocking Aura",
     };
-    static const char* triggerThresholdOptions[] {
-        "Present",
-        "Absent",
-        "More than",
-        "Less than",
-        "Exactly",
-        "Not",
-        "Between"
+    static const char* triggerConditionOptions[] {
+        "Status: Active",
+        "Status: Inactive",
+        "Duration: Less Than",
+        "Duration: More Than",
+        "Stacks: Less Than",
+        "Stacks: More Than",
+        "Stacks: Between",
     };
 
     ImGui::PushID("Trigger");
     {
-        // Trigger
         int triggerCategory = 0; // Default to "<Inherit From Parent>"
         if (trigger.category == "<Inherit From Parent>") triggerCategory = 0;
         else if (trigger.category == "Boons") triggerCategory = 1;
@@ -69,13 +68,13 @@ void form_Trigger(Trigger_t& trigger)
         else if (trigger.category == "Auras") triggerCategory = 3;
         else if (trigger.category == "Control Effects") triggerCategory = 4;
         else if (trigger.category == "Raid Mechanics") triggerCategory = 5;
-        ImGui::Combo("Type", &triggerCategory, triggerCategoryOptions, IM_ARRAYSIZE(triggerCategoryOptions));
+        ImGui::Combo("Category", &triggerCategory, triggerCategoryOptions, IM_ARRAYSIZE(triggerCategoryOptions));
         trigger.category = triggerCategoryOptions[triggerCategory];
     
         if ("<Inherit From Parent>" == trigger.category)
         {
             trigger.effect = "<Inherit From Parent>";
-            trigger.threshold = "<Inherit From Parent>";
+            trigger.condition = "<Inherit From Parent>";
         }
         else if ("Boons" == trigger.category)
         {
@@ -131,20 +130,33 @@ void form_Trigger(Trigger_t& trigger)
             ImGui::Combo("Effect", &triggerEffect, triggerAurasEffectOptions, IM_ARRAYSIZE(triggerAurasEffectOptions));
             trigger.effect = triggerAurasEffectOptions[triggerEffect];
         }
-    
+
         if ("<Inherit From Parent>" != trigger.effect)
         {
-            int triggerThreshold = 0; // Default to "Present"
-            if (trigger.threshold == "Present") triggerThreshold = 0;
-            else if (trigger.threshold == "Absent") triggerThreshold = 1;
-            else if (trigger.threshold == "More than") triggerThreshold = 2;
-            else if (trigger.threshold == "Less than") triggerThreshold = 3;
-            else if (trigger.threshold == "Exactly") triggerThreshold = 4;
-            else if (trigger.threshold == "Not") triggerThreshold = 5;
-            else if (trigger.threshold == "Between") triggerThreshold = 6;
+            int triggerCondition = 0; // Default to "Status: Active"
+            if (trigger.condition == "Status: Active") triggerCondition = 0;
+            else if (trigger.condition == "Status: Inactive") triggerCondition = 1;
+            else if (trigger.condition == "Duration: Less Than") triggerCondition = 2;
+            else if (trigger.condition == "Duration: More Than") triggerCondition = 3;
+            else if (trigger.condition == "Stacks: Less Than") triggerCondition = 4;
+            else if (trigger.condition == "Stacks: More Than") triggerCondition = 5;
+            else if (trigger.condition == "Stacks: Between") triggerCondition = 6;
     
-            ImGui::Combo("Threshold", &triggerThreshold, triggerThresholdOptions, IM_ARRAYSIZE(triggerThresholdOptions));
-            trigger.threshold = triggerThresholdOptions[triggerThreshold];
+            ImGui::Combo("Condition", &triggerCondition, triggerConditionOptions, IM_ARRAYSIZE(triggerConditionOptions));
+            trigger.condition = triggerConditionOptions[triggerCondition];
+
+            if (trigger.condition != "Status: Active" && trigger.condition != "Status: Inactive")
+            {
+                if (trigger.condition == "Stacks: Between")
+                {
+                    ImGui::InputFloat("Threshold (Min)", &trigger.threshold, 1.f, 1.f, "%.1f");
+                    ImGui::InputFloat("Threshold (Max)", &trigger.thresholdMax, 1.f, 1.f, "%.1f");
+                }
+                else
+                {
+                    ImGui::InputFloat("Threshold", &trigger.threshold, 1.f, 1.f, "%.1f");
+                }
+            }
         }
     }
     ImGui::PopID();

@@ -95,7 +95,9 @@ void dser_Trigger_t(json& object, Trigger_t& trigger)
     {
         dser_BasicType(object["category"], trigger.category);
         dser_BasicType(object["effect"], trigger.effect);
+        dser_BasicType(object["condition"], trigger.condition);
         dser_BasicType(object["threshold"], trigger.threshold);
+        dser_BasicType(object["threshold-max"], trigger.thresholdMax);
     }
 }
 
@@ -335,7 +337,9 @@ json ser_Trigger_t(const Trigger_t& trigger)
     json object = json::object();
     object["category"] = trigger.category;
     object["effect"] = trigger.effect;
+    object["condition"] = trigger.condition;
     object["threshold"] = trigger.threshold;
+    object["threshold-max"] = trigger.thresholdMax;
     return object;
 }
 

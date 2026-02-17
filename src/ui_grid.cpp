@@ -363,9 +363,21 @@ namespace UI::Grid {
             return false;
         }
 
-        if (((trigger.category == "<Inherit From Parent>")) ||
-            ((trigger.threshold == "Present") && (context.effects[userIndex][trigger.effect].stacks >= 1U)) ||
-            ((trigger.threshold == "Absent") && (context.effects[userIndex][trigger.effect].stacks == 0U)))
+        if (trigger.category == "<Inherit From Parent>")
+        {
+            return true;
+        }
+
+        auto currStacks = context.effects[userIndex][trigger.effect].stacks;
+        auto currDuration = context.effects[userIndex][trigger.effect].duration / 1000.0f;
+
+        if ((trigger.condition == "Status: Active" && currStacks >= 1U) ||
+            (trigger.condition == "Status: Inactive" && currStacks == 0U) ||
+            (trigger.condition == "Duration: Less Than" && currDuration < trigger.threshold) ||
+            (trigger.condition == "Duration: More Than" && currDuration > trigger.threshold) ||
+            (trigger.condition == "Stacks: Less Than" && currStacks < trigger.threshold) ||
+            (trigger.condition == "Stacks: More Than" && currStacks > trigger.threshold) ||
+            (trigger.condition == "Stacks: Between" && currStacks >= trigger.threshold && currStacks <= trigger.thresholdMax))
         {
             return true;
         }
