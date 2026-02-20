@@ -13,6 +13,7 @@ namespace UI::Radial {
         // Configuration
         Position_t positionConfig;
         Layout_t layoutConfig;
+        std::string palette;
         ColourPresets_t colourPresets;
 
         // Menu state
@@ -26,6 +27,7 @@ namespace UI::Radial {
 
         // Item state
         std::string charName[SQUAD_MEMBER_LIMIT];
+        VitalSignsData::EProfession profession[SQUAD_MEMBER_LIMIT];
         float health[SQUAD_MEMBER_LIMIT];
         VitalSignsData::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
         float barrier[SQUAD_MEMBER_LIMIT];
@@ -175,7 +177,7 @@ namespace UI::Radial {
         return properties;
     }
 
-    bool BeginRadialMenu(const char* name, const Position_t& position, const Layout_t& layout, const ColourPresets_t& colours, bool isActive)
+    bool BeginRadialMenu(const char* name, const Position_t& position, const Layout_t& layout, const std::string& palette, const ColourPresets_t& colours, bool isActive)
     {
         bool isOpen = false;
         bool isAlwaysDisplayed = ((layout.visibility == 0) || (layout.visibility == 1));
@@ -184,6 +186,7 @@ namespace UI::Radial {
         {
             context.positionConfig = position;
             context.layoutConfig = layout;
+            context.palette = palette;
             context.colourPresets = colours;
 
             context.isActive = isActive;
@@ -276,7 +279,7 @@ namespace UI::Radial {
                 float healthRadiusMin = annulusRadiusMin;
                 float healthRadiusMax = annulusRadiusMin + (annulusWidth * context.health[i]);
                 SectorDrawProperties_t healthProperties = CalcSectorProperties(centralAngle, arcSegments, healthRadiusMin, healthRadiusMax, itemSpacing, i);
-                DrawSector(drawList, healthProperties, context.menuPosition, GetHealthColour(context.colourPresets, context.healthType[i]));
+                DrawSector(drawList, healthProperties, context.menuPosition, GetHealthColour(context.colourPresets, context.palette, context.healthType[i], context.profession[i]));
 
                 if (isHovered)
                 {
@@ -373,13 +376,14 @@ namespace UI::Radial {
         ImGui::End();
     }
 
-    bool RadialMenuItem(const char* name, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects)
+    bool RadialMenuItem(const char* name, VitalSignsData::EProfession profession, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects)
     {
         bool isSelected = false;
 
         if (context.index < context.layoutConfig.radial.sectorCountMax)
         {
             context.charName[context.index] = std::string(name);
+            context.profession[context.index] = profession;
             context.health[context.index] = health;
             context.healthType[context.index] = healthType;
             context.barrier[context.index] = barrier;

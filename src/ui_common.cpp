@@ -10,30 +10,116 @@
 
 namespace UI {
 
-    ImColor GetHealthColour(const ColourPresets_t& config, VitalSignsData::E_HEALTH_TYPE healthType)
+    ImColor GetBackgroundColour(const ColourPresets_t& config, const std::string& palette)
+    {
+        if (palette == "Generic")
+        {
+            return config.COLOUR_BACKGROUND;
+        }
+        else if (palette == "Profession")
+        {
+            return config.COLOUR_PROF_BACKGROUND;
+        }
+    }
+
+    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsData::E_HEALTH_TYPE healthType, VitalSignsData::EProfession profession)
     {
         ImColor colour{};
 
-        switch (healthType)
+        if (palette == "Generic")
         {
-            case VitalSignsData::E_HEALTH_ALIVE:
-                colour = config.COLOUR_HEALTH;
-                break;
-            case VitalSignsData::E_HEALTH_DOWNED:
-                colour = config.COLOUR_HEALTH_DOWNED;
-                break;
-            case VitalSignsData::E_HEALTH_DEFEATED:
-                colour = config.COLOUR_HEALTH_DEFEATED;
-                break;
-            case VitalSignsData::E_HEALTH_SHROUD_NECROMANCER:
-                colour = config.COLOUR_SHROUD_NECROMANCER;
-                break;
-            case VitalSignsData::E_HEALTH_SHROUD_SPECTER:
-                colour = config.COLOUR_SHROUD_SPECTER;
-                break;
+            switch (healthType)
+            {
+                case VitalSignsData::E_HEALTH_ALIVE:
+                    colour = config.COLOUR_HEALTH;
+                    break;
+                case VitalSignsData::E_HEALTH_DOWNED:
+                    colour = config.COLOUR_HEALTH_DOWNED;
+                    break;
+                case VitalSignsData::E_HEALTH_DEFEATED:
+                    colour = config.COLOUR_HEALTH_DEFEATED;
+                    break;
+                case VitalSignsData::E_HEALTH_SHROUD_NECROMANCER:
+                    colour = config.COLOUR_SHROUD_NECROMANCER;
+                    break;
+                case VitalSignsData::E_HEALTH_SHROUD_SPECTER:
+                    colour = config.COLOUR_SHROUD_SPECTER;
+                    break;
+            }
+        }
+        else if (palette == "Profession")
+        {
+            float h, s, v;
+
+            switch (profession)
+            {
+                case VitalSignsData::EProfession::Elementalist:
+                    colour = config.COLOUR_PROF_HEALTH_ELEMENTALIST;
+                    break;
+                case VitalSignsData::EProfession::Engineer:
+                    colour = config.COLOUR_PROF_HEALTH_ENGINEER;
+                    break;
+                case VitalSignsData::EProfession::Guardian:
+                    colour = config.COLOUR_PROF_HEALTH_GUARDIAN;
+                    break;
+                case VitalSignsData::EProfession::Mesmer:
+                    colour = config.COLOUR_PROF_HEALTH_MESMER;
+                    break;
+                case VitalSignsData::EProfession::Necromancer:
+                    colour = config.COLOUR_PROF_HEALTH_NECROMANCER;
+                    break;
+                case VitalSignsData::EProfession::Ranger:
+                    colour = config.COLOUR_PROF_HEALTH_RANGER;
+                    break;
+                case VitalSignsData::EProfession::Revenant:
+                    colour = config.COLOUR_PROF_HEALTH_REVENANT;
+                    break;
+                case VitalSignsData::EProfession::Thief:
+                    colour = config.COLOUR_PROF_HEALTH_THIEF;
+                    break;
+                case VitalSignsData::EProfession::Warrior:
+                    colour = config.COLOUR_PROF_HEALTH_WARRIOR;
+                    break;
+            }
+
+            switch (healthType)
+            {
+                case VitalSignsData::E_HEALTH_DOWNED:
+                    colour = config.COLOUR_HEALTH_DOWNED;
+                    break;
+                case VitalSignsData::E_HEALTH_DEFEATED:
+                    colour = config.COLOUR_HEALTH_DEFEATED;
+                    break;
+                case VitalSignsData::E_HEALTH_SHROUD_NECROMANCER:
+                    ImGui::ColorConvertRGBtoHSV(colour.Value.x, colour.Value.y, colour.Value.z, h, s, v);
+                    v *= 0.5f;
+                    v = max(v, 0.0f);
+                    v = min(v, 255.0f);
+                    ImGui::ColorConvertHSVtoRGB(h, s, v, colour.Value.x, colour.Value.y, colour.Value.z);
+                    break;
+                case VitalSignsData::E_HEALTH_SHROUD_SPECTER:
+                    ImGui::ColorConvertRGBtoHSV(colour.Value.x, colour.Value.y, colour.Value.z, h, s, v);
+                    v *= 0.5f;
+                    v = max(v, 0.0f);
+                    v = min(v, 255.0f);
+                    ImGui::ColorConvertHSVtoRGB(h, s, v, colour.Value.x, colour.Value.y, colour.Value.z);
+                    break;
+            }
         }
 
         return colour;
+    }
+
+    ImColor GetBarrierColour(const ColourPresets_t& config, const std::string& palette)
+    {
+        if (palette == "Generic")
+        {
+            return config.COLOUR_BARRIER;
+        }
+        else if (palette == "Profession")
+        {
+            return config.COLOUR_PROF_BARRIER;
+        }
     }
 
     Texture* GetOrCreateTexture(const std::string& textureSource, const std::string& texturePath)

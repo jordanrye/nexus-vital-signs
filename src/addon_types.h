@@ -47,19 +47,19 @@ struct ColourPresets_t
     // ImColor COLOUR_ROLE_BARRIER = ImColor(170, 144, 78, 128);
     // ImColor COLOUR_ROLE_HOVERED = ImColor(255, 255, 255, 32);
 
-    /** TODO: Profession Colours */
-    // ImColor COLOUR_PROF_BACKGROUND = ImColor(0, 0, 0);
-    // ImColor COLOUR_PROF_HEALTH_ELEMENTALIST = ImColor(197, 110, 108);
-    // ImColor COLOUR_PROF_HEALTH_ENGINEER = ImColor(166, 125, 71);
-    // ImColor COLOUR_PROF_HEALTH_GUARDIAN = ImColor(91, 154, 174);
-    // ImColor COLOUR_PROF_HEALTH_MESMER = ImColor(146, 97, 170);
-    // ImColor COLOUR_PROF_HEALTH_NECROMANCER = ImColor(66, 134, 89);
-    // ImColor COLOUR_PROF_HEALTH_RANGER = ImColor(114, 178, 54);
-    // ImColor COLOUR_PROF_HEALTH_REVENANT = ImColor(166, 87, 71);
-    // ImColor COLOUR_PROF_HEALTH_THIEF = ImColor(154, 114, 119);
-    // ImColor COLOUR_PROF_HEALTH_WARRIOR = ImColor(204, 167, 82);
-    // ImColor COLOUR_PROF_BARRIER = ImColor(255, 255, 255, 128);
-    // ImColor COLOUR_PROF_HOVERED = ImColor(255, 255, 255, 32);
+    /* Profession Colours */
+    ImColor COLOUR_PROF_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_PROF_HEALTH_ELEMENTALIST = ImColor(197, 110, 108);
+    ImColor COLOUR_PROF_HEALTH_ENGINEER = ImColor(166, 125, 71);
+    ImColor COLOUR_PROF_HEALTH_GUARDIAN = ImColor(91, 154, 174);
+    ImColor COLOUR_PROF_HEALTH_MESMER = ImColor(146, 97, 170);
+    ImColor COLOUR_PROF_HEALTH_NECROMANCER = ImColor(66, 134, 89);
+    ImColor COLOUR_PROF_HEALTH_RANGER = ImColor(114, 178, 54);
+    ImColor COLOUR_PROF_HEALTH_REVENANT = ImColor(166, 87, 71);
+    ImColor COLOUR_PROF_HEALTH_THIEF = ImColor(154, 114, 119);
+    ImColor COLOUR_PROF_HEALTH_WARRIOR = ImColor(204, 167, 82);
+    ImColor COLOUR_PROF_BARRIER = ImColor(255, 255, 255, 128);
+    ImColor COLOUR_PROF_HOVERED = ImColor(255, 255, 255, 32);
 
     /** TODO: Party Colours */
     // ImColor COLOUR_PARTY_BACKGROUND = ImColor(0, 0, 0);

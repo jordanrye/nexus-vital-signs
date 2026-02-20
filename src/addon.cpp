@@ -153,7 +153,7 @@ namespace Addon {
         }
         else if ("Radial" == activeLayout->layout.type)
         {
-            if (UI::Radial::BeginRadialMenu("VitalSigns##Radial", activeLayout->position, activeLayout->layout, ColourPresets, isRadialMenuActive))
+            if (UI::Radial::BeginRadialMenu("VitalSigns##Radial", activeLayout->position, activeLayout->layout, activeLayout->colors, ColourPresets, isRadialMenuActive))
             {
                 for (auto &user : VitalsData->getUsers())
                 {
@@ -167,7 +167,7 @@ namespace Addon {
                         health = userData.Shroud.Current / userData.Shroud.Max;
                     }
 
-                    if (UI::Radial::RadialMenuItem(name.c_str(), health, userData.HealthType, barrier, userData.Effects))
+                    if (UI::Radial::RadialMenuItem(name.c_str(), userData.Profession, health, userData.HealthType, barrier, userData.Effects))
                     {
                         VitalsData->setTarget(user);
                     }
@@ -268,14 +268,6 @@ namespace Addon {
             ImGui::BeginDisabled();            
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
             ImGui::EndDisabled();
-        }
-        ImGui::PopID();
-
-        ImGui::PushID("SoloFrame");
-        {
-            ImGui::TextDisabled("Solo Frame");
-            ImGui::Separator();
-            form_SelectLayout(layoutNames, ConfigGeneral.soloLayout);
         }
         ImGui::PopID();
     }
@@ -460,13 +452,13 @@ namespace Addon {
             static int colorsSelection = 0; // Default to "Centre"
             if (colors == "Generic") colorsSelection = 0;
             else if (colors == "Role") colorsSelection = 1;
-            else if (colors == "Profession") colorsSelection = 2;
+            else if (colors == "Profession") colorsSelection = 1;
             else if (colors == "Party") colorsSelection = 3;
 
             if (ImGui::Combo("Color Palette", &colorsSelection, colorsOptions, IM_ARRAYSIZE(colorsOptions)))
             {
-                /// TODO: Switch between colour palettes
-                colors = colorsOptions[colorsSelection];
+                if (colorsSelection == 0) colors = "Generic";
+                else if (colorsSelection == 1) colors = "Profession";
             }
         }
 
@@ -906,6 +898,27 @@ namespace Addon {
                 ImGui::ColorEdit4("Shroud (Specter)", &(ColourPresets.COLOUR_SHROUD_SPECTER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+            }
+            ImGui::PopID();
+        });
+
+        AddPresetItem(coloursBranchId, "Colors", "Profession", []() {
+            ImGui::PushID("Colors/Profession");
+            {
+                ImGui::TextDisabled("Color Properties");
+                ImGui::Separator();
+                ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_PROF_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Elementalist", &(ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Engineer", &(ColourPresets.COLOUR_PROF_HEALTH_ENGINEER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Guardian", &(ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Mesmer", &(ColourPresets.COLOUR_PROF_HEALTH_MESMER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Necromancer", &(ColourPresets.COLOUR_PROF_HEALTH_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Ranger", &(ColourPresets.COLOUR_PROF_HEALTH_RANGER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Revenant", &(ColourPresets.COLOUR_PROF_HEALTH_REVENANT.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Thief", &(ColourPresets.COLOUR_PROF_HEALTH_THIEF.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Warrior", &(ColourPresets.COLOUR_PROF_HEALTH_WARRIOR.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_PROF_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_PROF_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
             }
             ImGui::PopID();
         });

@@ -729,7 +729,9 @@ namespace UI::Grid {
             DrawProperties_t parentProperties = CalcDrawProperties(frameDrawProperties.size.x, frameDrawProperties.size.y, frameDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, i);
             bool isHovered = IsItemHovered(parentProperties);
 
-            ImColor healthColour = GetHealthColour(context.colourPresets, context.healthType[i]);
+            ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig.colors);
+            ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig.colors, context.healthType[i], context.profession[i]);
+            ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig.colors);
             const Indicator_t* customBorder = nullptr;
             std::vector<std::pair<const Indicator_t*, bool>> drawables;
 
@@ -763,7 +765,7 @@ namespace UI::Grid {
             contentProps.height -= 2.0f * borderThickness;
             
             /* Background */
-            DrawCell(drawList, contentProps, context.colourPresets.COLOUR_BACKGROUND);
+            DrawCell(drawList, contentProps, backgroundColour);
             
             /* Health */
             if (context.health[i] > 0.001f)
@@ -794,7 +796,7 @@ namespace UI::Grid {
                     /* Overflow barrier */
                     properties.position.x += contentProps.width - barrierWidth;
                     properties.roundingCorners = ImDrawCornerFlags_Right;
-                    DrawCell(drawList, properties, context.colourPresets.COLOUR_BARRIER);
+                    DrawCell(drawList, properties, barrierColour);
                 }
                 else
                 {
@@ -803,7 +805,7 @@ namespace UI::Grid {
                     ImDrawCornerFlags roundingCorners = ((healthWidth + barrierWidth) < (contentProps.width - (float)contentProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_Right;
                     properties.position.x += healthWidth;
                     properties.roundingCorners = roundingCorners;
-                    DrawCell(drawList, properties, context.colourPresets.COLOUR_BARRIER);
+                    DrawCell(drawList, properties, barrierColour);
                 }
             }
 

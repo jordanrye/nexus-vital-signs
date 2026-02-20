@@ -9,9 +9,9 @@
 
 namespace UI::Radial {
 
-    bool BeginRadialMenu(const char* name, const Position_t& position, const Layout_t& layout, const ColourPresets_t& colours, bool isActive);
+    bool BeginRadialMenu(const char* name, const Position_t& position, const Layout_t& layout, const std::string& palette, const ColourPresets_t& colours, bool isActive);
     void EndRadialMenu();
-    bool RadialMenuItem(const char* name, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects);
+    bool RadialMenuItem(const char* name, VitalSignsData::EProfession profession, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects);
 
 } // namespace UI::Radial
 

@@ -11,7 +11,9 @@ namespace UI {
     const int BOON_LIMIT = 12; // max number of boons
     const int CONDITION_LIMIT = 14; // max number of conditions
 
-    ImColor GetHealthColour(const ColourPresets_t& config, VitalSignsData::E_HEALTH_TYPE healthType);
+    ImColor GetBackgroundColour(const ColourPresets_t& config, const std::string& palette);
+    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsData::E_HEALTH_TYPE healthType, VitalSignsData::EProfession profession);
+    ImColor GetBarrierColour(const ColourPresets_t& config, const std::string& palette);
 
     Texture* GetOrCreateTexture(const std::string& textureSource, const std::string& texturePath);
 
