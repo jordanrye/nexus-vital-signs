@@ -142,7 +142,7 @@ namespace Addon {
                         health = userData.Shroud.Current / userData.Shroud.Max;
                     }
     
-                    if (UI::Grid::GridMenuItem(name.c_str(), health, userData.HealthType, barrier, userData.Effects))
+                    if (UI::Grid::GridMenuItem(name.c_str(), userData.Profession, userData.Specialisation, health, userData.HealthType, barrier, userData.Effects))
                     {
                         VitalsData->setTarget(user);
                     }
@@ -310,16 +310,16 @@ namespace Addon {
                 if (UI::Grid::BeginGridMenu("Preview##Grid", *layout, ColourPresets, BorderPresets, true))
                 {
                     VitalSignsData::Effects_t dummyEffects{};
-                    UI::Grid::GridMenuItem("Preview 1", 1.0f, VitalSignsData::E_HEALTH_ALIVE, 0.0f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 2", 0.75f, VitalSignsData::E_HEALTH_ALIVE, 0.5f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 3", 0.5f, VitalSignsData::E_HEALTH_ALIVE, 0.25f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 4", 0.25f, VitalSignsData::E_HEALTH_ALIVE, 0.0f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 5", 0.5f, VitalSignsData::E_HEALTH_DOWNED, 0.0f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 6", 0.25f, VitalSignsData::E_HEALTH_DEFEATED, 0.0f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 7", 0.75f, VitalSignsData::E_HEALTH_SHROUD_NECROMANCER, 0.0f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 8", 0.5f, VitalSignsData::E_HEALTH_SHROUD_SPECTER, 0.0f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 9", 0.5f, VitalSignsData::E_HEALTH_SHROUD_NECROMANCER, 0.25f, dummyEffects);
-                    UI::Grid::GridMenuItem("Preview 10", 0.75f, VitalSignsData::E_HEALTH_SHROUD_SPECTER, 0.25f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 1", VitalSignsData::EProfession::Elementalist, VitalSignsData::ESpecialisation::None, 1.0f, VitalSignsData::E_HEALTH_ALIVE, 0.0f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 2", VitalSignsData::EProfession::Engineer, VitalSignsData::ESpecialisation::None, 0.75f, VitalSignsData::E_HEALTH_ALIVE, 0.5f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 3", VitalSignsData::EProfession::Guardian, VitalSignsData::ESpecialisation::None, 0.5f, VitalSignsData::E_HEALTH_ALIVE, 0.25f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 4", VitalSignsData::EProfession::Mesmer, VitalSignsData::ESpecialisation::None, 0.25f, VitalSignsData::E_HEALTH_ALIVE, 0.0f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 5", VitalSignsData::EProfession::Necromancer, VitalSignsData::ESpecialisation::None, 0.5f, VitalSignsData::E_HEALTH_DOWNED, 0.0f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 6", VitalSignsData::EProfession::Ranger, VitalSignsData::ESpecialisation::None, 0.25f, VitalSignsData::E_HEALTH_DEFEATED, 0.0f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 7", VitalSignsData::EProfession::Revenant, VitalSignsData::ESpecialisation::None, 0.75f, VitalSignsData::E_HEALTH_SHROUD_NECROMANCER, 0.0f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 8", VitalSignsData::EProfession::Thief, VitalSignsData::ESpecialisation::None, 0.5f, VitalSignsData::E_HEALTH_SHROUD_SPECTER, 0.0f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 9", VitalSignsData::EProfession::Warrior, VitalSignsData::ESpecialisation::None, 0.5f, VitalSignsData::E_HEALTH_SHROUD_NECROMANCER, 0.25f, dummyEffects);
+                    UI::Grid::GridMenuItem("Preview 10", VitalSignsData::EProfession::Warrior, VitalSignsData::ESpecialisation::None, 0.75f, VitalSignsData::E_HEALTH_SHROUD_SPECTER, 0.25f, dummyEffects);
                     UI::Grid::EndGridMenu();
                 }
 

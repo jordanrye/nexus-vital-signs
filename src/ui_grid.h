@@ -11,7 +11,7 @@ namespace UI::Grid {
 
     bool BeginGridMenu(const char* name, const LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive);
     void EndGridMenu();
-    bool GridMenuItem(const char* name, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects);
+    bool GridMenuItem(const char* name, VitalSignsData::EProfession profession, VitalSignsData::ESpecialisation specialisation, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects);
 
 } // namespace UI::Grid
 

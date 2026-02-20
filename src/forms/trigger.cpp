@@ -7,8 +7,7 @@ void form_Trigger(Trigger_t& trigger)
         "Boons",
         "Conditions",
         "Auras",
-        "Control Effects",
-        "Raid Mechanics",
+        "Professions",
     };
     static const char* triggerBoonsEffectOptions[] {
         "Aegis",
@@ -49,6 +48,53 @@ void form_Trigger(Trigger_t& trigger)
         "Magnetic Aura",
         "Shocking Aura",
     };
+    static const char* triggerProfessionOptions[] {
+        "Elementalist",
+        "Elementalist: Tempest",
+        "Elementalist: Weaver",
+        "Elementalist: Catalyst",
+        "Elementalist: Evoker",
+        "Engineer",
+        "Engineer: Scrapper",
+        "Engineer: Holosmith",
+        "Engineer: Mechanist",
+        "Engineer: Amalgam",
+        "Guardian",
+        "Guardian: Dragonhunter",
+        "Guardian: Firebrand",
+        "Guardian: Willbender",
+        "Guardian: Luminary",
+        "Mesmer",
+        "Mesmer: Chronomancer",
+        "Mesmer: Mirage",
+        "Mesmer: Virtuoso",
+        "Mesmer: Troubadour",
+        "Necromancer",
+        "Necromancer: Reaper",
+        "Necromancer: Scourge",
+        "Necromancer: Harbinger",
+        "Necromancer: Ritualist",
+        "Ranger",
+        "Ranger: Druid",
+        "Ranger: Soulbeast",
+        "Ranger: Untamed",
+        "Ranger: Galeshot",
+        "Revenant",
+        "Revenant: Herald",
+        "Revenant: Renegade",
+        "Revenant: Vindicator",
+        "Revenant: Conduit",
+        "Thief",
+        "Thief: Daredevil",
+        "Thief: Deadeye",
+        "Thief: Specter",
+        "Thief: Antiquary",
+        "Warrior",
+        "Warrior: Berserker",
+        "Warrior: Spellbreaker",
+        "Warrior: Bladesworn",
+        "Warrior: Paragon",
+    };
     static const char* triggerConditionOptions[] {
         "Status: Active",
         "Status: Inactive",
@@ -66,8 +112,7 @@ void form_Trigger(Trigger_t& trigger)
         else if (trigger.category == "Boons") triggerCategory = 1;
         else if (trigger.category == "Conditions") triggerCategory = 2;
         else if (trigger.category == "Auras") triggerCategory = 3;
-        else if (trigger.category == "Control Effects") triggerCategory = 4;
-        else if (trigger.category == "Raid Mechanics") triggerCategory = 5;
+        else if (trigger.category == "Professions") triggerCategory = 4;
         ImGui::Combo("Category", &triggerCategory, triggerCategoryOptions, IM_ARRAYSIZE(triggerCategoryOptions));
         trigger.category = triggerCategoryOptions[triggerCategory];
     
@@ -130,8 +175,22 @@ void form_Trigger(Trigger_t& trigger)
             ImGui::Combo("Effect", &triggerEffect, triggerAurasEffectOptions, IM_ARRAYSIZE(triggerAurasEffectOptions));
             trigger.effect = triggerAurasEffectOptions[triggerEffect];
         }
+        else if ("Professions" == trigger.category)
+        {
+            int triggerEffect = 0;             
+            for (int i = 0; i < IM_ARRAYSIZE(triggerProfessionOptions); i++)
+            {
+                if (trigger.effect == triggerProfessionOptions[i])
+                {
+                    triggerEffect = i;
+                    break;
+                }
+            }
+            ImGui::Combo("Effect", &triggerEffect, triggerProfessionOptions, IM_ARRAYSIZE(triggerProfessionOptions));
+            trigger.effect = triggerProfessionOptions[triggerEffect];
+        }
 
-        if ("<Inherit From Parent>" != trigger.effect)
+        if (("<Inherit From Parent>" != trigger.category) && ("Professions" != trigger.category))
         {
             int triggerCondition = 0; // Default to "Status: Active"
             if (trigger.condition == "Status: Active") triggerCondition = 0;

@@ -30,6 +30,8 @@ namespace UI::Grid {
 
         // Item state
         std::string charName[SQUAD_MEMBER_LIMIT];
+        VitalSignsData::EProfession profession[SQUAD_MEMBER_LIMIT];
+        VitalSignsData::ESpecialisation specialisation[SQUAD_MEMBER_LIMIT];
         float health[SQUAD_MEMBER_LIMIT];
         VitalSignsData::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
         float barrier[SQUAD_MEMBER_LIMIT];
@@ -364,6 +366,11 @@ namespace UI::Grid {
         }
 
         if (trigger.category == "<Inherit From Parent>")
+        {
+            return true;
+        }
+
+        if ((trigger.category == "Professions") && (trigger.effect == VitalSignsData::getProfessionString(context.profession[userIndex], context.specialisation[userIndex])))
         {
             return true;
         }
@@ -829,13 +836,15 @@ namespace UI::Grid {
         ImGui::End();
     }
 
-    bool GridMenuItem(const char* name, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects)
+    bool GridMenuItem(const char* name, VitalSignsData::EProfession profession, VitalSignsData::ESpecialisation specialisation, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects)
     {
         bool isSelected = false;
 
         if (context.index < (context.layoutConfig.layout.grid.rowCount * context.layoutConfig.layout.grid.columnCount))
         {
             context.charName[context.index] = std::string(name);
+            context.profession[context.index] = profession;
+            context.specialisation[context.index] = specialisation;
             context.health[context.index] = health;
             context.healthType[context.index] = healthType;
             context.barrier[context.index] = barrier;
