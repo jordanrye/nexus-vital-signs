@@ -48,7 +48,7 @@ extern "C" __declspec(dllexport) AddonDefinition * GetAddonDef()
     AddonDef.Version.Build = V_BUILD;
     AddonDef.Version.Revision = V_REVISION;
     AddonDef.Author = "Jordan";
-    AddonDef.Description = "Monitor the health, boons and conditions of your party or squad with customisable layouts.";
+    AddonDef.Description = "Monitor the health, effects and more of your party/squad with customisable layouts.";
     AddonDef.Load = AddonLoad;
     AddonDef.Unload = AddonUnload;
     AddonDef.Flags = EAddonFlags_IsVolatile;

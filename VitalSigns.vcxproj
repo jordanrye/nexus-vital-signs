@@ -108,7 +108,7 @@
     <ClInclude Include="src\basic_types.h" />
     <ClInclude Include="src\forms\forms.h" />
     <ClInclude Include="src\interface\gw2re\Game\Agent\Agent.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Agent\AgSelectionContext.h" />
+    <ClInclude Include="src\interface\gw2re\Game\AgentSelection\AsContext.h" />
     <ClInclude Include="src\interface\gw2re\Game\Char\Character.h" />
     <ClInclude Include="src\interface\gw2re\Game\Char\ChBuffMgr.h" />
     <ClInclude Include="src\interface\gw2re\Game\Char\ChCombatant.h" />
@@ -182,7 +182,7 @@
     <ClCompile Include="src\forms\text_limit.cpp" />
     <ClCompile Include="src\forms\trigger.cpp" />
     <ClCompile Include="src\interface\gw2re\Game\Agent\Agent.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Agent\AgSelectionContext.cpp" />
+    <ClCompile Include="src\interface\gw2re\Game\AgentSelection\AsContext.cpp" />
     <ClCompile Include="src\interface\gw2re\Game\Char\Character.cpp" />
     <ClCompile Include="src\interface\gw2re\Game\Char\ChBuffMgr.cpp" />
     <ClCompile Include="src\interface\gw2re\Game\Char\ChCombatant.cpp" />

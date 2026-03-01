@@ -376,18 +376,27 @@ namespace UI::Radial {
         ImGui::End();
     }
 
-    bool RadialMenuItem(const char* name, VitalSignsData::EProfession profession, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects)
+    bool RadialMenuItem(const VitalSignsData::UserData_t& userData)
     {
         bool isSelected = false;
 
         if (context.index < context.layoutConfig.radial.sectorCountMax)
         {
-            context.charName[context.index] = std::string(name);
-            context.profession[context.index] = profession;
+            std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
+            float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);
+            float barrier = ((userData.Health.Max > 0.0f) ? (userData.Barrier.Current / userData.Health.Max) : 0.0f);
+            if ((VitalSignsData::E_HEALTH_SHROUD_NECROMANCER == userData.HealthType) ||
+                (VitalSignsData::E_HEALTH_SHROUD_SPECTER == userData.HealthType))
+            {
+                health = ((userData.Shroud.Max > 0.0f) ? (userData.Shroud.Current / userData.Shroud.Max) : 0.0f);
+            }
+
+            context.charName[context.index] = name;
+            context.profession[context.index] = userData.Profession;
             context.health[context.index] = health;
-            context.healthType[context.index] = healthType;
+            context.healthType[context.index] = userData.HealthType;
             context.barrier[context.index] = barrier;
-            context.effects[context.index] = effects;
+            context.effects[context.index] = userData.Effects;
     
             if (context.index == context.indexHovered)
             {

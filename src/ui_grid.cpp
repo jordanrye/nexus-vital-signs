@@ -20,7 +20,6 @@ namespace UI::Grid {
         BorderPresets_t borderPresets;
 
         // Menu state
-        int lastFrameCount;
         bool isActive;
         bool isItemPending = false;
         bool isClose;
@@ -62,29 +61,6 @@ namespace UI::Grid {
         int rounding;
         ImDrawCornerFlags roundingCorners;
     };
-
-    bool IsItemHovered(DrawProperties_t& properties)
-    {
-        bool isHovered = false;
-
-        if (context.isActive)
-        {
-            /* Get mouse position */
-            const ImVec2 mousePos = ImGui::GetIO().MousePos;
-            
-            /* Get cell region */
-            ImVec2 r_min(properties.position);
-            ImVec2 r_max(r_min.x + properties.width, r_min.y + properties.height);
-
-            /* Determine hovered status */
-            if (ImGui::IsMouseHoveringRect(r_min, r_max, false))
-            {
-                isHovered = true;
-            }
-        }
-
-        return isHovered;
-    }
 
     ImVec2 CalcItemPosition(const DrawProperties_t& properties, const ImVec2& itemSize, const std::string& anchor, const Coordinate_t& offset)
     {
@@ -287,62 +263,41 @@ namespace UI::Grid {
             context.isActive = isActive;
             context.isClose = false;
 
-            if (ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoBackground|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoCollapse))
+            /* Update position */
+            context.menuPosition = ImVec2(
+                (ImGui::GetIO().DisplaySize.x / 2.f + context.layoutConfig.position.offset.x), 
+                (ImGui::GetIO().DisplaySize.y / 2.f + context.layoutConfig.position.offset.y));
+
+            ImGui::PushID(name);
+
+            if (!context.isActive)
             {
-                if (!context.isActive)
-                {
-                    // Disable interaction for everything within this block
-                    ImGui::BeginDisabled();
+                // Disable interaction for everything within this block
+                ImGui::BeginDisabled();
 
-                    // Override opacity
-                    context.colourPresets.COLOUR_BACKGROUND.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH_DOWNED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH_DEFEATED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_SHROUD_NECROMANCER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_SHROUD_SPECTER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_BARRIER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_HOVERED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                // Override opacity
+                context.colourPresets.COLOUR_BACKGROUND.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_HEALTH.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_HEALTH_DOWNED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_HEALTH_DEFEATED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_SHROUD_NECROMANCER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_SHROUD_SPECTER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_BARRIER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_HOVERED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
 
-                    context.borderPresets.COLOUR_BORDER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.borderPresets.COLOUR_BORDER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
 
-                    context.colourPresets.COLOUR_BOONS_1.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_BOONS_2.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_CONDITIONS_1.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_CONDITIONS_2.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_BOONS_1.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_BOONS_2.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_CONDITIONS_1.Value.w *= context.layoutConfig.layout.inactiveOpacity;
+                context.colourPresets.COLOUR_CONDITIONS_2.Value.w *= context.layoutConfig.layout.inactiveOpacity;
 
-                    context.isItemPending = false;
-                }
-
-                int frameCount = ImGui::GetFrameCount();
-                if ((context.lastFrameCount < (frameCount - 1)) || isAlwaysDisplayed)
-                {
-                    /* Fixed position */
-                    context.menuPosition = ImVec2(
-                        (ImGui::GetIO().DisplaySize.x / 2.f + context.layoutConfig.position.offset.x), 
-                        (ImGui::GetIO().DisplaySize.y / 2.f + context.layoutConfig.position.offset.y));
-
-                    /* Cursor position */
-                    // context.menuPosition = ImGui::GetIO().MousePos;
-                }
-                context.lastFrameCount = frameCount;
-                
-                context.index = 0;
-                if (context.isActive)
-                {
-                    context.indexHovered = -1;
-                }
-
-                isOpen = true;
+                context.isItemPending = false;
             }
-            else
-            {
-                if (!context.isActive)
-                {
-                    ImGui::EndDisabled();
-                }
-                ImGui::End();
-            }
+            
+            context.index = 0;
+
+            isOpen = true;
         }
 
         return isOpen;
@@ -695,9 +650,6 @@ namespace UI::Grid {
 
     void EndGridMenu()
     {
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
-        drawList->PushClipRectFullScreen();
-
         /* Grid properties */
         GridDrawProperties_t gridDrawProperties;
         gridDrawProperties.position = context.menuPosition;
@@ -722,108 +674,134 @@ namespace UI::Grid {
         borderDrawProperties.padding = _ImVec4(0.f);
         borderDrawProperties.spacing = (float)context.layoutConfig.layout.itemSpacing;
         borderDrawProperties.rounding = context.layoutConfig.layout.grid.cellRounding;
+
+        /* ImGui window properties */
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+        if (!context.isActive)
+        {
+            windowFlags |= ImGuiWindowFlags_NoInputs;
+        }
                 
         /* Draw items */
+        context.indexHovered = -1;
         for (int i = 0; i < context.index; i++)
         {
             DrawProperties_t parentProperties = CalcDrawProperties(frameDrawProperties.size.x, frameDrawProperties.size.y, frameDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, i);
-            bool isHovered = IsItemHovered(parentProperties);
 
-            ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig.colors);
-            ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig.colors, context.healthType[i], context.profession[i]);
-            ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig.colors);
-            const Indicator_t* customBorder = nullptr;
-            std::vector<std::pair<const Indicator_t*, bool>> drawables;
+            /* Create ImGui window */
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+            drawList->PushClipRectFullScreen();
+            ImGui::SetNextWindowPos(parentProperties.position);
+            ImGui::SetNextWindowSize(ImVec2(parentProperties.width, parentProperties.height));  
 
-            /* Process indicators (returns a list of drawable items) */
-            ProcessIndicatorsDFS(context.layoutConfig.indicators, i, false, false, &healthColour, &customBorder, drawables);
-            bool isLayoutPreview = (context.layoutConfig.previewNodeId != TreeNodeUID::NONE) && (context.layoutConfig.previewNodeId == context.layoutConfig.id);
-            ProcessIndicatorsDFS(context.layoutConfig.indicators, i, false, isLayoutPreview, &healthColour, &customBorder, drawables);
-
-            /* Border */
-            DrawProperties_t borderProps = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, i);
-            float borderThickness = 0.0f;
-            if (customBorder)
+            if (ImGui::Begin(context.charName[i].c_str(), nullptr, windowFlags))
             {
-                if (customBorder->border.thickness >= 1)
+                const bool isHovered = ImGui::IsWindowHovered();
+    
+                ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig.colors);
+                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig.colors, context.healthType[i], context.profession[i]);
+                ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig.colors);
+                const Indicator_t* customBorder = nullptr;
+                std::vector<std::pair<const Indicator_t*, bool>> drawables;
+    
+                /* Process indicators (returns a list of drawable items) */
+                if (context.layoutConfig.previewNodeId == TreeNodeUID::NONE)
                 {
-                    borderThickness = (float)customBorder->border.thickness;
-                    DrawBorder(drawList, borderProps, customBorder->border.color, borderThickness);
+                    /* Normal mode */
+                    ProcessIndicatorsDFS(context.layoutConfig.indicators, i, false, false, &healthColour, &customBorder, drawables);
                 }
-            }
-            else if (context.layoutConfig.layout.itemBorder >= 1)
-            {
-                borderThickness = (float)context.layoutConfig.layout.itemBorder;
-                DrawBorder(drawList, borderProps, context.borderPresets.COLOUR_BORDER, borderThickness);
-            }
-
-            /* Content properties */
-            DrawProperties_t contentProps = borderProps;
-            contentProps.position.x += borderThickness;
-            contentProps.position.y += borderThickness;
-            contentProps.width -= 2.0f * borderThickness;
-            contentProps.height -= 2.0f * borderThickness;
-            
-            /* Background */
-            DrawCell(drawList, contentProps, backgroundColour);
-            
-            /* Health */
-            if (context.health[i] > 0.001f)
-            {
-                float healthWidth = contentProps.width * context.health[i];
-                ImDrawCornerFlags roundingCorners = ((contentProps.width - healthWidth) < (float)contentProps.rounding) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
-                DrawProperties_t properties = contentProps;
-                properties.width = healthWidth;
-                properties.roundingCorners = roundingCorners;
-
-                DrawCell(drawList, properties, healthColour);
-
+                else if (context.layoutConfig.previewNodeId == context.layoutConfig.id)
+                {
+                    /* Preview mode */
+                    ProcessIndicatorsDFS(context.layoutConfig.indicators, i, false, true, &healthColour, &customBorder, drawables);
+                }
+    
+                /* Border */
+                DrawProperties_t borderProps = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, i);
+                float borderThickness = 0.0f;
+                if (customBorder)
+                {
+                    if (customBorder->border.thickness >= 1)
+                    {
+                        borderThickness = (float)customBorder->border.thickness;
+                        DrawBorder(drawList, borderProps, customBorder->border.color, borderThickness);
+                    }
+                }
+                else if (context.layoutConfig.layout.itemBorder >= 1)
+                {
+                    borderThickness = (float)context.layoutConfig.layout.itemBorder;
+                    DrawBorder(drawList, borderProps, context.borderPresets.COLOUR_BORDER, borderThickness);
+                }
+    
+                /* Content properties */
+                DrawProperties_t contentProps = borderProps;
+                contentProps.position.x += borderThickness;
+                contentProps.position.y += borderThickness;
+                contentProps.width -= 2.0f * borderThickness;
+                contentProps.height -= 2.0f * borderThickness;
+                
+                /* Background */
+                DrawCell(drawList, contentProps, backgroundColour);
+                
+                /* Health */
+                if (context.health[i] > 0.001f)
+                {
+                    float healthWidth = contentProps.width * context.health[i];
+                    ImDrawCornerFlags roundingCorners = ((contentProps.width - healthWidth) < (float)contentProps.rounding) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
+                    DrawProperties_t properties = contentProps;
+                    properties.width = healthWidth;
+                    properties.roundingCorners = roundingCorners;
+    
+                    DrawCell(drawList, properties, healthColour);
+    
+                    if (isHovered)
+                    {
+                        DrawCell(drawList, properties, context.colourPresets.COLOUR_HOVERED);
+                    }
+                }
+                
+                /* Barrier */
+                if (context.barrier[i] > 0.001f)
+                {
+                    float barrierWidth = contentProps.width * context.barrier[i];
+                    DrawProperties_t properties = contentProps;
+                    properties.width = barrierWidth;
+    
+                    if ((context.barrier[i] + context.health[i]) > 0.999f)
+                    {
+                        /* Overflow barrier */
+                        properties.position.x += contentProps.width - barrierWidth;
+                        properties.roundingCorners = ImDrawCornerFlags_Right;
+                        DrawCell(drawList, properties, barrierColour);
+                    }
+                    else
+                    {
+                        /* Padding barrier */
+                        float healthWidth = contentProps.width * context.health[i];
+                        ImDrawCornerFlags roundingCorners = ((healthWidth + barrierWidth) < (contentProps.width - (float)contentProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_Right;
+                        properties.position.x += healthWidth;
+                        properties.roundingCorners = roundingCorners;
+                        DrawCell(drawList, properties, barrierColour);
+                    }
+                }
+    
+                /* Indicators */
+                for (const auto& pair : drawables)
+                {
+                    DrawIndicator(drawList, parentProperties, contentProps, pair.first, i, pair.second);
+                }
+    
                 if (isHovered)
                 {
-                    DrawCell(drawList, properties, context.colourPresets.COLOUR_HOVERED);
+                    context.indexHovered = i;
+    
+                    context.isItemPending = true;
                 }
             }
-            
-            /* Barrier */
-            if (context.barrier[i] > 0.001f)
-            {
-                float barrierWidth = contentProps.width * context.barrier[i];
-                DrawProperties_t properties = contentProps;
-                properties.width = barrierWidth;
+            ImGui::End();
 
-                if ((context.barrier[i] + context.health[i]) > 0.999f)
-                {
-                    /* Overflow barrier */
-                    properties.position.x += contentProps.width - barrierWidth;
-                    properties.roundingCorners = ImDrawCornerFlags_Right;
-                    DrawCell(drawList, properties, barrierColour);
-                }
-                else
-                {
-                    /* Padding barrier */
-                    float healthWidth = contentProps.width * context.health[i];
-                    ImDrawCornerFlags roundingCorners = ((healthWidth + barrierWidth) < (contentProps.width - (float)contentProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_Right;
-                    properties.position.x += healthWidth;
-                    properties.roundingCorners = roundingCorners;
-                    DrawCell(drawList, properties, barrierColour);
-                }
-            }
-
-            /* Indicators */
-            for (const auto& pair : drawables)
-            {
-                DrawIndicator(drawList, parentProperties, contentProps, pair.first, i, pair.second);
-            }
-
-            if (isHovered)
-            {
-                context.indexHovered = i;
-
-                context.isItemPending = true;
-            }
+            drawList->PopClipRect();
         }
-
-        drawList->PopClipRect();
 
         if (context.isClose || !context.isActive)
         {
@@ -835,24 +813,33 @@ namespace UI::Grid {
             }
         }
 
-        ImGui::End();
+        ImGui::PopID();
     }
 
-    bool GridMenuItem(const char* name, VitalSignsData::EProfession profession, VitalSignsData::ESpecialisation specialisation, float health, VitalSignsData::E_HEALTH_TYPE healthType, float barrier, VitalSignsData::Effects_t& effects)
+    bool GridMenuItem(const VitalSignsData::UserData_t& userData)
     {
         bool isSelected = false;
 
         if (context.index < (context.layoutConfig.layout.grid.rowCount * context.layoutConfig.layout.grid.columnCount))
         {
-            context.charName[context.index] = std::string(name);
-            context.profession[context.index] = profession;
-            context.specialisation[context.index] = specialisation;
+            std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
+            float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);
+            float barrier = ((userData.Health.Max > 0.0f) ? (userData.Barrier.Current / userData.Health.Max) : 0.0f);
+            if ((VitalSignsData::E_HEALTH_SHROUD_NECROMANCER == userData.HealthType) ||
+                (VitalSignsData::E_HEALTH_SHROUD_SPECTER == userData.HealthType))
+            {
+                health = ((userData.Shroud.Max > 0.0f) ? (userData.Shroud.Current / userData.Shroud.Max) : 0.0f);
+            }
+
+            context.charName[context.index] = name;
+            context.profession[context.index] = userData.Profession;
+            context.specialisation[context.index] = userData.Specialisation;
             context.health[context.index] = health;
-            context.healthType[context.index] = healthType;
+            context.healthType[context.index] = userData.HealthType;
             context.barrier[context.index] = barrier;
-            context.effects[context.index] = effects;
+            context.effects[context.index] = userData.Effects;
     
-            if (context.index == context.indexHovered)
+            if ((context.index == context.indexHovered) && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
             {
                 isSelected = true;
                 context.isClose = true;
