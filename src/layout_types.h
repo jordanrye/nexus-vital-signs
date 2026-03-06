@@ -112,8 +112,8 @@ struct ColourIndicator_t
 struct HighlightIndicator_t
 {
     ImColor color = ImColor(255, 255, 255, 255);
-    std::string direction = "Bottom";
-    float height = 50.f;
+    std::string position = "Bottom";
+    float size = 50.f;
     Trigger_t trigger;
 };
 

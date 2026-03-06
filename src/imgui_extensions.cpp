@@ -351,7 +351,7 @@ namespace ImGui
         ImGui::PopID();
     }
 
-    void AddRectFilledGradient(ImDrawList* draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col_1, ImU32 col_2, float rounding, ImDrawCornerFlags rounding_corners)
+    void AddRectFilledGradientV(ImDrawList* draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col_1, ImU32 col_2, float rounding, ImDrawCornerFlags rounding_corners)
     {
         // Draw a placeholder rectangle and record the vertices.
         int vtx_idx_begin = draw_list->VtxBuffer.Size;
@@ -373,6 +373,35 @@ namespace ImGui
         {
             // Calculate interpolation factor 't' based on vertex Y position
             float t = ImClamp((vert->pos.y - p_min.y) / gradient_height, 0.0f, 1.0f);
+            
+            // Linear interpolation of all channels
+            ImVec4 interpolated_col = ImLerp(c0, c1, t);
+            vert->col = ImGui::ColorConvertFloat4ToU32(interpolated_col);
+        }
+    }
+
+    void AddRectFilledGradientH(ImDrawList* draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col_1, ImU32 col_2, float rounding, ImDrawCornerFlags rounding_corners)
+    {
+        // Draw a placeholder rectangle and record the vertices.
+        int vtx_idx_begin = draw_list->VtxBuffer.Size;
+        draw_list->AddRectFilled(p_min, p_max, IM_COL32_WHITE, rounding, rounding_corners);
+        int vtx_idx_end = draw_list->VtxBuffer.Size;
+
+        // Manually shade the vertices
+        ImDrawVert* vert_start = draw_list->VtxBuffer.Data + vtx_idx_begin;
+        ImDrawVert* vert_end = draw_list->VtxBuffer.Data + vtx_idx_end;
+
+        // Deconstruct colour channels for interpolation
+        ImVec4 c0 = ImGui::ColorConvertU32ToFloat4(col_1);
+        ImVec4 c1 = ImGui::ColorConvertU32ToFloat4(col_2);
+
+        // Calculate gradient axis (horizontal)
+        float gradient_width = p_max.x - p_min.x;
+
+        for (ImDrawVert* vert = vert_start; vert < vert_end; vert++)
+        {
+            // Calculate interpolation factor 't' based on vertex X position
+            float t = ImClamp((vert->pos.x - p_min.x) / gradient_width, 0.0f, 1.0f);
             
             // Linear interpolation of all channels
             ImVec4 interpolated_col = ImLerp(c0, c1, t);

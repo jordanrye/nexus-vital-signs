@@ -756,7 +756,9 @@ namespace Addon {
         {
             static const char* directionOptions[] {
                 "Top",
-                "Bottom"
+                "Bottom",
+                "Left",
+                "Right"
             };
 
             ImGui::TextDisabled("Highlight Properties");
@@ -765,15 +767,17 @@ namespace Addon {
                 ImGui::ColorEdit4("Color##HIGHLIGHT_COLOR", (float*)&indicator.highlight.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 
                 int directionSelection = 1; // Default to "Bottom"
-                if (indicator.highlight.direction == "Top") directionSelection = 0;
-                else if (indicator.highlight.direction == "Bottom") directionSelection = 1;
+                if (indicator.highlight.position == "Top") directionSelection = 0;
+                else if (indicator.highlight.position == "Bottom") directionSelection = 1;
+                else if (indicator.highlight.position == "Left") directionSelection = 2;
+                else if (indicator.highlight.position == "Right") directionSelection = 3;
 
                 if (ImGui::Combo("Position##HIGHLIGHT_POSITION", &directionSelection, directionOptions, IM_ARRAYSIZE(directionOptions)))
                 {
-                    indicator.highlight.direction = directionOptions[directionSelection];
+                    indicator.highlight.position = directionOptions[directionSelection];
                 }
 
-                ImGui::SliderFloat("Height (%)##HIGHLIGHT_HEIGHT", &indicator.highlight.height, 0.0f, 100.0f, "%.0f");
+                ImGui::SliderFloat("Size (%)##HIGHLIGHT_SIZE", &indicator.highlight.size, 0.0f, 100.0f, "%.0f");
             }
             
             ImGui::TextDisabled("Trigger");

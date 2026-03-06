@@ -200,8 +200,8 @@ void dser_HighlightIndicator_t(json& object, HighlightIndicator_t& highlight)
     if (!object.is_null())
     {
         dser_ImColor(object["color"], highlight.color);
-        dser_BasicType(object["direction"], highlight.direction);
-        dser_BasicType(object["height"], highlight.height);
+        dser_BasicType(object["position"], highlight.position);
+        dser_BasicType(object["size"], highlight.size);
         dser_Trigger_t(object["trigger"], highlight.trigger);
     }
 }
@@ -417,8 +417,8 @@ json ser_HighlightIndicator_t(const HighlightIndicator_t& highlight)
 {
     json object = json::object();
     object["color"] = ser_ImColor(highlight.color);
-    object["direction"] = highlight.direction;
-    object["height"] = highlight.height;
+    object["position"] = highlight.position;
+    object["size"] = highlight.size;
     object["trigger"] = ser_Trigger_t(highlight.trigger);
     return object;
 }

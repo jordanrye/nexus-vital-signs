@@ -29,6 +29,7 @@ namespace ImGui
     bool ButtonPlus(const char* label);
     void ButtonFile(const char* label, std::string& filePath, std::string targetDir, std::string hiddenSubstr = "", const wchar_t* filter = L"All Files (*.*)\0*.*\0Supported Files (*.png, *.jpg, *.jpeg)\0*.png;*.jpg;*.jpeg\0PNG (*.png)\0*.png\0JPEG (*.jpg, *.jpeg)\0*.jpg;*.jpeg\0");
 
-    void AddRectFilledGradient(ImDrawList* drawList, const ImVec2& p_min, const ImVec2& p_max, ImU32 col_1, ImU32 col_2, float rounding, ImDrawCornerFlags rounding_corners);
+    void AddRectFilledGradientV(ImDrawList* draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col_1, ImU32 col_2, float rounding, ImDrawCornerFlags rounding_corners);
+    void AddRectFilledGradientH(ImDrawList* draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col_1, ImU32 col_2, float rounding, ImDrawCornerFlags rounding_corners);
 
 } // namespace ImGui
