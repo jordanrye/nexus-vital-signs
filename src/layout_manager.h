@@ -20,7 +20,7 @@ public:
     using OnIndicatorSwapCallback = std::function<void(TreeNodeUID layoutId, size_t oldIndex, size_t newIndex)>;
 
     // Data management
-    void Create(const std::string& name, const std::string& type, const std::filesystem::path& path);
+    void Create(const std::string& name, const std::string& type, bool createFromTemplate, const std::filesystem::path& path);
     void Insert(const std::filesystem::path& path, const LayoutConfig_t& layout);
     bool Delete(TreeNodeUID id);
     TreeNodeUID AddIndicator(TreeNodeUID parentId, const std::string& name, const std::string& type);
@@ -51,4 +51,6 @@ private:
     OnIndicatorCreatedCallback m_onIndicatorCreatedCallback;
     OnIndicatorDeletedCallback m_onIndicatorDeletedCallback;
     OnIndicatorSwapCallback m_onIndicatorSwapCallback;
+
+    void RegisterIndicatorsRecursive(TreeNodeUID parentId, const std::vector<Indicator_t>& indicators);
 };

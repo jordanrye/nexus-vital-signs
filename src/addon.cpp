@@ -364,16 +364,19 @@ namespace Addon {
 
         static char inputBuff_Name[MAX_PATH] = "";
         static std::string inputStr_Type = "Grid";
+        static bool createFromTemplate = false;
 
         if (ImGui::BeginPopupModal("Create a new layout", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::InputText("Name", inputBuff_Name, IM_ARRAYSIZE(inputBuff_Name));
             form_SelectLayoutType(inputStr_Type);
+            ImGui::Checkbox("Create using default template", &createFromTemplate);
 
             if (ImGui::Button("Cancel", ImVec2(100, 0)))
             {
                 // Reset state and close
                 memset(inputBuff_Name, 0, sizeof(inputBuff_Name));
+                createFromTemplate = false;
                 ImGui::CloseCurrentPopup();
             }
 
@@ -385,9 +388,10 @@ namespace Addon {
 
             if (ImGui::Button("Create", ImVec2(100, 0)))
             {
-                g_LayoutManager.Create(std::string(inputBuff_Name), inputStr_Type, PacksDir);
+                g_LayoutManager.Create(std::string(inputBuff_Name), inputStr_Type, createFromTemplate, PacksDir);
 
                 memset(inputBuff_Name, 0, sizeof(inputBuff_Name));
+                createFromTemplate = false;
                 ImGui::CloseCurrentPopup();
             }
             

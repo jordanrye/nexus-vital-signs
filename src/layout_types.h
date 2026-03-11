@@ -195,7 +195,7 @@ struct LayoutConfig_t
 {
     bool enabled;
     std::string name;
-    std::string colors;
+    std::string colors = "Generic";
     Position_t position;
     Layout_t layout;
     std::vector<Indicator_t> indicators;
