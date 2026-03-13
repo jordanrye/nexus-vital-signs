@@ -290,8 +290,24 @@ namespace UI::Grid {
                 (ImGui::GetIO().DisplaySize.x / 2.f + context.layoutConfig.position.offset.x), 
                 (ImGui::GetIO().DisplaySize.y / 2.f + context.layoutConfig.position.offset.y));
             
-            float menuWidth = (float)(context.layoutConfig.layout.grid.columnCount * context.layoutConfig.layout.grid.cellWidth + (context.layoutConfig.layout.grid.columnCount - 1) * context.layoutConfig.layout.itemSpacing);
-            float menuHeight = (float)(context.layoutConfig.layout.grid.rowCount * context.layoutConfig.layout.grid.cellHeight + (context.layoutConfig.layout.grid.rowCount - 1) * context.layoutConfig.layout.itemSpacing);
+            int rows, columns;
+            int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
+            int cellMax = max(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT);
+
+            if ((context.layoutConfig.layout.grid.cellDirection == "Left-to-right") || 
+                (context.layoutConfig.layout.grid.cellDirection == "Right-to-left"))
+            {
+                rows = (cellMax + cellDirectionMax - 1) / cellDirectionMax;
+                columns = cellDirectionMax;
+            }
+            else
+            {
+                rows = cellDirectionMax;
+                columns = (cellMax + cellDirectionMax - 1) / cellDirectionMax;
+            }
+
+            float menuWidth = (float)(columns * context.layoutConfig.layout.grid.cellWidth + (columns - 1) * context.layoutConfig.layout.itemSpacing);
+            float menuHeight = (float)(rows * context.layoutConfig.layout.grid.cellHeight + (rows - 1) * context.layoutConfig.layout.itemSpacing);
             
             ImGui::SetNextWindowPos(context.menuPosition);
             ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight));
@@ -706,8 +722,22 @@ namespace UI::Grid {
         /* Grid properties */
         GridDrawProperties_t gridDrawProperties;
         gridDrawProperties.position = context.menuPosition;
-        gridDrawProperties.rows = context.layoutConfig.layout.grid.rowCount;
-        gridDrawProperties.columns = context.layoutConfig.layout.grid.columnCount;
+
+        int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
+        int cellMax = min(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT);
+
+        if ((context.layoutConfig.layout.grid.cellDirection == "Left-to-right") || 
+            (context.layoutConfig.layout.grid.cellDirection == "Right-to-left"))
+        {
+            gridDrawProperties.rows = (cellMax + cellDirectionMax - 1) / cellDirectionMax;
+            gridDrawProperties.columns = cellDirectionMax;
+        }
+        else
+        {
+            gridDrawProperties.rows = cellDirectionMax;
+            gridDrawProperties.columns = (cellMax + cellDirectionMax - 1) / cellDirectionMax;
+        }
+
         gridDrawProperties.direction = context.layoutConfig.layout.grid.cellDirection;
 
         /* Frame properties */
@@ -873,7 +903,7 @@ namespace UI::Grid {
     {
         bool isSelected = false;
 
-        if (context.index < (context.layoutConfig.layout.grid.rowCount * context.layoutConfig.layout.grid.columnCount))
+        if (context.index < min(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT))
         {
             std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
             float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);

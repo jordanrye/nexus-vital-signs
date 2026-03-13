@@ -25,11 +25,9 @@ struct Position_t
 
 struct GridProperties_t
 {
-    int rowCount = 5;
-    int rowMax; /** NOTE: Not currently used */
-    int columnCount = 1;
-    int columnMax; /** NOTE: Not currently used */
     std::string cellDirection = "Left-to-right";
+    int cellDirectionMax = 5;
+    int cellMax = 10;
     int cellWidth = 200;
     int cellHeight = 60;
     int cellRounding = 4;

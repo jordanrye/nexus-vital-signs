@@ -355,9 +355,8 @@ static LayoutConfig_t GetDefaultGridLayout()
     layout.position.offset = { 0, 0 };
     layout.layout.type = "Grid";
     // Grid specific properties
-    layout.layout.grid.rowCount = 5;
-    layout.layout.grid.columnCount = 1;
     layout.layout.grid.cellDirection = "Top-to-bottom";
+    layout.layout.grid.cellDirectionMax = 5;
     layout.layout.grid.cellWidth = 180;
     layout.layout.grid.cellHeight = 100;
     layout.layout.grid.cellRounding = 4;

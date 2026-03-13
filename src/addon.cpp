@@ -507,27 +507,28 @@ namespace Addon {
             /* Grid */
             if (1U == layoutSelection)
             {
-                static int cellDirectionSelection = 1; // Default to "Left-to-right"
-                if (layout.grid.cellDirection == "Top-to-bottom") cellDirectionSelection = 0;
-                else if (layout.grid.cellDirection == "Left-to-right") cellDirectionSelection = 1;
-
-                if (ImGui::InputInt("Max Rows##GRID_ROWS", &layout.grid.rowCount, 1))
-                {
-                    if (layout.grid.rowCount < 0)
-                    {
-                        layout.grid.rowCount = 0;
-                    }
-                }
-                if (ImGui::InputInt("Max Columns##GRID_COLUMNS", &layout.grid.columnCount, 1))
-                {
-                    if (layout.grid.columnCount < 0)
-                    {
-                        layout.grid.columnCount = 0;
-                    }
-                }
-
-                // Cell Direction
                 form_Direction(layout.grid.cellDirection);
+
+                std::string label = ((layout.grid.cellDirection == "Top-to-bottom" || layout.grid.cellDirection == "Bottom-to-top") ? "Row" : "Column");
+                if (ImGui::SliderInt(std::string("Max Cells Per " + label + "##CELL_DIRECTION_MAX").c_str(), &layout.grid.cellDirectionMax, 1, UI::SQUAD_MEMBER_LIMIT))
+                {
+                    if (layout.grid.cellDirectionMax < 1)
+                    {
+                        layout.grid.cellDirectionMax = 1;
+                    }
+                }
+
+                if (ImGui::SliderInt("Max Cells##CELL_MAX", &layout.grid.cellMax, 1, UI::SQUAD_MEMBER_LIMIT))
+                {
+                    if (layout.grid.cellMax < 1)
+                    {
+                        layout.grid.cellMax = 1;
+                    }
+                    if (layout.grid.cellMax > UI::SQUAD_MEMBER_LIMIT)
+                    {
+                        layout.grid.cellMax = UI::SQUAD_MEMBER_LIMIT;
+                    }
+                }
                 
                 if (ImGui::InputInt("Cell Width##CELL_WIDTH", &layout.grid.cellWidth, 1))
                 {
