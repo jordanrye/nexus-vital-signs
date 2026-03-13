@@ -167,7 +167,6 @@ namespace Settings
             {
                 layoutConfig.id = g_LayoutEditor.GenerateUID();
     
-                dser_BasicType(layout["enabled"], layoutConfig.enabled);
                 dser_BasicType(layout["name"], layoutConfig.name);
                 dser_BasicType(layout["colors"], layoutConfig.colors);
                 dser_Position_t(layout["position"], layoutConfig.position);
@@ -201,7 +200,6 @@ namespace Settings
         auto& layoutConfig = g_LayoutManager.GetLayoutFromFilePath(layoutFilePath);
 
         /* General */
-        layout["enabled"] = layoutConfig.enabled;
         layout["name"] = layoutConfig.name;
         layout["colors"] = layoutConfig.colors;
         layout["position"] = ser_Position_t(layoutConfig.position);

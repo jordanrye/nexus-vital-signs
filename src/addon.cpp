@@ -401,7 +401,7 @@ namespace Addon {
         }
     }
 
-    void ContentViewGeneral(bool& enabled, std::string& name, std::string& colors, Position_t& position, Layout_t& layout)
+    void ContentViewGeneral(std::string& name, std::string& colors, Position_t& position, Layout_t& layout)
     {
         static const char* colorsOptions[] {
             "Generic Color Palette",
@@ -437,7 +437,6 @@ namespace Addon {
             memset(inputBuff, 0, MAX_PATH);
             strcpy_s(inputBuff, MAX_PATH, name.c_str());
 
-            ImGui::Checkbox("Enabled", &enabled);
             if (ImGui::InputText("Name", inputBuff, IM_ARRAYSIZE(inputBuff)))
             {
                 name = inputBuff;
@@ -872,7 +871,7 @@ namespace Addon {
             /* Register root-level "layout" content view */
             g_LayoutEditor.RegisterContentView(layout_pair.second.id, [layout_path]() {
                 auto& layout = g_LayoutManager.GetLayoutFromFilePath(layout_path);
-                ContentViewGeneral(layout.enabled, layout.name, layout.colors, layout.position, layout.layout);
+                ContentViewGeneral(layout.name, layout.colors, layout.position, layout.layout);
             });
             
             RegisterLayoutEditorViewsDFS(children, layout_pair.second.indicators);

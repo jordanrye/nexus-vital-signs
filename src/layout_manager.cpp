@@ -349,7 +349,6 @@ void LayoutManager::RegisterIndicatorsRecursive(TreeNodeUID parentId, const std:
 static LayoutConfig_t GetDefaultGridLayout()
 {
     LayoutConfig_t layout{};
-    layout.enabled = true;
     layout.colors = "Generic";
     layout.position.anchor = "Centre";
     layout.position.offset = { 0, 0 };
@@ -404,7 +403,6 @@ static LayoutConfig_t GetDefaultGridLayout()
     boonIndicatorQuickness.trigger.effect = "Quickness";
     boonIndicatorQuickness.trigger.condition = "Status: Active";
     boonIndicator.iconList.list.push_back(boonIndicatorQuickness);
-    layout.indicators.push_back(boonIndicator);
     Icon_t boonIndicatorMight{};
     boonIndicatorMight.id = g_LayoutEditor.GenerateUID();
     boonIndicatorMight.source = "URL";
@@ -413,6 +411,7 @@ static LayoutConfig_t GetDefaultGridLayout()
     boonIndicatorMight.trigger.effect = "Might";
     boonIndicatorMight.trigger.condition = "Status: Active";
     boonIndicator.iconList.list.push_back(boonIndicatorMight);
+    layout.indicators.push_back(boonIndicator);
 
     // Add a default set of indicators for all conditions.
     Indicator_t conditionIndicator{};
@@ -546,7 +545,6 @@ static LayoutConfig_t GetDefaultGridLayout()
 static LayoutConfig_t GetDefaultRadialLayout()
 {
     LayoutConfig_t layout{};
-    layout.enabled = true;
     layout.colors = "Generic";
     layout.position.anchor = "Centre";
     layout.position.offset = { 0, 0 };

@@ -191,7 +191,6 @@ struct IconTextConfig_t : public TextConfig_t
 
 struct LayoutConfig_t
 {
-    bool enabled;
     std::string name;
     std::string colors = "Generic";
     Position_t position;

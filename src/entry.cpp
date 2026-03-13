@@ -98,7 +98,7 @@ void AddonLoad(AddonAPI* aApi)
         g_LayoutEditor.AppendNode(TreeNodeUID::NONE, uid, label, type, TreeNodeType::ROOT);
         g_LayoutEditor.RegisterContentView(uid, [filePath]() { //
             auto& layout = g_LayoutManager.GetLayoutFromFilePath(filePath);
-            Addon::ContentViewGeneral(layout.enabled, layout.name, layout.colors, layout.position, layout.layout);
+            Addon::ContentViewGeneral(layout.name, layout.colors, layout.position, layout.layout);
         });
     });
     g_LayoutManager.SetOnLayoutDeletedCallback([&](TreeNodeUID uid) {
