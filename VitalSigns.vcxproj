@@ -96,14 +96,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\addon.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Behavior\BehaviorData.h" />
+    <ClInclude Include="src\interface\gw2re\Game\Behavior\Behavior.h" />
     <ClInclude Include="src\interface\gw2re\Game\Behavior\BehaviorOrder.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Behavior\EBehavior.h" />
+    <ClInclude Include="src\interface\gw2re\Game\Behavior\EBehaviorFlags.h" />
+    <ClInclude Include="src\interface\gw2re\Game\Behavior\EBehaviorOrder.h" />
+    <ClInclude Include="src\interface\gw2re\Game\Behavior\EBehaviorSignal.h" />
     <ClInclude Include="src\interface\gw2re\Game\Char\ChCliOrder.h" />
     <ClInclude Include="src\interface\gw2re\Game\Map\EMapFlags.h" />
     <ClInclude Include="src\interface\gw2re\Game\Map\EMapType.h" />
     <ClInclude Include="src\interface\gw2re\Game\Map\MapDef.h" />
     <ClInclude Include="src\interface\gw2re\Game\MissionContext.h" />
+    <ClInclude Include="src\interface\gw2re\Game\Portal\PlChannelMember.h" />
     <ClInclude Include="src\interface\vital_signs_interface.h" />
     <ClInclude Include="src\basic_types.h" />
     <ClInclude Include="src\forms\forms.h" />
