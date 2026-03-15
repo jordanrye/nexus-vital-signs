@@ -24,7 +24,7 @@
     - **Colours, Borders & Highlights:** Add visual emphasis to frames based on triggers.
     - **Resource Bars:** Visualise health, barrier, and shroud (Necromancer/Specter) resources.
 - **Colour Palettes:** 
-    - **Generic:** Matches the native Guild Wars 2 UI aesthetic.
+    - **Generic:** Based on the Guild Wars 2 colour scheme of the party and squad UI.
     - **Profession:** Quickly identify teammates with health bars using profession-specific colours.
 - **Live Preview:** Visualise your changes with dummy data as you edit.
 
@@ -53,7 +53,7 @@ Automatically switch between different layouts based on your group type:
 1. Ensure [Nexus](https://raidcore.gg/Nexus) is installed.
 2. Download [`VitalSigns.dll`](https://github.com/jordanrye/nexus-vital-signs/releases/latest) and place it into your `<Guild Wars 2>/addons` directory.
 3. Launch the game and open the Nexus addons window (default `Ctrl+O`) to configure Vital Signs:
-    - **General:** Assign specific layouts based on group type and setting.
+    - **General:** Assign specific layouts to be used in different group settings.
     - **Layout Editor:** Create, delete, and modify the visual components of your layouts.
     - **Presets:** Manage global colour palettes and text styles for a unified look.
 
@@ -73,22 +73,22 @@ To preserve game integrity and adhere to the policy outlined above, limitations 
 
 Vital Signs will only display information which is natively presented in the game client. The following table contains a non-exhaustive list of examples as to what may and may not be permitted under this rule:
 
-| Data | Availability | Party UI | Simple Party UI | Squad UI |
-| --- | --- | :---: | :---: | :---: |
-| Health & Barrier | Health and barrier can be displayed at all times. A percentage value can be given for health, but must be limited to zero decimal places. Raw numerical values for the current and maximum health of other players is **not** permitted. | ✔ | ✔ | ✔ |
-| Life Force | Life Force can be displayed while Shroud is active. A percentage value can be given for Life Force, but must be limited to zero decimal places. | ✔ | ✔ | ✔ |
-| Health (while in Shroud) | Health can be displayed simultaneously while in Shroud. | ✔ | ✔ | |
-| Boons & Conditions | Duration and stacks are permitted. | ✔ | ✔ | |
-| Auras | Duration is permitted. | ✔ | | |
-| Misc. (Superspeed, Stealth, and Revealed) | Duration is permitted. | ✔ | | |
-| Control Effects | Indicated effects limited to Stun and Daze are permitted. Other effects such as Knockback, Launch and Pull are **not** permitted. | ✔ | | |
-| Squad Border Effects | Raid mechanics which are indicated via a border in the Squad UI are permitted (e.g., pink border for Exile's Embrace). Duration is **not** permitted. | | | ✔ |
-| Profession & Elite Specialisation | Current Profession and Elite Specialisation (if applicable) are permitted. Viewing individual trait selections (i.e., gear check) is **not** permitted. | ✔ | ✔ | ✔ |
-| Levels | Character Level, Mastery Level and Agony Resistance (in Fractals) are permitted. | ✔ | ✔ | |
+| Data | Availability | Default Party UI | Simple Party UI | Squad Grid UI | Target Frame |
+| --- | --- | :---: | :---: | :---: | :---: |
+| Health & Barrier | Health and barrier can be displayed at all times. A percentage value can be given for health, but must be limited to zero decimal places. Raw numerical values for the current and maximum health of other players is **not** permitted. | ✔ | ✔ | ✔ | ✔ |
+| Life Force | Life Force can be displayed while Shroud is active. A percentage value can be given for Life Force, but must be limited to zero decimal places. | ✔ | ✔ | ✔ | ✔ |
+| Health (while in Shroud) | Health can be displayed simultaneously while in Shroud. | ✔ | ✔ | | ✔ |
+| Boons & Conditions | Duration and stacks are permitted. | ✔ | ✔ | | ✔ |
+| Auras | Limited to the party context (i.e., not available while in a squad). Duration is permitted. | ✔ | | | ✔ |
+| Misc. (Superspeed, Stealth, and Revealed) | Limited to the party context. Duration is permitted. | ✔ | | | ✔ |
+| Control Effects | Limited to the party context. Indicated effects including Stun and Daze are permitted, while other effects such as as Knockback, Launch and Pull are **not** permitted. | ✔ | | | ✔ |
+| Squad Border Effects | Raid mechanics which are indicated via a border in the Squad Grid UI are permitted (e.g., pink border for Exile's Embrace). Duration is **not** permitted. | | | ✔ | |
+| Profession & Elite Specialisation | Current Profession and Elite Specialisation (if applicable) are permitted. Viewing individual trait selections (i.e., gear check) is **not** permitted. | ✔ | ✔ | ✔ | ✔ |
+| Levels | Character Level, Mastery Level and Agony Resistance (in Fractals) are permitted. | ✔ | ✔ | | ✔ |
 
 #### Mode Restrictions
 
-The addon is automatically disabled in competitive zones (i.e., PvP and WvW) to preserve game integrity and prevent the player from gaining an unfair advantage over others.
+The addon is automatically disabled in competitive zones (i.e., PvP and WvW) to preserve game integrity and prevent the user from gaining an unfair advantage over other players.
 
 ### Disclaimer
 
