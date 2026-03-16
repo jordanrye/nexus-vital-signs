@@ -77,7 +77,7 @@ Vital Signs will only display information which is natively presented in the gam
 | --- | --- | :---: | :---: | :---: | :---: |
 | Health & Barrier | Health and barrier can be displayed at all times. A percentage value can be given for health, but must be limited to zero decimal places. Raw numerical values for the current and maximum health of other players is **not** permitted. | ✔ | ✔ | ✔ | ✔ |
 | Life Force | Life Force can be displayed while Shroud is active. A percentage value can be given for Life Force, but must be limited to zero decimal places. | ✔ | ✔ | ✔ | ✔ |
-| Health (while in Shroud) | Health can be displayed simultaneously while in Shroud. | ✔ | ✔ | | ✔ |
+| Health (while in Shroud) | Health and Life Force can be displayed simultaneously while in Shroud. | ✔ | ✔ | | ✔ |
 | Boons & Conditions | Duration and stacks are permitted. | ✔ | ✔ | | ✔ |
 | Auras | Limited to the party context (i.e., not available while in a squad). Duration is permitted. | ✔ | | | ✔ |
 | Misc. (Superspeed, Stealth, and Revealed) | Limited to the party context. Duration is permitted. | ✔ | | | ✔ |
