@@ -48,12 +48,12 @@ extern "C" __declspec(dllexport) AddonDefinition * GetAddonDef()
     AddonDef.Version.Build = V_BUILD;
     AddonDef.Version.Revision = V_REVISION;
     AddonDef.Author = "Jordan";
-    AddonDef.Description = "Monitor the health, effects and more of your party/squad with customisable layouts.";
+    AddonDef.Description = "Monitor the health, effects and status of your party/squad with customisable layouts.";
     AddonDef.Load = AddonLoad;
     AddonDef.Unload = AddonUnload;
     AddonDef.Flags = EAddonFlags_IsVolatile;
     AddonDef.Provider = EUpdateProvider_GitHub;
-    AddonDef.UpdateLink = "https://github.com/jordanrye/nexus-target-healing";
+    AddonDef.UpdateLink = "https://github.com/jordanrye/nexus-control-options";
 
     return &AddonDef;
 }
