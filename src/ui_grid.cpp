@@ -286,13 +286,9 @@ namespace UI::Grid {
             context.isActive = isActive;
             context.isClose = false;
 
-            context.menuPosition = ImVec2(
-                (ImGui::GetIO().DisplaySize.x / 2.f + context.layoutConfig.position.offset.x), 
-                (ImGui::GetIO().DisplaySize.y / 2.f + context.layoutConfig.position.offset.y));
-            
             int rows, columns;
             int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
-            int cellMax = max(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT);
+            int cellMax = min(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT);
 
             if ((context.layoutConfig.layout.grid.cellDirection == "Left-to-right") || 
                 (context.layoutConfig.layout.grid.cellDirection == "Right-to-left"))
@@ -309,6 +305,13 @@ namespace UI::Grid {
             float menuWidth = (float)(columns * context.layoutConfig.layout.grid.cellWidth + (columns - 1) * context.layoutConfig.layout.itemSpacing);
             float menuHeight = (float)(rows * context.layoutConfig.layout.grid.cellHeight + (rows - 1) * context.layoutConfig.layout.itemSpacing);
             
+            DrawProperties_t displayProps{};
+            displayProps.position = ImVec2(0.f, 0.f);
+            displayProps.width = ImGui::GetIO().DisplaySize.x;
+            displayProps.height = ImGui::GetIO().DisplaySize.y;
+
+            context.menuPosition = CalcItemPosition(displayProps, ImVec2(menuWidth, menuHeight), context.layoutConfig.position.anchor, context.layoutConfig.position.offset);
+
             ImGui::SetNextWindowPos(context.menuPosition);
             ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight));
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
