@@ -53,7 +53,7 @@ extern "C" __declspec(dllexport) AddonDefinition * GetAddonDef()
     AddonDef.Unload = AddonUnload;
     AddonDef.Flags = EAddonFlags_IsVolatile;
     AddonDef.Provider = EUpdateProvider_GitHub;
-    AddonDef.UpdateLink = "https://github.com/jordanrye/nexus-control-options";
+    AddonDef.UpdateLink = "https://github.com/jordanrye/nexus-vital-signs";
 
     return &AddonDef;
 }
