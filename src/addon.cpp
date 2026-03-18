@@ -405,9 +405,7 @@ namespace Addon {
     {
         static const char* colorsOptions[] {
             "Generic Color Palette",
-            "Role Color Palette",
-            "Profession Color Palette",
-            "Party Color Palette",
+            "Profession Color Palette"
         };
         static const char* layoutOptions[] {
             "Radial",

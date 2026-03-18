@@ -6,7 +6,6 @@ void form_Trigger(Trigger_t& trigger)
         "<Inherit From Parent>", 
         "Boons",
         "Conditions",
-        "Auras",
         "Professions",
     };
     static const char* triggerBoonsEffectOptions[] {
@@ -38,15 +37,6 @@ void form_Trigger(Trigger_t& trigger)
         "Torment",
         "Vulnerability",
         "Weakness",
-    };
-    static const char* triggerAurasEffectOptions[] {
-        "Chaos Aura",
-        "Dark Aura",
-        "Fire Aura",
-        "Frost Aura",
-        "Light Aura",
-        "Magnetic Aura",
-        "Shocking Aura",
     };
     static const char* triggerProfessionOptions[] {
         "Elementalist",
@@ -111,8 +101,7 @@ void form_Trigger(Trigger_t& trigger)
         if (trigger.category == "<Inherit From Parent>") triggerCategory = 0;
         else if (trigger.category == "Boons") triggerCategory = 1;
         else if (trigger.category == "Conditions") triggerCategory = 2;
-        else if (trigger.category == "Auras") triggerCategory = 3;
-        else if (trigger.category == "Professions") triggerCategory = 4;
+        else if (trigger.category == "Professions") triggerCategory = 3;
         ImGui::Combo("Category", &triggerCategory, triggerCategoryOptions, IM_ARRAYSIZE(triggerCategoryOptions));
         trigger.category = triggerCategoryOptions[triggerCategory];
     
@@ -160,20 +149,6 @@ void form_Trigger(Trigger_t& trigger)
     
             ImGui::Combo("Effect", &triggerEffect, triggerConditionsEffectOptions, IM_ARRAYSIZE(triggerConditionsEffectOptions));
             trigger.effect = triggerConditionsEffectOptions[triggerEffect];
-        }
-        else if ("Auras" == trigger.category)
-        {
-            int triggerEffect = 0; // Default to "Chaos Aura"
-            if (trigger.effect == "Chaos Aura") triggerEffect = 0;
-            else if (trigger.effect == "Dark Aura") triggerEffect = 1;
-            else if (trigger.effect == "Fire Aura") triggerEffect = 2;
-            else if (trigger.effect == "Frost Aura") triggerEffect = 3;
-            else if (trigger.effect == "Light Aura") triggerEffect = 4;
-            else if (trigger.effect == "Magnetic Aura") triggerEffect = 5;
-            else if (trigger.effect == "Shocking Aura") triggerEffect = 6;
-
-            ImGui::Combo("Effect", &triggerEffect, triggerAurasEffectOptions, IM_ARRAYSIZE(triggerAurasEffectOptions));
-            trigger.effect = triggerAurasEffectOptions[triggerEffect];
         }
         else if ("Professions" == trigger.category)
         {
