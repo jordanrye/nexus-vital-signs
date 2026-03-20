@@ -85,7 +85,7 @@ namespace Addon {
 
     void Render()
     {
-        if (isPreviewModeActive || !NexusLink->IsGameplay || !VitalsData->isAvailable())
+        if (isPreviewModeActive || !NexusLink || !NexusLink->IsGameplay || !VitalsData || !VitalsData->isAvailable())
         {
             isPreviewModeActive = false;
             return;
