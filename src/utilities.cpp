@@ -118,18 +118,18 @@ namespace font {
         m_FontsCache[key] = (ImFont*)aFont;
     }
 
-    ImFont* GetFont(const std::string& fontPath, float fontSize)
+    ImFont* GetFont(const std::string& fontFilePath, float fontSize)
     {
-        if (fontPath.empty()) return nullptr;
+        if (fontFilePath.empty()) return nullptr;
 
-        std::string key = fontPath + "_" + std::to_string(fontSize) + "px";
+        std::string key = fontFilePath + "_" + std::to_string(fontSize) + "px";
         if (m_FontsCache.find(key) != m_FontsCache.end())
         {
             return m_FontsCache[key];
         }
 
         ImFont* font = nullptr;
-        std::filesystem::path path(fontPath);
+        std::filesystem::path path(fontFilePath);
         if (path.is_relative())
         {
             path = GameDir / path;

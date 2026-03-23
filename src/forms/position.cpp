@@ -30,3 +30,23 @@ void form_Position(Position_t& position)
     ImGui::InputInt("Offset X##Position", &position.offset.x, 1);
     ImGui::InputInt("Offset Y##Position", &position.offset.y, 1);
 }
+
+void form_Position(std::string& source, Position_t& position)
+{
+    static const char* positionOptions[] = {
+        "Default position",
+        "Custom position"
+    };
+
+    int option = 0; // Default to "Default position"
+    if (source == "Default position") option = 0;
+    else if (source == "Custom position") option = 1;
+
+    ImGui::Combo("Position##POSITION_TYPE", &option, positionOptions, IM_ARRAYSIZE(positionOptions));
+    source = positionOptions[option];
+
+    if (option == 1)
+    {
+        form_Position(position);
+    }
+}

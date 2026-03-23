@@ -22,7 +22,7 @@ namespace Settings
         if (!object.is_null())
         {
             dser_BasicType(object["font-type"], config.fontType);
-            dser_BasicType(object["font-path"], config.fontPath);
+            dser_BasicType(object["font"], config.font);
             dser_BasicType(object["font-size-type"], config.fontSizeType);
             dser_BasicType(object["font-size"], config.fontSize);
             dser_ImColor(object["color"], config.color);
@@ -46,7 +46,7 @@ namespace Settings
     {
         json object = json::object();
         object["font-type"] = config.fontType;
-        object["font-path"] = config.fontPath;
+        object["font"] = config.font;
         object["font-size-type"] = config.fontSizeType;
         object["font-size"] = config.fontSize;
         object["color"] = ser_ImColor(config.color);

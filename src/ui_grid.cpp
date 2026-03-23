@@ -157,12 +157,17 @@ namespace UI::Grid {
         drawList->AddRect(p_min, p_max, colour, properties.rounding, properties.roundingCorners, thickness);
     }
 
-    void DrawIconText(ImDrawList* const drawList, const ImVec2& iconPosition, const ImVec2& iconSize, const std::string& text, const IconTextConfig_t& config)
+    void DrawIconText(ImDrawList* const drawList, const ImVec2& iconPosition, const ImVec2& iconSize, const std::string& text, const IconText_t& config, const IconTextConfig_t& globalConfig)
     {
-        std::string fontPath = (config.fontType == "Custom font") ? config.fontPath : "";
-        float fontSize = (config.fontSizeType == "Custom font size") ? config.fontSize : ImGui::GetIO().FontDefault->FontSize;
+        std::string fontFilePath = ""; // Nexus font
+        if (config.textStyle.fontSource == "Default font") fontFilePath = globalConfig.font;
+        else if (config.textStyle.fontSource == "Custom font") fontFilePath = config.textStyle.font;
 
-        ImFont* font = utils::font::GetFont(fontPath, fontSize);
+        float fontSize = ImGui::GetIO().FontDefault->FontSize;
+        if (config.textStyle.fontSizeSource == "Default font size") fontSize = globalConfig.fontSize;
+        else if (config.textStyle.fontSizeSource == "Custom font size") fontSize = config.textStyle.fontSize;
+
+        ImFont* font = utils::font::GetFont(fontFilePath, fontSize);
 
         if (font)
         {
@@ -178,22 +183,31 @@ namespace UI::Grid {
         iconProps.height = iconSize.y;
         // rounding ignored
 
-        ImVec2 textPos = CalcItemPosition(iconProps, textSize, config.position.anchor, config.position.offset);
+        std::string anchor = (config.positionSource == "Custom position") ? config.position.anchor : globalConfig.position.anchor;
+        Coordinate_t offset = (config.positionSource == "Custom position") ? config.position.offset : globalConfig.position.offset;
 
-        if (config.shadow) drawList->AddText(font, fontSize, textPos + ImVec2(1, 1), config.shadowColor, text.c_str());
-        if (config.outline) {
-            drawList->AddText(font, fontSize, textPos + ImVec2(-1, 0), config.outlineColor, text.c_str());
-            drawList->AddText(font, fontSize, textPos + ImVec2(1, 0), config.outlineColor, text.c_str());
-            drawList->AddText(font, fontSize, textPos + ImVec2(0, -1), config.outlineColor, text.c_str());
-            drawList->AddText(font, fontSize, textPos + ImVec2(0, 1), config.outlineColor, text.c_str());
+        ImVec2 textPos = CalcItemPosition(iconProps, textSize, anchor, offset);
+
+        ImColor color = (config.textStyle.colorSource == "Custom color") ? config.textStyle.color : globalConfig.color;
+        bool useShadow = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.shadow : globalConfig.shadow;
+        ImColor shadowColor = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.shadowColor : globalConfig.shadowColor;
+        bool useOutline = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outline : globalConfig.outline;
+        ImColor outlineColor = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outlineColor : globalConfig.outlineColor;
+
+        if (useShadow) drawList->AddText(font, fontSize, textPos + ImVec2(1, 1), shadowColor, text.c_str());
+        if (useOutline) {
+            drawList->AddText(font, fontSize, textPos + ImVec2(-1, 0), outlineColor, text.c_str());
+            drawList->AddText(font, fontSize, textPos + ImVec2(1, 0), outlineColor, text.c_str());
+            drawList->AddText(font, fontSize, textPos + ImVec2(0, -1), outlineColor, text.c_str());
+            drawList->AddText(font, fontSize, textPos + ImVec2(0, 1), outlineColor, text.c_str());
         }
-        drawList->AddText(font, fontSize, textPos, config.color, text.c_str());
+        drawList->AddText(font, fontSize, textPos, color, text.c_str());
 
         if (font) drawList->PopTextureID();
         if (font) ImGui::PopFont();
     }
 
-    void DrawIcon(ImDrawList * const drawList, DrawProperties_t properties, Texture* icon, const Size_t& size, std::string anchor, Coordinate_t offset, bool showDuration, float duration, bool showStacks, unsigned int stacks)
+    void DrawIcon(ImDrawList * const drawList, DrawProperties_t properties, Texture* icon, const Size_t& size, std::string anchor, Coordinate_t offset, bool showDuration, float duration, const IconText_t& durationConfig, bool showStacks, unsigned int stacks, const IconText_t& stacksConfig)
     {
         if (icon != nullptr)
         {
@@ -206,14 +220,14 @@ namespace UI::Grid {
             {
                 char buf[32];
                 sprintf_s(buf, "%.1f", (duration / 1000.f));
-                DrawIconText(drawList, iconPosition, iconSize, buf, ConfigIconDuration);
+                DrawIconText(drawList, iconPosition, iconSize, buf, durationConfig, ConfigIconDuration);
             }
 
             if (showStacks && (stacks > 1U))
             {
                 char buf[32];
                 sprintf_s(buf, "%u", stacks);
-                DrawIconText(drawList, iconPosition, iconSize, buf, ConfigIconStacks);
+                DrawIconText(drawList, iconPosition, iconSize, buf, stacksConfig, ConfigIconStacks);
             }
         }
     }
@@ -574,7 +588,7 @@ namespace UI::Grid {
             Texture* texture = UI::GetOrCreateTexture(indicator->iconSingle.icon.source, indicator->iconSingle.icon.path);
             float duration = context.effects[userIndex][indicator->iconSingle.icon.trigger.effect].duration;
             unsigned int stacks = context.effects[userIndex][indicator->iconSingle.icon.trigger.effect].stacks;
-            DrawIcon(drawList, parentProperties, texture, indicator->iconSingle.size, indicator->iconSingle.position.anchor, indicator->iconSingle.position.offset, indicator->iconSingle.showDuration, duration, indicator->iconSingle.showStacks, stacks);
+            DrawIcon(drawList, parentProperties, texture, indicator->iconSingle.size, indicator->iconSingle.position.anchor, indicator->iconSingle.position.offset, indicator->iconSingle.showDuration, duration, indicator->iconSingle.durationText, indicator->iconSingle.showStacks, stacks, indicator->iconSingle.stacksText);
         }
         else if (indicator->type == "Icon List")
         {
@@ -607,7 +621,7 @@ namespace UI::Grid {
                     Texture* texture = UI::GetOrCreateTexture(icon.source, icon.path);
                     float duration = context.effects[userIndex][icon.trigger.effect].duration;
                     unsigned int stacks = context.effects[userIndex][icon.trigger.effect].stacks;
-                    DrawIcon(drawList, parentProperties, texture, indicator->iconList.size, indicator->iconList.position.anchor, iconOffset, indicator->iconList.showDuration, duration, indicator->iconList.showStacks, stacks);
+                    DrawIcon(drawList, parentProperties, texture, indicator->iconList.size, indicator->iconList.position.anchor, iconOffset, indicator->iconList.showDuration, duration, indicator->iconList.durationText, indicator->iconList.showStacks, stacks, indicator->iconList.stacksText);
 
                     if (indicator->iconList.listLength == "Dynamic")
                     {
@@ -637,14 +651,14 @@ namespace UI::Grid {
                 text = indicator->text.textCustom;
             }
 
-            std::string fontPath = ""; // Nexus font
+            std::string fontFilePath = ""; // Nexus font
             if (indicator->text.fontType == "Default font")
             {
-                fontPath = ConfigText.fontPath;
+                fontFilePath = ConfigText.font;
             }
             else if (indicator->text.fontType == "Custom font")
             {
-                fontPath = indicator->text.fontPath;
+                fontFilePath = indicator->text.font;
             }
 
             float fontSize = ImGui::GetIO().FontDefault->FontSize;
@@ -657,7 +671,7 @@ namespace UI::Grid {
                 fontSize = indicator->text.fontSize;
             }
 
-            ImFont* font = utils::font::GetFont(fontPath, fontSize);
+            ImFont* font = utils::font::GetFont(fontFilePath, fontSize);
 
             if (indicator->text.widthType == "Character limit")
             {

@@ -24,6 +24,8 @@ namespace ImGui
     void BeginDisabled();
     void EndDisabled();
 
+    bool CheckableCollapsingHeader(const char* label, bool* is_enabled, ImGuiTreeNodeFlags flags = 0);
+
     bool ButtonArrow(const char* label, ImGuiDir direction, bool disabled);
     bool ButtonCross(const char* label);
     bool ButtonPlus(const char* label);

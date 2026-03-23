@@ -30,7 +30,7 @@ namespace utils {
 
 namespace font {
 
-    ImFont* GetFont(const std::string& fontPath, float fontSize);
+    ImFont* GetFont(const std::string& fontFilePath, float fontSize);
     void ReleaseFonts();
 
 } // namespace font

@@ -23,6 +23,24 @@ struct Position_t
     Coordinate_t offset;
 };
 
+struct TextStyle_t
+{
+    std::string fontSource = "Default font";
+    std::string font;
+    
+    std::string fontSizeSource = "Default font size";
+    float fontSize = 10.0f;
+    
+    std::string colorSource = "Default color";
+    ImColor color = ImColor(255, 255, 255, 255);
+    
+    std::string decoratorSource = "Default decorators";
+    bool shadow = false;
+    ImColor shadowColor = ImColor(0, 0, 0, 255);
+    bool outline = false;
+    ImColor outlineColor = ImColor(0, 0, 0, 255);
+};
+
 struct GridProperties_t
 {
     std::string cellDirection = "Left-to-right";
@@ -71,14 +89,25 @@ struct Icon_t
     TreeNodeUID id;
 };
 
+struct IconText_t
+{
+    TextStyle_t textStyle;
+    
+    std::string positionSource = "Default position";
+    Position_t position;
+};
+
 struct IconSingle_t
 {
     Size_t size;
     Position_t position;
     Icon_t icon;
-
+    
     bool showDuration = false;
+    IconText_t durationText;
+
     bool showStacks = false;
+    IconText_t stacksText;
 };
 
 struct IconList_t
@@ -91,7 +120,10 @@ struct IconList_t
     std::vector<Icon_t> list;
     
     bool showDuration = false;
+    IconText_t durationText;
+    
     bool showStacks = false;
+    IconText_t stacksText;
 };
 
 struct BorderIndicator_t
@@ -122,7 +154,7 @@ struct TextIndicator_t
     std::string textCustom;
     
     std::string fontType = "Default font";
-    std::string fontPath;
+    std::string font;
     
     std::string fontSizeType = "Default font size";
     float fontSize = 10.0f;
@@ -173,7 +205,7 @@ struct Indicator_t
 struct TextConfig_t
 {
     std::string fontType = "Nexus font";
-    std::string fontPath;
+    std::string font;
     std::string fontSizeType = "Nexus font size";
     float fontSize = 13.0f;
     ImColor color = ImColor(255, 255, 255, 255);
@@ -186,6 +218,7 @@ struct TextConfig_t
 struct IconTextConfig_t : public TextConfig_t
 {
     Position_t position;
+
     IconTextConfig_t(std::string anchor = "Centre") { position.anchor = anchor; }
 };
 

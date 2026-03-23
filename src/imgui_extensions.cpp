@@ -89,7 +89,7 @@ namespace ImGui
         ImGui::BeginGroup();
         ImGui::Dummy(ImVec2(frameHeight * 0.5f, 0.0f));
         ImGui::SameLine(0.0f, 0.0f);
-        ImGui::Text(name);
+        ImGui::TextDisabled(name);
         auto labelMin = ImGui::GetItemRectMin();
         auto labelMax = ImGui::GetItemRectMax();
         ImGui::SameLine(0.0f, 0.0f);
@@ -207,6 +207,23 @@ namespace ImGui
 
         // Pop the style var to restore original alpha
         ImGui::PopStyleVar();
+    }
+
+    bool CheckableCollapsingHeader(const char* label, bool* is_enabled, ImGuiTreeNodeFlags flags)
+    {
+        ImGui::PushID(label);
+
+        bool is_open = ImGui::CollapsingHeader(label, flags | ImGuiTreeNodeFlags_AllowItemOverlap);
+        float button_spacing = ImGui::GetItemRectSize().y + ImGui::GetStyle().ItemSpacing.x;
+        ImGui::SameLine(ImGui::GetContentRegionMax().x - button_spacing);
+        if (ImGui::ButtonCross("x"))
+        {
+            *is_enabled = !(*is_enabled);
+        }
+        
+        ImGui::PopID();
+        
+        return is_open;
     }
 
     bool ButtonArrow(const char* label, ImGuiDir direction, bool disabled)

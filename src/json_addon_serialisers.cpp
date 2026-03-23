@@ -135,6 +135,34 @@ void dser_Icon_t(json& object, Icon_t& icon)
     }
 }
 
+void dser_TextStyle_t(json& object, TextStyle_t& textStyle)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["font-type"], textStyle.fontSource);
+        dser_BasicType(object["font"], textStyle.font);
+        dser_BasicType(object["font-size-type"], textStyle.fontSizeSource);
+        dser_BasicType(object["font-size"], textStyle.fontSize);
+        dser_BasicType(object["color-type"], textStyle.colorSource);
+        dser_ImColor(object["color"], textStyle.color);
+        dser_BasicType(object["decorators-type"], textStyle.decoratorSource);
+        dser_BasicType(object["shadow"], textStyle.shadow);
+        dser_ImColor(object["shadow-color"], textStyle.shadowColor);
+        dser_BasicType(object["outline"], textStyle.outline);
+        dser_ImColor(object["outline-color"], textStyle.outlineColor);
+    }
+}
+
+void dser_IconText_t(json& object, IconText_t& iconText)
+{
+    if (!object.is_null())
+    {
+        dser_TextStyle_t(object["font"], iconText.textStyle);
+        dser_BasicType(object["position-type"], iconText.positionSource);
+        dser_Position_t(object["position"], iconText.position);
+    }
+}
+
 void dser_IconSingle_t(json& object, IconSingle_t& iconSingle)
 {
     if (!object.is_null())
@@ -143,7 +171,9 @@ void dser_IconSingle_t(json& object, IconSingle_t& iconSingle)
         dser_Position_t(object["position"], iconSingle.position);
         dser_Icon_t(object["icon"], iconSingle.icon);
         dser_BasicType(object["show-duration"], iconSingle.showDuration);
+        dser_IconText_t(object["duration-text"], iconSingle.durationText);
         dser_BasicType(object["show-stacks"], iconSingle.showStacks);
+        dser_IconText_t(object["stacks-text"], iconSingle.stacksText);
     }
 }
 
@@ -157,7 +187,9 @@ void dser_IconList_t(json& object, IconList_t& iconList)
         dser_BasicType(object["listDirection"], iconList.listDirection);
         dser_BasicType(object["listSpacing"], iconList.listSpacing);
         dser_BasicType(object["show-duration"], iconList.showDuration);
+        dser_IconText_t(object["duration-text"], iconList.durationText);
         dser_BasicType(object["show-stacks"], iconList.showStacks);
+        dser_IconText_t(object["stacks-text"], iconList.stacksText);
 
         if (!object["list"].is_null() && object["list"].is_array())
         {
@@ -212,7 +244,7 @@ void dser_TextIndicator_t(json& object, TextIndicator_t& text)
         dser_BasicType(object["text-content"], text.textContent);
         dser_BasicType(object["text-custom"], text.textCustom);
         dser_BasicType(object["font-type"], text.fontType);
-        dser_BasicType(object["font-path"], text.fontPath);
+        dser_BasicType(object["font"], text.font);
         dser_BasicType(object["font-size-type"], text.fontSizeType);
         dser_BasicType(object["font-size"], text.fontSize);
         dser_BasicType(object["color-type"], text.colorType);
@@ -361,6 +393,32 @@ json ser_Icon_t(const Icon_t& icon)
     return object;
 }
 
+json ser_TextStyle_t(const TextStyle_t& textStyle)
+{
+    json object = json::object();
+    object["font-type"] = textStyle.fontSource;
+    object["font"] = textStyle.font;
+    object["font-size-type"] = textStyle.fontSizeSource;
+    object["font-size"] = textStyle.fontSize;
+    object["color-type"] = textStyle.colorSource;
+    object["color"] = ser_ImColor(textStyle.color);
+    object["decorators-type"] = textStyle.decoratorSource;
+    object["shadow"] = textStyle.shadow;
+    object["shadow-color"] = ser_ImColor(textStyle.shadowColor);
+    object["outline"] = textStyle.outline;
+    object["outline-color"] = ser_ImColor(textStyle.outlineColor);
+    return object;
+}
+
+json ser_IconText_t(const IconText_t& iconText)
+{
+    json object = json::object();
+    object["font"] = ser_TextStyle_t(iconText.textStyle);
+    object["position-type"] = iconText.positionSource;
+    object["position"] = ser_Position_t(iconText.position);
+    return object;
+}
+
 json ser_IconSingle_t(const IconSingle_t& iconSingle)
 {
     json object = json::object();
@@ -368,7 +426,9 @@ json ser_IconSingle_t(const IconSingle_t& iconSingle)
     object["position"] = ser_Position_t(iconSingle.position);
     object["icon"] = ser_Icon_t(iconSingle.icon);
     object["show-duration"] = iconSingle.showDuration;
+    object["duration-text"] = ser_IconText_t(iconSingle.durationText);
     object["show-stacks"] = iconSingle.showStacks;
+    object["stacks-text"] = ser_IconText_t(iconSingle.stacksText);
     return object;
 }
 
@@ -381,7 +441,9 @@ json ser_IconList_t(const IconList_t& iconList)
     object["listDirection"] = iconList.listDirection;
     object["listSpacing"] = iconList.listSpacing;
     object["show-duration"] = iconList.showDuration;
+    object["duration-text"] = ser_IconText_t(iconList.durationText);
     object["show-stacks"] = iconList.showStacks;
+    object["stacks-text"] = ser_IconText_t(iconList.stacksText);
 
     object["list"] = json::array();
     for (auto& icon : iconList.list)
@@ -426,7 +488,7 @@ json ser_TextIndicator_t(const TextIndicator_t& text)
     object["text-content"] = text.textContent;
     object["text-custom"] = text.textCustom;
     object["font-type"] = text.fontType;
-    object["font-path"] = text.fontPath;
+    object["font"] = text.font;
     object["font-size-type"] = text.fontSizeType;
     object["font-size"] = text.fontSize;
     object["color-type"] = text.colorType;

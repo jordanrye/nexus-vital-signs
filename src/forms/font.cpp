@@ -1,6 +1,6 @@
 #include "forms.h"
 
-void form_Font(std::string& fontSource, std::string& fontPath)
+void form_Font(std::string& fontSource, std::string& fontFilePath)
 {
     static const char* fontOptions[] = {
         "Default font",
@@ -19,13 +19,13 @@ void form_Font(std::string& fontSource, std::string& fontPath)
     switch (option)
     {
         case 0:
-            fontPath = "";
+            fontFilePath = "";
             break;
         case 1:
-            fontPath = "";
+            fontFilePath = "";
             break;
         case 2:
-            ImGui::ButtonFile("Font File", fontPath, FontsDir.string(), GameDir.string(), L"All Files (*.*)\0*.*\0TrueType Font (*.ttf)\0*.ttf\0OpenType Font (*.otf)\0*.otf\0");
+            ImGui::ButtonFile("Font File", fontFilePath, FontsDir.string(), GameDir.string(), L"All Files (*.*)\0*.*\0TrueType Font (*.ttf)\0*.ttf\0OpenType Font (*.otf)\0*.otf\0");
             break;
     }
 }

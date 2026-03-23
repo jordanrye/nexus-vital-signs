@@ -607,8 +607,70 @@ namespace Addon {
             {
                 form_Texture(indicator.iconSingle.icon.source, indicator.iconSingle.icon.path);
                 form_Size(indicator.iconSingle.size);
-                ImGui::Checkbox("Show Duration", &indicator.iconSingle.showDuration);
-                ImGui::Checkbox("Show Stacks", &indicator.iconSingle.showStacks);
+                
+                ImGui::PushID("DurationText");
+                if (indicator.iconSingle.showDuration)
+                {
+                    if (ImGui::CheckableCollapsingHeader("Duration", &(indicator.iconSingle.showDuration)))
+                    {
+                        ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Position(indicator.iconSingle.durationText.positionSource, indicator.iconSingle.durationText.position);
+                        }
+                        ImGui::EndGroupPanel();
+                        
+                        ImGui::BeginGroupPanel("Text Style", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Font(indicator.iconSingle.durationText.textStyle.fontSource, indicator.iconSingle.durationText.textStyle.font);
+                            form_FontSize(indicator.iconSingle.durationText.textStyle.fontSizeSource, indicator.iconSingle.durationText.textStyle.fontSize);
+                            form_FontColour(indicator.iconSingle.durationText.textStyle.colorSource, indicator.iconSingle.durationText.textStyle.color);
+                            form_FontDecorator(
+                                indicator.iconSingle.durationText.textStyle.decoratorSource, 
+                                indicator.iconSingle.durationText.textStyle.shadow, 
+                                indicator.iconSingle.durationText.textStyle.shadowColor, 
+                                indicator.iconSingle.durationText.textStyle.outline, 
+                                indicator.iconSingle.durationText.textStyle.outlineColor);
+                        }
+                        ImGui::EndGroupPanel();
+                    }
+                }
+                else
+                {
+                    ImGui::Checkbox("Show Duration", &indicator.iconSingle.showDuration);
+                }
+                ImGui::PopID();
+                
+                ImGui::PushID("StacksText");
+                if (indicator.iconSingle.showStacks)
+                {
+                    if (ImGui::CheckableCollapsingHeader("Stacks", &(indicator.iconSingle.showStacks)))
+                    {
+                        ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Position(indicator.iconSingle.stacksText.positionSource, indicator.iconSingle.stacksText.position);
+                        }
+                        ImGui::EndGroupPanel();
+    
+                        ImGui::BeginGroupPanel("Text Style", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Font(indicator.iconSingle.stacksText.textStyle.fontSource, indicator.iconSingle.stacksText.textStyle.font);
+                            form_FontSize(indicator.iconSingle.stacksText.textStyle.fontSizeSource, indicator.iconSingle.stacksText.textStyle.fontSize);
+                            form_FontColour(indicator.iconSingle.stacksText.textStyle.colorSource, indicator.iconSingle.stacksText.textStyle.color);
+                            form_FontDecorator(
+                                indicator.iconSingle.stacksText.textStyle.decoratorSource, 
+                                indicator.iconSingle.stacksText.textStyle.shadow, 
+                                indicator.iconSingle.stacksText.textStyle.shadowColor, 
+                                indicator.iconSingle.stacksText.textStyle.outline, 
+                                indicator.iconSingle.stacksText.textStyle.outlineColor);
+                        }
+                        ImGui::EndGroupPanel();
+                    }
+                }
+                else
+                {
+                    ImGui::Checkbox("Show Stacks", &indicator.iconSingle.showStacks);
+                }
+                ImGui::PopID();
             }
             
             ImGui::TextDisabled("Trigger");
@@ -638,8 +700,70 @@ namespace Addon {
             ImGui::Separator();
             {
                 form_Size(indicator.iconList.size);
-                ImGui::Checkbox("Show Duration", &indicator.iconList.showDuration);
-                ImGui::Checkbox("Show Stacks", &indicator.iconList.showStacks);
+
+                ImGui::PushID("DurationText");
+                if (indicator.iconList.showDuration)
+                {
+                    if (ImGui::CheckableCollapsingHeader("Duration", &(indicator.iconList.showDuration)))
+                    {
+                        ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Position(indicator.iconList.durationText.positionSource, indicator.iconList.durationText.position);
+                        }
+                        ImGui::EndGroupPanel();
+
+                        ImGui::BeginGroupPanel("Text Style", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Font(indicator.iconList.durationText.textStyle.fontSource, indicator.iconList.durationText.textStyle.font);
+                            form_FontSize(indicator.iconList.durationText.textStyle.fontSizeSource, indicator.iconList.durationText.textStyle.fontSize);
+                            form_FontColour(indicator.iconList.durationText.textStyle.colorSource, indicator.iconList.durationText.textStyle.color);
+                            form_FontDecorator(
+                                indicator.iconList.durationText.textStyle.decoratorSource, 
+                                indicator.iconList.durationText.textStyle.shadow, 
+                                indicator.iconList.durationText.textStyle.shadowColor, 
+                                indicator.iconList.durationText.textStyle.outline, 
+                                indicator.iconList.durationText.textStyle.outlineColor);   
+                        }
+                        ImGui::EndGroupPanel();
+                    }
+                }
+                else
+                {
+                    ImGui::Checkbox("Show Duration", &indicator.iconList.showDuration);
+                }
+                ImGui::PopID();
+
+                ImGui::PushID("StacksText");
+                if (indicator.iconList.showStacks)
+                {
+                    if (ImGui::CheckableCollapsingHeader("Stacks", &(indicator.iconList.showStacks)))
+                    {
+                        ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Position(indicator.iconList.stacksText.positionSource, indicator.iconList.stacksText.position);
+                        }
+                        ImGui::EndGroupPanel();
+                        
+                        ImGui::BeginGroupPanel("Text Style", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Font(indicator.iconList.stacksText.textStyle.fontSource, indicator.iconList.stacksText.textStyle.font);
+                            form_FontSize(indicator.iconList.stacksText.textStyle.fontSizeSource, indicator.iconList.stacksText.textStyle.fontSize);
+                            form_FontColour(indicator.iconList.stacksText.textStyle.colorSource, indicator.iconList.stacksText.textStyle.color);
+                            form_FontDecorator(
+                                indicator.iconList.stacksText.textStyle.decoratorSource, 
+                                indicator.iconList.stacksText.textStyle.shadow, 
+                                indicator.iconList.stacksText.textStyle.shadowColor, 
+                                indicator.iconList.stacksText.textStyle.outline, 
+                                indicator.iconList.stacksText.textStyle.outlineColor);
+                        }
+                        ImGui::EndGroupPanel();
+                    }
+                }
+                else
+                {
+                    ImGui::Checkbox("Show Stacks", &indicator.iconList.showStacks);
+                }
+                ImGui::PopID();
             }
 
             ImGui::TextDisabled("Icon List");
@@ -803,10 +927,10 @@ namespace Addon {
                 form_TextContent(indicator.text.textContent, indicator.text.textCustom);
             }
 
-            ImGui::TextDisabled("Text Properties");
+            ImGui::TextDisabled("Text Style");
             ImGui::Separator();
             {
-                form_Font(indicator.text.fontType, indicator.text.fontPath);
+                form_Font(indicator.text.fontType, indicator.text.font);
                 form_FontSize(indicator.text.fontSizeType, indicator.text.fontSize);
                 form_FontColour(indicator.text.colorType, indicator.text.color);
                 form_FontDecorator(indicator.text.decoratorsType, indicator.text.shadow, indicator.text.shadowColor, indicator.text.outline, indicator.text.outlineColor);
@@ -955,9 +1079,9 @@ namespace Addon {
         AddPresetItem(textBranchId, "Text", "General", []() {
             ImGui::PushID("Text/General");
             {
-                ImGui::TextDisabled("Text Properties");
+                ImGui::TextDisabled("Text Style");
                 ImGui::Separator();
-                form_FontPreset(ConfigText.fontType, ConfigText.fontPath);
+                form_FontPreset(ConfigText.fontType, ConfigText.font);
                 form_FontSizePreset(ConfigText.fontSizeType, ConfigText.fontSize);
                 ImGui::ColorEdit4("Color##TEXT_COLOR", (float*)&ConfigText.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 form_FontDecoratorPreset(ConfigText.shadow, ConfigText.shadowColor, ConfigText.outline, ConfigText.outlineColor);
@@ -968,9 +1092,9 @@ namespace Addon {
         AddPresetItem(textBranchId, "Text", "Icon (Duration)", []() {
             ImGui::PushID("Text/Icon/Duration");
             {
-                ImGui::TextDisabled("Text Properties");
+                ImGui::TextDisabled("Text Style");
                 ImGui::Separator();
-                form_FontPreset(ConfigIconDuration.fontType, ConfigIconDuration.fontPath);
+                form_FontPreset(ConfigIconDuration.fontType, ConfigIconDuration.font);
                 form_FontSizePreset(ConfigIconDuration.fontSizeType, ConfigIconDuration.fontSize);
                 ImGui::ColorEdit4("Color##ICON_DURATION_COLOR", (float*)&ConfigIconDuration.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 form_FontDecoratorPreset(ConfigIconDuration.shadow, ConfigIconDuration.shadowColor, ConfigIconDuration.outline, ConfigIconDuration.outlineColor);
@@ -985,9 +1109,9 @@ namespace Addon {
         AddPresetItem(textBranchId, "Text", "Icon (Stacks)", []() {
             ImGui::PushID("Text/Icon/Stacks");
             {
-                ImGui::TextDisabled("Text Properties");
+                ImGui::TextDisabled("Text Style");
                 ImGui::Separator();
-                form_FontPreset(ConfigIconStacks.fontType, ConfigIconStacks.fontPath);
+                form_FontPreset(ConfigIconStacks.fontType, ConfigIconStacks.font);
                 form_FontSizePreset(ConfigIconStacks.fontSizeType, ConfigIconStacks.fontSize);
                 ImGui::ColorEdit4("Color##ICON_STACKS_COLOR", (float*)&ConfigIconStacks.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 form_FontDecoratorPreset(ConfigIconStacks.shadow, ConfigIconStacks.shadowColor, ConfigIconStacks.outline, ConfigIconStacks.outlineColor);
