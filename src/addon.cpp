@@ -798,17 +798,17 @@ namespace Addon {
 
                     if (isOpen)
                     {
-                        ImGui::TextDisabled("Icon Properties");
-                        ImGui::Separator();
+                        ImGui::BeginGroupPanel("Icon Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Texture(icon.source, icon.path);
                         }
+                        ImGui::EndGroupPanel();
 
-                        ImGui::TextDisabled("Trigger");
-                        ImGui::Separator();
+                        ImGui::BeginGroupPanel("Trigger", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Trigger(icon.trigger);
                         }
+                        ImGui::EndGroupPanel();
                     }
 
                     idx++;
