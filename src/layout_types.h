@@ -91,10 +91,10 @@ struct Icon_t
 
 struct IconText_t
 {
-    TextStyle_t textStyle;
-    
     std::string positionSource = "Default position";
     Position_t position;
+    TextStyle_t textStyle;
+    int textFormatPrecision = 1;
 };
 
 struct IconSingle_t

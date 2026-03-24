@@ -619,6 +619,18 @@ namespace Addon {
                         }
                         ImGui::EndGroupPanel();
                         
+                        ImGui::BeginGroupPanel("Text", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            ImGui::BeginDisabled();
+                            static const char* textOptions[] = { "Effect duration" };
+                            int option = 0;
+                            ImGui::Combo("Text##", &option, textOptions, IM_ARRAYSIZE(textOptions));
+                            ImGui::EndDisabled();
+
+                            ImGui::SliderInt("Precision", &indicator.iconSingle.durationText.textFormatPrecision, 0, 2);
+                        }
+                        ImGui::EndGroupPanel();
+
                         ImGui::BeginGroupPanel("Text Style", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Font(indicator.iconSingle.durationText.textStyle.fontSource, indicator.iconSingle.durationText.textStyle.font);
@@ -709,6 +721,18 @@ namespace Addon {
                         ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Position(indicator.iconList.durationText.positionSource, indicator.iconList.durationText.position);
+                        }
+                        ImGui::EndGroupPanel();
+
+                        ImGui::BeginGroupPanel("Text", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            ImGui::BeginDisabled();
+                            static const char* textOptions[] = { "Effect duration" };
+                            int option = 0;
+                            ImGui::Combo("Text##", &option, textOptions, IM_ARRAYSIZE(textOptions));
+                            ImGui::EndDisabled();
+
+                            ImGui::SliderInt("Precision", &indicator.iconList.durationText.textFormatPrecision, 0, 2);
                         }
                         ImGui::EndGroupPanel();
 

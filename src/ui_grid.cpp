@@ -219,7 +219,16 @@ namespace UI::Grid {
             if (showDuration)
             {
                 char buf[32];
-                sprintf_s(buf, "%.1f", (duration / 1000.f));
+                if (durationConfig.textFormatPrecision <= 0)
+                {
+                    sprintf_s(buf, "%.0f", std::ceil(duration / 1000.f));
+                }
+                else
+                {
+                    char fmt[16];
+                    sprintf_s(fmt, "%%.%df", durationConfig.textFormatPrecision);
+                    sprintf_s(buf, fmt, (duration / 1000.f));
+                }
                 DrawIconText(drawList, iconPosition, iconSize, buf, durationConfig, ConfigIconDuration);
             }
 

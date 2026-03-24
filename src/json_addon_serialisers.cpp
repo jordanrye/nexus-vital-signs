@@ -157,9 +157,10 @@ void dser_IconText_t(json& object, IconText_t& iconText)
 {
     if (!object.is_null())
     {
-        dser_TextStyle_t(object["font"], iconText.textStyle);
-        dser_BasicType(object["position-type"], iconText.positionSource);
+        dser_BasicType(object["position-source"], iconText.positionSource);
         dser_Position_t(object["position"], iconText.position);
+        dser_TextStyle_t(object["text-style"], iconText.textStyle);
+        dser_BasicType(object["text-format-precision"], iconText.textFormatPrecision);
     }
 }
 
@@ -413,9 +414,10 @@ json ser_TextStyle_t(const TextStyle_t& textStyle)
 json ser_IconText_t(const IconText_t& iconText)
 {
     json object = json::object();
-    object["font"] = ser_TextStyle_t(iconText.textStyle);
-    object["position-type"] = iconText.positionSource;
+    object["position-source"] = iconText.positionSource;
     object["position"] = ser_Position_t(iconText.position);
+    object["text-style"] = ser_TextStyle_t(iconText.textStyle);
+    object["text-format-precision"] = iconText.textFormatPrecision;
     return object;
 }
 
