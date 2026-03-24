@@ -216,7 +216,23 @@ namespace UI::Grid {
 
             drawList->AddImage(icon->Resource, iconPosition, ImVec2(iconPosition.x + iconSize.x, iconPosition.y + iconSize.y));
 
-            if (showDuration)
+            bool isDurationVisible = showDuration;
+            if (isDurationVisible)
+            {
+                std::string condition = (durationConfig.trigger.source == "Custom trigger") ? durationConfig.trigger.condition : ConfigIconDuration.trigger.condition;
+                float threshold = (durationConfig.trigger.source == "Custom trigger") ? durationConfig.trigger.threshold : ConfigIconDuration.trigger.threshold;
+
+                if (condition == "Duration: Less Than" && (duration / 1000.f) >= threshold)
+                {
+                    isDurationVisible = false;
+                }
+                else if (condition == "Duration: More Than" && (duration / 1000.f) <= threshold)
+                {
+                    isDurationVisible = false;
+                }
+            }
+
+            if (isDurationVisible)
             {
                 char buf[32];
                 if (durationConfig.textFormatPrecision <= 0)
@@ -232,7 +248,28 @@ namespace UI::Grid {
                 DrawIconText(drawList, iconPosition, iconSize, buf, durationConfig, ConfigIconDuration);
             }
 
-            if (showStacks && (stacks > 1U))
+            bool isStacksVisible = showStacks && (stacks > 1U);
+            if (isStacksVisible)
+            {
+                std::string condition = (stacksConfig.trigger.source == "Custom trigger") ? stacksConfig.trigger.condition : ConfigIconStacks.trigger.condition;
+                float threshold = (stacksConfig.trigger.source == "Custom trigger") ? stacksConfig.trigger.threshold : ConfigIconStacks.trigger.threshold;
+                float thresholdMax = (stacksConfig.trigger.source == "Custom trigger") ? stacksConfig.trigger.thresholdMax : ConfigIconStacks.trigger.thresholdMax;
+
+                if (condition == "Stacks: Less Than" && stacks >= threshold)
+                {
+                    isStacksVisible = false;
+                }
+                else if (condition == "Stacks: More Than" && stacks <= threshold)
+                {
+                    isStacksVisible = false;
+                }
+                else if (condition == "Stacks: Between" && (stacks < threshold || stacks > thresholdMax))
+                {
+                    isStacksVisible = false;
+                }
+            }
+
+            if (isStacksVisible)
             {
                 char buf[32];
                 sprintf_s(buf, "%u", stacks);

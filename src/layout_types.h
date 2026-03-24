@@ -89,12 +89,21 @@ struct Icon_t
     TreeNodeUID id;
 };
 
+struct IconTextTrigger_t
+{
+    std::string source = "Default trigger";
+    std::string condition = "<Inherit From Parent>";
+    float threshold = 0.0f;
+    float thresholdMax = 0.0f;
+};
+
 struct IconText_t
 {
     std::string positionSource = "Default position";
     Position_t position;
     TextStyle_t textStyle;
     int textFormatPrecision = 1;
+    IconTextTrigger_t trigger;
 };
 
 struct IconSingle_t
@@ -218,6 +227,7 @@ struct TextConfig_t
 struct IconTextConfig_t : public TextConfig_t
 {
     Position_t position;
+    IconTextTrigger_t trigger;
 
     IconTextConfig_t(std::string anchor = "Centre") { position.anchor = anchor; }
 };

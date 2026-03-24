@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\addon.cpp" />
+    <ClCompile Include="src\forms\icon_text.cpp" />
     <ClCompile Include="src\interface\gw2re\Game\Behavior\BehaviorOrder.cpp" />
     <ClCompile Include="src\interface\gw2re\Game\Char\ChCliOrder.cpp" />
     <ClCompile Include="src\interface\vital_signs_interface.cpp" />

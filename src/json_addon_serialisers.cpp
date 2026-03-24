@@ -153,6 +153,17 @@ void dser_TextStyle_t(json& object, TextStyle_t& textStyle)
     }
 }
 
+void dser_IconTextTrigger_t(json& object, IconTextTrigger_t& trigger)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["source"], trigger.source);
+        dser_BasicType(object["condition"], trigger.condition);
+        dser_BasicType(object["threshold"], trigger.threshold);
+        dser_BasicType(object["threshold-max"], trigger.thresholdMax);
+    }
+}
+
 void dser_IconText_t(json& object, IconText_t& iconText)
 {
     if (!object.is_null())
@@ -161,6 +172,7 @@ void dser_IconText_t(json& object, IconText_t& iconText)
         dser_Position_t(object["position"], iconText.position);
         dser_TextStyle_t(object["text-style"], iconText.textStyle);
         dser_BasicType(object["text-format-precision"], iconText.textFormatPrecision);
+        dser_IconTextTrigger_t(object["trigger"], iconText.trigger);
     }
 }
 
@@ -411,6 +423,16 @@ json ser_TextStyle_t(const TextStyle_t& textStyle)
     return object;
 }
 
+json ser_IconTextTrigger_t(const IconTextTrigger_t& trigger)
+{
+    json object = json::object();
+    object["source"] = trigger.source;
+    object["condition"] = trigger.condition;
+    object["threshold"] = trigger.threshold;
+    object["threshold-max"] = trigger.thresholdMax;
+    return object;
+}
+
 json ser_IconText_t(const IconText_t& iconText)
 {
     json object = json::object();
@@ -418,6 +440,7 @@ json ser_IconText_t(const IconText_t& iconText)
     object["position"] = ser_Position_t(iconText.position);
     object["text-style"] = ser_TextStyle_t(iconText.textStyle);
     object["text-format-precision"] = iconText.textFormatPrecision;
+    object["trigger"] = ser_IconTextTrigger_t(iconText.trigger);
     return object;
 }
 

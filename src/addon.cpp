@@ -644,6 +644,8 @@ namespace Addon {
                                 indicator.iconSingle.durationText.textStyle.outlineColor);
                         }
                         ImGui::EndGroupPanel();
+
+                        form_IconTextTriggerDuration(indicator.iconSingle.durationText.trigger);
                     }
                 }
                 else
@@ -676,6 +678,8 @@ namespace Addon {
                                 indicator.iconSingle.stacksText.textStyle.outlineColor);
                         }
                         ImGui::EndGroupPanel();
+
+                        form_IconTextTriggerStacks(indicator.iconSingle.stacksText.trigger);
                     }
                 }
                 else
@@ -749,6 +753,8 @@ namespace Addon {
                                 indicator.iconList.durationText.textStyle.outlineColor);   
                         }
                         ImGui::EndGroupPanel();
+
+                        form_IconTextTriggerDuration(indicator.iconList.durationText.trigger);
                     }
                 }
                 else
@@ -781,6 +787,8 @@ namespace Addon {
                                 indicator.iconList.stacksText.textStyle.outlineColor);
                         }
                         ImGui::EndGroupPanel();
+
+                        form_IconTextTriggerStacks(indicator.iconList.stacksText.trigger);
                     }
                 }
                 else
@@ -1126,6 +1134,10 @@ namespace Addon {
                 ImGui::TextDisabled("Position");
                 ImGui::Separator();
                 form_Position(ConfigIconDuration.position);
+
+                ImGui::TextDisabled("Trigger");
+                ImGui::Separator();
+                form_IconTextTriggerDuration(ConfigIconDuration.trigger, false);
             }
             ImGui::PopID();
         });
@@ -1143,6 +1155,10 @@ namespace Addon {
                 ImGui::TextDisabled("Position");
                 ImGui::Separator();
                 form_Position(ConfigIconStacks.position);
+
+                ImGui::TextDisabled("Trigger");
+                ImGui::Separator();
+                form_IconTextTriggerStacks(ConfigIconStacks.trigger, false);
             }
             ImGui::PopID();
         });
