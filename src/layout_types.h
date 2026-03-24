@@ -102,6 +102,7 @@ struct IconText_t
     std::string positionSource = "Default position";
     Position_t position;
     TextStyle_t textStyle;
+    std::string textFormatSource = "Default precision";
     int textFormatPrecision = 1;
     IconTextTrigger_t trigger;
 };
@@ -227,6 +228,7 @@ struct TextConfig_t
 struct IconTextConfig_t : public TextConfig_t
 {
     Position_t position;
+    int textFormatPrecision = 1;
     IconTextTrigger_t trigger;
 
     IconTextConfig_t(std::string anchor = "Centre") { position.anchor = anchor; }

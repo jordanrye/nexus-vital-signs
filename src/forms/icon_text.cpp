@@ -1,5 +1,32 @@
 #include "forms.h"
 
+void form_IconTextFormatDuration(std::string& source, int& precision, bool showSource)
+{
+    if (showSource) ImGui::BeginGroupPanel("Text", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+
+    ImGui::BeginDisabled();
+    static const char* textOptions[] = { "Effect duration" };
+    int option = 0;
+    ImGui::Combo("Text##", &option, textOptions, IM_ARRAYSIZE(textOptions));
+    ImGui::EndDisabled();
+
+    int sourceSelection = 1;
+    if (showSource)
+    {
+        static const char* sourceOptions[] = { "Default precision", "Custom precision" };
+        sourceSelection = (source == "Custom precision") ? 1 : 0;
+        if (ImGui::Combo("Source##FORMAT_SOURCE", &sourceSelection, sourceOptions, IM_ARRAYSIZE(sourceOptions)))
+            source = sourceOptions[sourceSelection];
+    }
+
+    if (sourceSelection == 1)
+    {
+        ImGui::SliderInt("Precision##FORMAT_PRECISION", &precision, 0, 2);
+    }
+
+    if (showSource) ImGui::EndGroupPanel();
+}
+
 void form_IconTextTriggerDuration(IconTextTrigger_t& trigger, bool showSource)
 {
     if (showSource) ImGui::BeginGroupPanel("Trigger", ImVec2(ImGui::GetContentRegionMax().x, 0.f));

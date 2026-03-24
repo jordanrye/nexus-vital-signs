@@ -619,17 +619,7 @@ namespace Addon {
                         }
                         ImGui::EndGroupPanel();
                         
-                        ImGui::BeginGroupPanel("Text", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
-                        {
-                            ImGui::BeginDisabled();
-                            static const char* textOptions[] = { "Effect duration" };
-                            int option = 0;
-                            ImGui::Combo("Text##", &option, textOptions, IM_ARRAYSIZE(textOptions));
-                            ImGui::EndDisabled();
-
-                            ImGui::SliderInt("Precision", &indicator.iconSingle.durationText.textFormatPrecision, 0, 2);
-                        }
-                        ImGui::EndGroupPanel();
+                        form_IconTextFormatDuration(indicator.iconSingle.durationText.textFormatSource, indicator.iconSingle.durationText.textFormatPrecision);
 
                         ImGui::BeginGroupPanel("Text Style", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
@@ -728,17 +718,7 @@ namespace Addon {
                         }
                         ImGui::EndGroupPanel();
 
-                        ImGui::BeginGroupPanel("Text", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
-                        {
-                            ImGui::BeginDisabled();
-                            static const char* textOptions[] = { "Effect duration" };
-                            int option = 0;
-                            ImGui::Combo("Text##", &option, textOptions, IM_ARRAYSIZE(textOptions));
-                            ImGui::EndDisabled();
-
-                            ImGui::SliderInt("Precision", &indicator.iconList.durationText.textFormatPrecision, 0, 2);
-                        }
-                        ImGui::EndGroupPanel();
+                        form_IconTextFormatDuration(indicator.iconList.durationText.textFormatSource, indicator.iconList.durationText.textFormatPrecision);
 
                         ImGui::BeginGroupPanel("Text Style", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
@@ -1124,16 +1104,21 @@ namespace Addon {
         AddPresetItem(textBranchId, "Text", "Icon (Duration)", []() {
             ImGui::PushID("Text/Icon/Duration");
             {
+                ImGui::TextDisabled("Position");
+                ImGui::Separator();
+                form_Position(ConfigIconDuration.position);
+
+                ImGui::TextDisabled("Text");
+                ImGui::Separator();
+                std::string dummySource;
+                form_IconTextFormatDuration(dummySource, ConfigIconDuration.textFormatPrecision, false);
+
                 ImGui::TextDisabled("Text Style");
                 ImGui::Separator();
                 form_FontPreset(ConfigIconDuration.fontType, ConfigIconDuration.font);
                 form_FontSizePreset(ConfigIconDuration.fontSizeType, ConfigIconDuration.fontSize);
                 ImGui::ColorEdit4("Color##ICON_DURATION_COLOR", (float*)&ConfigIconDuration.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 form_FontDecoratorPreset(ConfigIconDuration.shadow, ConfigIconDuration.shadowColor, ConfigIconDuration.outline, ConfigIconDuration.outlineColor);
-                
-                ImGui::TextDisabled("Position");
-                ImGui::Separator();
-                form_Position(ConfigIconDuration.position);
 
                 ImGui::TextDisabled("Trigger");
                 ImGui::Separator();
@@ -1145,16 +1130,16 @@ namespace Addon {
         AddPresetItem(textBranchId, "Text", "Icon (Stacks)", []() {
             ImGui::PushID("Text/Icon/Stacks");
             {
+                ImGui::TextDisabled("Position");
+                ImGui::Separator();
+                form_Position(ConfigIconStacks.position);
+
                 ImGui::TextDisabled("Text Style");
                 ImGui::Separator();
                 form_FontPreset(ConfigIconStacks.fontType, ConfigIconStacks.font);
                 form_FontSizePreset(ConfigIconStacks.fontSizeType, ConfigIconStacks.fontSize);
                 ImGui::ColorEdit4("Color##ICON_STACKS_COLOR", (float*)&ConfigIconStacks.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 form_FontDecoratorPreset(ConfigIconStacks.shadow, ConfigIconStacks.shadowColor, ConfigIconStacks.outline, ConfigIconStacks.outlineColor);
-                
-                ImGui::TextDisabled("Position");
-                ImGui::Separator();
-                form_Position(ConfigIconStacks.position);
 
                 ImGui::TextDisabled("Trigger");
                 ImGui::Separator();

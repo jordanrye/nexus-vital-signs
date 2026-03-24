@@ -17,6 +17,7 @@ void form_FontSizePreset(std::string& fontSource, float& fontSize);
 void form_FontColour(std::string& source, ImColor& colour);
 void form_FontDecorator(std::string& source, bool& isShadow, ImColor& colourShadow, bool& isOutline, ImColor& colourOutline);
 void form_FontDecoratorPreset(bool& isShadow, ImColor& colourShadow, bool& isOutline, ImColor& colourOutline);
+void form_IconTextFormatDuration(std::string& source, int& precision, bool showSource = true);
 void form_IconTextTriggerDuration(IconTextTrigger_t& trigger, bool showSource = true);
 void form_IconTextTriggerStacks(IconTextTrigger_t& trigger, bool showSource = true);
 void form_ListLength(std::string& listLength);

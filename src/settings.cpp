@@ -39,6 +39,7 @@ namespace Settings
         {
             dser_TextConfig_t(object, config);
             dser_Position_t(object["position"], config.position);
+            dser_BasicType(object["text-format-precision"], config.textFormatPrecision);
             dser_IconTextTrigger_t(object["trigger"], config.trigger);
         }
     }
@@ -62,6 +63,7 @@ namespace Settings
     {
         json object = ser_TextConfig_t(config);
         object["position"] = ser_Position_t(config.position);
+        object["text-format-precision"] = config.textFormatPrecision;
         object["trigger"] = ser_IconTextTrigger_t(config.trigger);
         return object;
     }

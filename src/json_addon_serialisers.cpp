@@ -171,6 +171,7 @@ void dser_IconText_t(json& object, IconText_t& iconText)
         dser_BasicType(object["position-source"], iconText.positionSource);
         dser_Position_t(object["position"], iconText.position);
         dser_TextStyle_t(object["text-style"], iconText.textStyle);
+        dser_BasicType(object["text-format-source"], iconText.textFormatSource);
         dser_BasicType(object["text-format-precision"], iconText.textFormatPrecision);
         dser_IconTextTrigger_t(object["trigger"], iconText.trigger);
     }
@@ -439,6 +440,7 @@ json ser_IconText_t(const IconText_t& iconText)
     object["position-source"] = iconText.positionSource;
     object["position"] = ser_Position_t(iconText.position);
     object["text-style"] = ser_TextStyle_t(iconText.textStyle);
+    object["text-format-source"] = iconText.textFormatSource;
     object["text-format-precision"] = iconText.textFormatPrecision;
     object["trigger"] = ser_IconTextTrigger_t(iconText.trigger);
     return object;
