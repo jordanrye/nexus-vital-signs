@@ -22,9 +22,9 @@ LayoutManager g_LayoutManager{};
 ColourPresets_t ColourPresets{};
 BorderPresets_t BorderPresets{};
 
-TextConfig_t ConfigText{};
-IconTextConfig_t ConfigIconDuration("Bottom-right");
-IconTextConfig_t ConfigIconStacks("Top-right");
+TextStyle_t ConfigText = []{ TextStyle_t c; c.fontSource = "Nexus font"; c.fontSizeSource = "Nexus font size"; c.fontSize = 0.0f; return c; }();
+IconText_t ConfigIconDuration = []{ IconText_t c; c.position.anchor = "Bottom-right"; c.textStyle.fontSource = "Nexus font"; c.textStyle.fontSizeSource = "Nexus font size"; c.textStyle.fontSize = 0.0f; return c; }();
+IconText_t ConfigIconStacks = []{ IconText_t c; c.position.anchor = "Top-right"; c.textStyle.fontSource = "Nexus font"; c.textStyle.fontSizeSource = "Nexus font size"; c.textStyle.fontSize = 0.0f; return c; }();
 
 TreeView g_LayoutEditor{};
 TreeView g_PresetConfig{};

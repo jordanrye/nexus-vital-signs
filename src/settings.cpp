@@ -17,57 +17,6 @@ namespace Settings
 
     bool jsonParse(const std::filesystem::path& aFilePath, json& jObject);
 
-    void dser_TextConfig_t(json& object, TextConfig_t& config)
-    {
-        if (!object.is_null())
-        {
-            dser_BasicType(object["font-type"], config.fontType);
-            dser_BasicType(object["font"], config.font);
-            dser_BasicType(object["font-size-type"], config.fontSizeType);
-            dser_BasicType(object["font-size"], config.fontSize);
-            dser_ImColor(object["color"], config.color);
-            dser_BasicType(object["shadow"], config.shadow);
-            dser_ImColor(object["shadow-color"], config.shadowColor);
-            dser_BasicType(object["outline"], config.outline);
-            dser_ImColor(object["outline-color"], config.outlineColor);
-        }
-    }
-
-    void dser_IconTextConfig_t(json& object, IconTextConfig_t& config)
-    {
-        if (!object.is_null())
-        {
-            dser_TextConfig_t(object, config);
-            dser_Position_t(object["position"], config.position);
-            dser_BasicType(object["text-format-precision"], config.textFormatPrecision);
-            dser_IconTextTrigger_t(object["trigger"], config.trigger);
-        }
-    }
-
-    json ser_TextConfig_t(const TextConfig_t& config)
-    {
-        json object = json::object();
-        object["font-type"] = config.fontType;
-        object["font"] = config.font;
-        object["font-size-type"] = config.fontSizeType;
-        object["font-size"] = config.fontSize;
-        object["color"] = ser_ImColor(config.color);
-        object["shadow"] = config.shadow;
-        object["shadow-color"] = ser_ImColor(config.shadowColor);
-        object["outline"] = config.outline;
-        object["outline-color"] = ser_ImColor(config.outlineColor);
-        return object;
-    }
-
-    json ser_IconTextConfig_t(const IconTextConfig_t& config)
-    {
-        json object = ser_TextConfig_t(config);
-        object["position"] = ser_Position_t(config.position);
-        object["text-format-precision"] = config.textFormatPrecision;
-        object["trigger"] = ser_IconTextTrigger_t(config.trigger);
-        return object;
-    }
-
     void Load(const std::filesystem::path& aSettingsPath)
     {
         json settings = json::object();
@@ -103,17 +52,17 @@ namespace Settings
 
                 if (!settings["text"].is_null())
                 {
-                    dser_TextConfig_t(settings["text"], ConfigText);
+                    dser_TextStyle_t(settings["text"], ConfigText);
                 }
 
                 if (!settings["icon-duration"].is_null())
                 {
-                    dser_IconTextConfig_t(settings["icon-duration"], ConfigIconDuration);
+                    dser_IconText_t(settings["icon-duration"], ConfigIconDuration);
                 }
 
                 if (!settings["icon-stacks"].is_null())
                 {
-                    dser_IconTextConfig_t(settings["icon-stacks"], ConfigIconStacks);
+                    dser_IconText_t(settings["icon-stacks"], ConfigIconStacks);
                 }
             }
         }
@@ -144,9 +93,9 @@ namespace Settings
             colors["border"] = ser_ImColor(BorderPresets.COLOUR_BORDER);
         }
 
-        settings["text"] = ser_TextConfig_t(ConfigText);
-        settings["icon-duration"] = ser_IconTextConfig_t(ConfigIconDuration);
-        settings["icon-stacks"] = ser_IconTextConfig_t(ConfigIconStacks);
+        settings["text"] = ser_TextStyle_t(ConfigText);
+        settings["icon-duration"] = ser_IconText_t(ConfigIconDuration);
+        settings["icon-stacks"] = ser_IconText_t(ConfigIconStacks);
 
         /* write updated configuration to disk */
         Mutex.lock();

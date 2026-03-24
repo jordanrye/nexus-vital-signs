@@ -212,28 +212,6 @@ struct Indicator_t
     TreeNodeUID id;
 };
 
-struct TextConfig_t
-{
-    std::string fontType = "Nexus font";
-    std::string font;
-    std::string fontSizeType = "Nexus font size";
-    float fontSize = 13.0f;
-    ImColor color = ImColor(255, 255, 255, 255);
-    bool shadow = false;
-    ImColor shadowColor = ImColor(0, 0, 0, 255);
-    bool outline = false;
-    ImColor outlineColor = ImColor(0, 0, 0, 255);
-};
-
-struct IconTextConfig_t : public TextConfig_t
-{
-    Position_t position;
-    int textFormatPrecision = 1;
-    IconTextTrigger_t trigger;
-
-    IconTextConfig_t(std::string anchor = "Centre") { position.anchor = anchor; }
-};
-
 struct LayoutConfig_t
 {
     std::string name;

@@ -31,9 +31,10 @@ extern GeneralConfig_t ConfigGeneral;
 extern LayoutManager g_LayoutManager;
 extern ColourPresets_t ColourPresets;
 extern BorderPresets_t BorderPresets;
-extern TextConfig_t ConfigText;
-extern IconTextConfig_t ConfigIconDuration;
-extern IconTextConfig_t ConfigIconStacks;
+
+extern TextStyle_t ConfigText;
+extern IconText_t ConfigIconDuration;
+extern IconText_t ConfigIconStacks;
 
 extern TreeView g_LayoutEditor;
 extern TreeView g_PresetConfig;

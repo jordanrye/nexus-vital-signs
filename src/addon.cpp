@@ -1093,8 +1093,8 @@ namespace Addon {
             {
                 ImGui::TextDisabled("Text Style");
                 ImGui::Separator();
-                form_FontPreset(ConfigText.fontType, ConfigText.font);
-                form_FontSizePreset(ConfigText.fontSizeType, ConfigText.fontSize);
+                form_FontPreset(ConfigText.fontSource, ConfigText.font);
+                form_FontSizePreset(ConfigText.fontSizeSource, ConfigText.fontSize);
                 ImGui::ColorEdit4("Color##TEXT_COLOR", (float*)&ConfigText.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 form_FontDecoratorPreset(ConfigText.shadow, ConfigText.shadowColor, ConfigText.outline, ConfigText.outlineColor);
             }
@@ -1115,10 +1115,10 @@ namespace Addon {
 
                 ImGui::TextDisabled("Text Style");
                 ImGui::Separator();
-                form_FontPreset(ConfigIconDuration.fontType, ConfigIconDuration.font);
-                form_FontSizePreset(ConfigIconDuration.fontSizeType, ConfigIconDuration.fontSize);
-                ImGui::ColorEdit4("Color##ICON_DURATION_COLOR", (float*)&ConfigIconDuration.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-                form_FontDecoratorPreset(ConfigIconDuration.shadow, ConfigIconDuration.shadowColor, ConfigIconDuration.outline, ConfigIconDuration.outlineColor);
+                form_FontPreset(ConfigIconDuration.textStyle.fontSource, ConfigIconDuration.textStyle.font);
+                form_FontSizePreset(ConfigIconDuration.textStyle.fontSizeSource, ConfigIconDuration.textStyle.fontSize);
+                ImGui::ColorEdit4("Color##ICON_DURATION_COLOR", (float*)&ConfigIconDuration.textStyle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                form_FontDecoratorPreset(ConfigIconDuration.textStyle.shadow, ConfigIconDuration.textStyle.shadowColor, ConfigIconDuration.textStyle.outline, ConfigIconDuration.textStyle.outlineColor);
 
                 ImGui::TextDisabled("Trigger");
                 ImGui::Separator();
@@ -1136,10 +1136,10 @@ namespace Addon {
 
                 ImGui::TextDisabled("Text Style");
                 ImGui::Separator();
-                form_FontPreset(ConfigIconStacks.fontType, ConfigIconStacks.font);
-                form_FontSizePreset(ConfigIconStacks.fontSizeType, ConfigIconStacks.fontSize);
-                ImGui::ColorEdit4("Color##ICON_STACKS_COLOR", (float*)&ConfigIconStacks.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-                form_FontDecoratorPreset(ConfigIconStacks.shadow, ConfigIconStacks.shadowColor, ConfigIconStacks.outline, ConfigIconStacks.outlineColor);
+                form_FontPreset(ConfigIconStacks.textStyle.fontSource, ConfigIconStacks.textStyle.font);
+                form_FontSizePreset(ConfigIconStacks.textStyle.fontSizeSource, ConfigIconStacks.textStyle.fontSize);
+                ImGui::ColorEdit4("Color##ICON_STACKS_COLOR", (float*)&ConfigIconStacks.textStyle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                form_FontDecoratorPreset(ConfigIconStacks.textStyle.shadow, ConfigIconStacks.textStyle.shadowColor, ConfigIconStacks.textStyle.outline, ConfigIconStacks.textStyle.outlineColor);
 
                 ImGui::TextDisabled("Trigger");
                 ImGui::Separator();

@@ -157,14 +157,14 @@ namespace UI::Grid {
         drawList->AddRect(p_min, p_max, colour, properties.rounding, properties.roundingCorners, thickness);
     }
 
-    void DrawIconText(ImDrawList* const drawList, const ImVec2& iconPosition, const ImVec2& iconSize, const std::string& text, const IconText_t& config, const IconTextConfig_t& globalConfig)
+    void DrawIconText(ImDrawList* const drawList, const ImVec2& iconPosition, const ImVec2& iconSize, const std::string& text, const IconText_t& config, const IconText_t& globalConfig)
     {
         std::string fontFilePath = ""; // Nexus font
-        if (config.textStyle.fontSource == "Default font") fontFilePath = globalConfig.font;
+        if (config.textStyle.fontSource == "Default font") fontFilePath = globalConfig.textStyle.font;
         else if (config.textStyle.fontSource == "Custom font") fontFilePath = config.textStyle.font;
 
         float fontSize = ImGui::GetIO().FontDefault->FontSize;
-        if (config.textStyle.fontSizeSource == "Default font size") fontSize = globalConfig.fontSize;
+        if (config.textStyle.fontSizeSource == "Default font size") fontSize = globalConfig.textStyle.fontSize;
         else if (config.textStyle.fontSizeSource == "Custom font size") fontSize = config.textStyle.fontSize;
 
         ImFont* font = utils::font::GetFont(fontFilePath, fontSize);
@@ -188,11 +188,11 @@ namespace UI::Grid {
 
         ImVec2 textPos = CalcItemPosition(iconProps, textSize, anchor, offset);
 
-        ImColor color = (config.textStyle.colorSource == "Custom color") ? config.textStyle.color : globalConfig.color;
-        bool useShadow = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.shadow : globalConfig.shadow;
-        ImColor shadowColor = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.shadowColor : globalConfig.shadowColor;
-        bool useOutline = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outline : globalConfig.outline;
-        ImColor outlineColor = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outlineColor : globalConfig.outlineColor;
+        ImColor color = (config.textStyle.colorSource == "Custom color") ? config.textStyle.color : globalConfig.textStyle.color;
+        bool useShadow = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.shadow : globalConfig.textStyle.shadow;
+        ImColor shadowColor = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.shadowColor : globalConfig.textStyle.shadowColor;
+        bool useOutline = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outline : globalConfig.textStyle.outline;
+        ImColor outlineColor = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outlineColor : globalConfig.textStyle.outlineColor;
 
         if (useShadow) drawList->AddText(font, fontSize, textPos + ImVec2(1, 1), shadowColor, text.c_str());
         if (useOutline) {
