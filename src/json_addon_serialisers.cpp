@@ -65,8 +65,6 @@ void dser_Layout_t(json& object, Layout_t& layout)
         dser_RadialProperties_t(object["radial"], layout.radial);
         dser_BasicType(object["border"], layout.itemBorder);
         dser_BasicType(object["spacing"], layout.itemSpacing);
-        dser_BasicType(object["visibility"], layout.visibility);
-        dser_BasicType(object["inactive-opacity"], layout.inactiveOpacity);
     }
 }
 

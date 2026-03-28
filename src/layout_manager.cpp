@@ -361,8 +361,6 @@ static LayoutConfig_t GetDefaultGridLayout()
     layout.layout.grid.cellRounding = 4;
     layout.layout.itemBorder = 1;
     layout.layout.itemSpacing = 4;
-    layout.layout.visibility = 0; // Always visible
-    layout.layout.inactiveOpacity = 0.33f;
 
     // Add a default indicator for character name.
     Indicator_t nameIndicator{};
@@ -555,8 +553,6 @@ static LayoutConfig_t GetDefaultRadialLayout()
     layout.layout.radial.sectorCountMin = 4;
     layout.layout.radial.sectorCountMax = 10;
     layout.layout.itemSpacing = 4;
-    layout.layout.visibility = 2; // Visible while activated
-    layout.layout.inactiveOpacity = 0.33f;
 
     return layout;
 }

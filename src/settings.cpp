@@ -124,7 +124,6 @@ namespace Settings
                 dser_BasicType(layout["colors"], layoutConfig.colors);
                 dser_Position_t(layout["position"], layoutConfig.position);
                 dser_Layout_t(layout["layout"], layoutConfig.layout);
-                // dser_Behaviour_t(layout["behaviour"], layoutConfig.behaviour);
     
                 auto& indicators = layout["indicators"];
                 if (!indicators.is_null() && indicators.is_array())
@@ -157,7 +156,6 @@ namespace Settings
         layout["colors"] = layoutConfig.colors;
         layout["position"] = ser_Position_t(layoutConfig.position);
         layout["layout"] = ser_Layout_t(layoutConfig.layout);
-        // layout["behaviour"] = ser_Behaviour_t(layoutConfig.behaviour);
 
         /* Indicators */
         layout["indicators"] = json::array();

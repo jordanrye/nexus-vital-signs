@@ -337,9 +337,8 @@ namespace UI::Grid {
     bool BeginGridMenu(const char* name, const LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive)
     {
         bool isOpen = false;
-        bool isAlwaysDisplayed = (layout.layout.visibility == 0);
 
-        if (isActive || isAlwaysDisplayed || context.isItemPending)
+        if (isActive || context.isItemPending)
         {
             context.layoutConfig = layout;
             context.colourPresets = colours;
@@ -386,18 +385,6 @@ namespace UI::Grid {
                 {
                     // Disable interaction for everything within this block
                     ImGui::BeginDisabled();
-
-                    // Override opacity
-                    context.colourPresets.COLOUR_BACKGROUND.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH_DOWNED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH_DEFEATED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_SHROUD_NECROMANCER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_SHROUD_SPECTER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_BARRIER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-                    context.colourPresets.COLOUR_HOVERED.Value.w *= context.layoutConfig.layout.inactiveOpacity;
-
-                    context.borderPresets.COLOUR_BORDER.Value.w *= context.layoutConfig.layout.inactiveOpacity;
 
                     context.isItemPending = false;
                 }

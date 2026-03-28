@@ -586,16 +586,6 @@ namespace Addon {
                 }
             }
         }
-
-        ImGui::TextDisabled("Behaviour");
-        ImGui::Separator();
-        {
-            ImGui::Combo("Visibility##VISIBILITY", &layout.visibility, visibilityOptions, IM_ARRAYSIZE(visibilityOptions));
-            if ((0 == layout.visibility) || (1 == layout.visibility))
-            {
-                ImGui::SliderFloat("Opacity (Inactive)##INACTIVE_OPACITY", &layout.inactiveOpacity, 0.f, 1.f);
-            }
-        }
     }
 
     void ContentViewIndicator(Indicator_t& indicator)

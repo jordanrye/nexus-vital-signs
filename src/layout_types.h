@@ -66,8 +66,6 @@ struct Layout_t
     RadialProperties_t radial;
     int itemBorder = 1;
     int itemSpacing = 4;
-    int visibility = 0;
-    float inactiveOpacity = 0.33;
 };
 
 struct Trigger_t
