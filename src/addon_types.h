@@ -9,14 +9,17 @@ struct GeneralConfig_t
 {
     /* Party (5 Players) */
     std::string partyLayout;
+    std::string partyVisibility = "Always show";
     bool isHiddenNativeParty = false;
     
     /* Raid (10 Players) */
     std::string raidLayout;
+    std::string raidVisibility = "Always show";
     bool isHiddenNativeRaid = false;
 
     /* Squad (50 Players) */
     std::string squadLayout;
+    std::string squadVisibility = "Always show";
     bool isHiddenNativeSquad = false;
 
     /* Solo (No Group) */

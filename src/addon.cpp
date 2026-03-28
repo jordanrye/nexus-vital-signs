@@ -83,6 +83,16 @@ namespace Addon {
         }
     }
 
+    bool IsFrameHidden(std::string visibility)
+    {
+        if (visibility == "Hide out of combat" && !isInCombat())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     void Render()
     {
         if (isPreviewModeActive || !NexusLink || !NexusLink->IsGameplay || !VitalsData || !VitalsData->isAvailable())
@@ -98,12 +108,21 @@ namespace Addon {
         switch (groupType)
         {
             case VitalSignsData::E_GROUP_PARTY:
+                if (IsFrameHidden(ConfigGeneral.partyVisibility)) {
+                    return;
+                }
                 activeLayoutName = ConfigGeneral.partyLayout;
                 break;
             case VitalSignsData::E_GROUP_SQUAD_10:
-                activeLayoutName = ConfigGeneral.raidLayout;
+                if (IsFrameHidden(ConfigGeneral.raidVisibility)) {
+                    return;
+                }    
+            activeLayoutName = ConfigGeneral.raidLayout;
                 break;
             case VitalSignsData::E_GROUP_SQUAD_50:
+                if (IsFrameHidden(ConfigGeneral.squadVisibility)) {
+                    return;
+                }
                 activeLayoutName = ConfigGeneral.squadLayout;
                 break;
             case VitalSignsData::E_GROUP_NONE:
@@ -227,6 +246,7 @@ namespace Addon {
             ImGui::TextDisabled("Party Frames (5 Players)");
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.partyLayout);
+            form_Visibility(ConfigGeneral.partyVisibility);
             ImGui::BeginDisabled();            
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeParty);
             ImGui::EndDisabled();
@@ -238,6 +258,7 @@ namespace Addon {
             ImGui::TextDisabled("Raid Frames (10 Players)");
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.raidLayout);
+            form_Visibility(ConfigGeneral.raidVisibility);
             ImGui::BeginDisabled();            
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeRaid);
             ImGui::EndDisabled();
@@ -249,6 +270,7 @@ namespace Addon {
             ImGui::TextDisabled("Squad Frames (50 Players)");
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.squadLayout);
+            form_Visibility(ConfigGeneral.squadVisibility);
             ImGui::BeginDisabled();            
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
             ImGui::EndDisabled();
@@ -562,16 +584,6 @@ namespace Addon {
                         layout.itemSpacing = -layout.itemBorder;
                     }
                 }
-            }
-        }
-
-        ImGui::TextDisabled("Behaviour");
-        ImGui::Separator();
-        {
-            ImGui::Combo("Visibility##VISIBILITY", &layout.visibility, visibilityOptions, IM_ARRAYSIZE(visibilityOptions));
-            if ((0 == layout.visibility) || (1 == layout.visibility))
-            {
-                ImGui::SliderFloat("Opacity (Inactive)##INACTIVE_OPACITY", &layout.inactiveOpacity, 0.f, 1.f);
             }
         }
     }

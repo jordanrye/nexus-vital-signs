@@ -180,9 +180,9 @@ namespace UI::Radial {
     bool BeginRadialMenu(const char* name, const Position_t& position, const Layout_t& layout, const std::string& palette, const ColourPresets_t& colours, bool isActive)
     {
         bool isOpen = false;
-        bool isAlwaysDisplayed = ((layout.visibility == 0) || (layout.visibility == 1));
+        static const bool isVisible = true; /** FIXME: Toggle based on show, hide or camouflage.  */
 
-        if (isActive || isAlwaysDisplayed || context.isItemPending)
+        if (isActive || isVisible || context.isItemPending)
         {
             context.positionConfig = position;
             context.layoutConfig = layout;
@@ -198,27 +198,12 @@ namespace UI::Radial {
                 {
                     // Disable interaction for everything within this block
                     ImGui::BeginDisabled();
-
-                    // Override opacity
-                    context.colourPresets.COLOUR_BACKGROUND.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH_DOWNED.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_HEALTH_DEFEATED.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_SHROUD_NECROMANCER.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_SHROUD_SPECTER.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_BARRIER.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_HOVERED.Value.w *= context.layoutConfig.inactiveOpacity;
-                    
-                    context.colourPresets.COLOUR_BOONS_1.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_BOONS_2.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_CONDITIONS_1.Value.w *= context.layoutConfig.inactiveOpacity;
-                    context.colourPresets.COLOUR_CONDITIONS_2.Value.w *= context.layoutConfig.inactiveOpacity;
                     
                     context.isItemPending = false;
                 }
 
                 int frameCount = ImGui::GetFrameCount();
-                if ((context.lastFrameCount < (frameCount - 1)) || isAlwaysDisplayed)
+                if ((context.lastFrameCount < (frameCount - 1)) || isVisible)
                 {
                     /* Fixed position */
                     context.menuPosition = ImVec2(
