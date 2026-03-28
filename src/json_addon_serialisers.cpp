@@ -358,6 +358,8 @@ json ser_Layout_t(const Layout_t& layout)
     object["type"] = layout.type;
     object["grid"] = ser_GridProperties_t(layout.grid);
     object["radial"] = ser_RadialProperties_t(layout.radial);
+    object["border"] = layout.itemBorder;
+    object["spacing"] = layout.itemSpacing;
     return object;
 }
 
