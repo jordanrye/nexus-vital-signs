@@ -32,3 +32,4 @@ void form_TextContent(std::string& textType, std::string& textCustom);
 void form_TextLimit(std::string& limitType, float& limitValue);
 void form_Texture(std::string& textureSource, std::string& texturePath);
 void form_Trigger(Trigger_t& trigger);
+void form_Visibility(std::string& visibility);
