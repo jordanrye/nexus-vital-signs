@@ -63,7 +63,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)src;$(SolutionDir)src\interface\gw2re</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;$(SolutionDir)src\data_link\gw2re</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -79,7 +79,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)src;$(SolutionDir)src\interface\gw2re</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;$(SolutionDir)src\data_link\gw2re</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,47 +90,47 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\addon.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Behavior\Behavior.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Behavior\BehaviorOrder.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Behavior\EBehaviorFlags.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Behavior\EBehaviorOrder.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Behavior\EBehaviorSignal.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\ChCliOrder.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Map\EMapFlags.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Map\EMapType.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Map\MapDef.h" />
-    <ClInclude Include="src\interface\gw2re\Game\MissionContext.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Portal\PlChannelMember.h" />
-    <ClInclude Include="src\interface\vital_signs_interface.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Behavior\Behavior.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorFlags.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorOrder.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorSignal.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\ChCliOrder.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Map\EMapFlags.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Map\EMapType.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Map\MapDef.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\MissionContext.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelMember.h" />
+    <ClInclude Include="src\data_link\data_link.h" />
     <ClInclude Include="src\basic_types.h" />
     <ClInclude Include="src\forms\forms.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Agent\Agent.h" />
-    <ClInclude Include="src\interface\gw2re\Game\AgentSelection\AsContext.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\Character.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\ChBuffMgr.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\ChCombatant.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\ChCoreStats.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\ChProfession.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\EChBuffType.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\EChProfession.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\EChProfessionState.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Char\EChSpecialization.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Game\EventApi.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Player\Player.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Player\Specialization\SpecDef.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Player\Specialization\SpecMgr.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Portal\PlContext.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Portal\PlUser.h" />
-    <ClInclude Include="src\interface\gw2re\Game\PropContext.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Squad\SquadContext.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Text\Types.h" />
-    <ClInclude Include="src\interface\gw2re\Game\Types.h" />
-    <ClInclude Include="src\interface\gw2re\memtools\memtools.h" />
-    <ClInclude Include="src\interface\gw2re\Util\FuncDefs.h" />
-    <ClInclude Include="src\interface\gw2re\Util\Hook.h" />
-    <ClInclude Include="src\interface\gw2re\Util\Offset.h" />
-    <ClInclude Include="src\interface\gw2re\Util\Validation.h" />
-    <ClInclude Include="src\interface\gw2re\Util\WrapperClass.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Agent\Agent.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\AgentSelection\AsContext.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\Character.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\ChBuffMgr.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\ChCombatant.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\ChCoreStats.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\ChProfession.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\EChBuffType.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\EChProfession.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\EChProfessionState.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Char\EChSpecialization.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Game\EventApi.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Player\Player.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Player\Specialization\SpecDef.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Player\Specialization\SpecMgr.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlContext.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlUser.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\PropContext.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Squad\SquadContext.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Text\Types.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Types.h" />
+    <ClInclude Include="src\data_link\gw2re\memtools\memtools.h" />
+    <ClInclude Include="src\data_link\gw2re\Util\FuncDefs.h" />
+    <ClInclude Include="src\data_link\gw2re\Util\Hook.h" />
+    <ClInclude Include="src\data_link\gw2re\Util\Offset.h" />
+    <ClInclude Include="src\data_link\gw2re\Util\Validation.h" />
+    <ClInclude Include="src\data_link\gw2re\Util\WrapperClass.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />
     <ClInclude Include="src\imgui\imgui_internal.h" />
@@ -162,9 +162,9 @@
     <ClCompile Include="src\addon.cpp" />
     <ClCompile Include="src\forms\icon_text.cpp" />
     <ClCompile Include="src\forms\visibility.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Behavior\BehaviorOrder.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Char\ChCliOrder.cpp" />
-    <ClCompile Include="src\interface\vital_signs_interface.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Char\ChCliOrder.cpp" />
+    <ClCompile Include="src\data_link\data_link.cpp" />
     <ClCompile Include="src\entry.cpp" />
     <ClCompile Include="src\forms\select_layout.cpp" />
     <ClCompile Include="src\forms\direction.cpp" />
@@ -180,22 +180,22 @@
     <ClCompile Include="src\forms\text_content.cpp" />
     <ClCompile Include="src\forms\text_limit.cpp" />
     <ClCompile Include="src\forms\trigger.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Agent\Agent.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\AgentSelection\AsContext.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Char\Character.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Char\ChBuffMgr.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Char\ChCombatant.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Char\ChCoreStats.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Char\ChProfession.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Game\EventApi.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Player\Player.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Player\Specialization\SpecDef.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Player\Specialization\SpecMgr.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Portal\PlContext.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Portal\PlUser.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\PropContext.cpp" />
-    <ClCompile Include="src\interface\gw2re\Game\Types.cpp" />
-    <ClCompile Include="src\interface\gw2re\Util\Validation.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Agent\Agent.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\AgentSelection\AsContext.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Char\Character.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Char\ChBuffMgr.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Char\ChCombatant.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Char\ChCoreStats.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Char\ChProfession.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Game\EventApi.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Player\Player.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Player\Specialization\SpecDef.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Player\Specialization\SpecMgr.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Portal\PlContext.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Portal\PlUser.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\PropContext.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Types.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Util\Validation.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />

@@ -1,7 +1,7 @@
 #ifndef VS_UI_RADIAL_H
 #define VS_UI_RADIAL_H
 
-#include "interface/vital_signs_interface.h"
+#include "data_link/data_link.h"
 #include "imgui/imgui.h"
 
 #include "layout_types.h"
@@ -11,7 +11,7 @@ namespace UI::Radial {
 
     bool BeginRadialMenu(const char* name, const Position_t& position, const Layout_t& layout, const std::string& palette, const ColourPresets_t& colours, bool isActive);
     void EndRadialMenu();
-    bool RadialMenuItem(const VitalSignsData::UserData_t& userData);
+    bool RadialMenuItem(const VitalSignsDataLink::UserData_t& userData);
 
 } // namespace UI::Radial
 

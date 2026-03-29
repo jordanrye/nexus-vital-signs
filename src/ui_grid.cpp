@@ -29,12 +29,12 @@ namespace UI::Grid {
 
         // Item state
         std::string charName[SQUAD_MEMBER_LIMIT];
-        VitalSignsData::EProfession profession[SQUAD_MEMBER_LIMIT];
-        VitalSignsData::ESpecialisation specialisation[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::EProfession profession[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::ESpecialisation specialisation[SQUAD_MEMBER_LIMIT];
         float health[SQUAD_MEMBER_LIMIT];
-        VitalSignsData::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
         float barrier[SQUAD_MEMBER_LIMIT];
-        VitalSignsData::Effects_t effects[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::Effects_t effects[SQUAD_MEMBER_LIMIT];
     } context;
 
     struct GridDrawProperties_t 
@@ -426,7 +426,7 @@ namespace UI::Grid {
             return true;
         }
 
-        if ((trigger.category == "Professions") && (trigger.effect == VitalSignsData::getProfessionString(context.profession[userIndex], context.specialisation[userIndex])))
+        if ((trigger.category == "Professions") && (trigger.effect == VitalSignsDataLink::getProfessionString(context.profession[userIndex], context.specialisation[userIndex])))
         {
             return true;
         }
@@ -951,7 +951,7 @@ namespace UI::Grid {
         ImGui::End(); // Begin in `BeginGridMenu`
     }
 
-    bool GridMenuItem(const VitalSignsData::UserData_t& userData)
+    bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData)
     {
         bool isSelected = false;
 
@@ -960,8 +960,8 @@ namespace UI::Grid {
             std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
             float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);
             float barrier = ((userData.Health.Max > 0.0f) ? (userData.Barrier.Current / userData.Health.Max) : 0.0f);
-            if ((VitalSignsData::E_HEALTH_SHROUD_NECROMANCER == userData.HealthType) ||
-                (VitalSignsData::E_HEALTH_SHROUD_SPECTER == userData.HealthType))
+            if ((VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER == userData.HealthType) ||
+                (VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER == userData.HealthType))
             {
                 health = ((userData.Shroud.Max > 0.0f) ? (userData.Shroud.Current / userData.Shroud.Max) : 0.0f);
             }

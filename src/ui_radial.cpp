@@ -27,11 +27,11 @@ namespace UI::Radial {
 
         // Item state
         std::string charName[SQUAD_MEMBER_LIMIT];
-        VitalSignsData::EProfession profession[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::EProfession profession[SQUAD_MEMBER_LIMIT];
         float health[SQUAD_MEMBER_LIMIT];
-        VitalSignsData::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
         float barrier[SQUAD_MEMBER_LIMIT];
-        VitalSignsData::Effects_t effects[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::Effects_t effects[SQUAD_MEMBER_LIMIT];
     } context;
 
     struct SectorDrawProperties_t 
@@ -361,7 +361,7 @@ namespace UI::Radial {
         ImGui::End();
     }
 
-    bool RadialMenuItem(const VitalSignsData::UserData_t& userData)
+    bool RadialMenuItem(const VitalSignsDataLink::UserData_t& userData)
     {
         bool isSelected = false;
 
@@ -370,8 +370,8 @@ namespace UI::Radial {
             std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
             float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);
             float barrier = ((userData.Health.Max > 0.0f) ? (userData.Barrier.Current / userData.Health.Max) : 0.0f);
-            if ((VitalSignsData::E_HEALTH_SHROUD_NECROMANCER == userData.HealthType) ||
-                (VitalSignsData::E_HEALTH_SHROUD_SPECTER == userData.HealthType))
+            if ((VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER == userData.HealthType) ||
+                (VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER == userData.HealthType))
             {
                 health = ((userData.Shroud.Max > 0.0f) ? (userData.Shroud.Current / userData.Shroud.Max) : 0.0f);
             }

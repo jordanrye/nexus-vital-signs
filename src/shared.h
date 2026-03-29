@@ -6,7 +6,7 @@
 
 #include "nexus/Nexus.h"
 #include "mumble/Mumble.h"
-#include "interface/vital_signs_interface.h"
+#include "data_link/data_link.h"
 
 #include "addon_types.h"
 #include "imgui_tree_view.h"
@@ -19,7 +19,7 @@ extern AddonAPI* APIDefs;
 extern Mumble::Data* MumbleLink;
 extern Mumble::Identity* MumbleIdentity;
 extern NexusLinkData* NexusLink;
-extern VitalSignsData* VitalsData;
+extern VitalSignsDataLink* VitalsData;
 
 extern std::filesystem::path GameDir;
 extern std::filesystem::path AddonDir;

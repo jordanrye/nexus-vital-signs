@@ -7,6 +7,6 @@
 [submodule "src/imgui"]
 	path = src/imgui
 	url = git@github.com:RaidcoreGG/imgui.git
-[submodule "src/interface"]
-	path = src/interface
+[submodule "src/data_link"]
+	path = src/data_link
 	url = git@github.com:TyrianDeveloperCollective/GW2-VitalSigns-Private.git

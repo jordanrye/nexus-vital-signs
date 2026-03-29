@@ -22,7 +22,7 @@ namespace UI {
         }
     }
 
-    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsData::E_HEALTH_TYPE healthType, VitalSignsData::EProfession profession)
+    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType, VitalSignsDataLink::EProfession profession)
     {
         ImColor colour{};
 
@@ -30,19 +30,19 @@ namespace UI {
         {
             switch (healthType)
             {
-                case VitalSignsData::E_HEALTH_ALIVE:
+                case VitalSignsDataLink::E_HEALTH_ALIVE:
                     colour = config.COLOUR_HEALTH;
                     break;
-                case VitalSignsData::E_HEALTH_DOWNED:
+                case VitalSignsDataLink::E_HEALTH_DOWNED:
                     colour = config.COLOUR_HEALTH_DOWNED;
                     break;
-                case VitalSignsData::E_HEALTH_DEFEATED:
+                case VitalSignsDataLink::E_HEALTH_DEFEATED:
                     colour = config.COLOUR_HEALTH_DEFEATED;
                     break;
-                case VitalSignsData::E_HEALTH_SHROUD_NECROMANCER:
+                case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
                     colour = config.COLOUR_SHROUD_NECROMANCER;
                     break;
-                case VitalSignsData::E_HEALTH_SHROUD_SPECTER:
+                case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
                     colour = config.COLOUR_SHROUD_SPECTER;
                     break;
             }
@@ -53,51 +53,51 @@ namespace UI {
 
             switch (profession)
             {
-                case VitalSignsData::EProfession::Elementalist:
+                case VitalSignsDataLink::EProfession::Elementalist:
                     colour = config.COLOUR_PROF_HEALTH_ELEMENTALIST;
                     break;
-                case VitalSignsData::EProfession::Engineer:
+                case VitalSignsDataLink::EProfession::Engineer:
                     colour = config.COLOUR_PROF_HEALTH_ENGINEER;
                     break;
-                case VitalSignsData::EProfession::Guardian:
+                case VitalSignsDataLink::EProfession::Guardian:
                     colour = config.COLOUR_PROF_HEALTH_GUARDIAN;
                     break;
-                case VitalSignsData::EProfession::Mesmer:
+                case VitalSignsDataLink::EProfession::Mesmer:
                     colour = config.COLOUR_PROF_HEALTH_MESMER;
                     break;
-                case VitalSignsData::EProfession::Necromancer:
+                case VitalSignsDataLink::EProfession::Necromancer:
                     colour = config.COLOUR_PROF_HEALTH_NECROMANCER;
                     break;
-                case VitalSignsData::EProfession::Ranger:
+                case VitalSignsDataLink::EProfession::Ranger:
                     colour = config.COLOUR_PROF_HEALTH_RANGER;
                     break;
-                case VitalSignsData::EProfession::Revenant:
+                case VitalSignsDataLink::EProfession::Revenant:
                     colour = config.COLOUR_PROF_HEALTH_REVENANT;
                     break;
-                case VitalSignsData::EProfession::Thief:
+                case VitalSignsDataLink::EProfession::Thief:
                     colour = config.COLOUR_PROF_HEALTH_THIEF;
                     break;
-                case VitalSignsData::EProfession::Warrior:
+                case VitalSignsDataLink::EProfession::Warrior:
                     colour = config.COLOUR_PROF_HEALTH_WARRIOR;
                     break;
             }
 
             switch (healthType)
             {
-                case VitalSignsData::E_HEALTH_DOWNED:
+                case VitalSignsDataLink::E_HEALTH_DOWNED:
                     colour = config.COLOUR_HEALTH_DOWNED;
                     break;
-                case VitalSignsData::E_HEALTH_DEFEATED:
+                case VitalSignsDataLink::E_HEALTH_DEFEATED:
                     colour = config.COLOUR_HEALTH_DEFEATED;
                     break;
-                case VitalSignsData::E_HEALTH_SHROUD_NECROMANCER:
+                case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
                     ImGui::ColorConvertRGBtoHSV(colour.Value.x, colour.Value.y, colour.Value.z, h, s, v);
                     v *= 0.5f;
                     v = max(v, 0.0f);
                     v = min(v, 255.0f);
                     ImGui::ColorConvertHSVtoRGB(h, s, v, colour.Value.x, colour.Value.y, colour.Value.z);
                     break;
-                case VitalSignsData::E_HEALTH_SHROUD_SPECTER:
+                case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
                     ImGui::ColorConvertRGBtoHSV(colour.Value.x, colour.Value.y, colour.Value.z, h, s, v);
                     v *= 0.5f;
                     v = max(v, 0.0f);

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <queue>
 
-#include "interface/vital_signs_interface.h"
+#include "data_link/data_link.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "imgui_extensions.h"
@@ -101,31 +101,31 @@ namespace Addon {
             return;
         }
 
-        const VitalSignsData::E_GROUP_TYPE groupType = VitalsData->getGroupType();
+        const VitalSignsDataLink::E_GROUP_TYPE groupType = VitalsData->getGroupType();
         std::string activeLayoutName = ConfigGeneral.soloLayout;
         LayoutConfig_t* activeLayout = nullptr;
 
         switch (groupType)
         {
-            case VitalSignsData::E_GROUP_PARTY:
+            case VitalSignsDataLink::E_GROUP_PARTY:
                 if (IsFrameHidden(ConfigGeneral.partyVisibility)) {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.partyLayout;
                 break;
-            case VitalSignsData::E_GROUP_SQUAD_10:
+            case VitalSignsDataLink::E_GROUP_SQUAD_10:
                 if (IsFrameHidden(ConfigGeneral.raidVisibility)) {
                     return;
                 }    
             activeLayoutName = ConfigGeneral.raidLayout;
                 break;
-            case VitalSignsData::E_GROUP_SQUAD_50:
+            case VitalSignsDataLink::E_GROUP_SQUAD_50:
                 if (IsFrameHidden(ConfigGeneral.squadVisibility)) {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.squadLayout;
                 break;
-            case VitalSignsData::E_GROUP_NONE:
+            case VitalSignsDataLink::E_GROUP_NONE:
             default:
                 activeLayoutName = ConfigGeneral.soloLayout;
                 break;
@@ -307,35 +307,35 @@ namespace Addon {
                 
                 if (UI::Grid::BeginGridMenu("Preview##Grid", *layout, ColourPresets, BorderPresets, true))
                 {
-                    VitalSignsData::Effects_t dummyEffects{};
-                    auto AddPreviewItem = [&](const char* name, VitalSignsData::EProfession prof, VitalSignsData::ESpecialisation spec, float hp, VitalSignsData::E_HEALTH_TYPE hpType, float barrier) {
-                        VitalSignsData::UserData_t user;
+                    VitalSignsDataLink::Effects_t dummyEffects{};
+                    auto AddPreviewItem = [&](const char* name, VitalSignsDataLink::EProfession prof, VitalSignsDataLink::ESpecialisation spec, float hp, VitalSignsDataLink::E_HEALTH_TYPE hpType, float barrier) {
+                        VitalSignsDataLink::UserData_t user;
                         user.CharacterName = name;
                         user.Profession = prof;
                         user.Specialisation = spec;
                         user.HealthType = hpType;
-                        user.Health = VitalSignsData::Resource_t(hp, 1.0f);
-                        user.Barrier = VitalSignsData::Resource_t(barrier, 1.0f);
-                        user.Shroud = VitalSignsData::Resource_t(hp, 1.0f);
+                        user.Health = VitalSignsDataLink::Resource_t(hp, 1.0f);
+                        user.Barrier = VitalSignsDataLink::Resource_t(barrier, 1.0f);
+                        user.Shroud = VitalSignsDataLink::Resource_t(hp, 1.0f);
                         user.Effects = dummyEffects;
                         UI::Grid::GridMenuItem(user);
                     };
 
-                    AddPreviewItem("Preview 1", VitalSignsData::EProfession::Elementalist, VitalSignsData::ESpecialisation::None, 1.0f, VitalSignsData::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem("Preview 2", VitalSignsData::EProfession::Engineer, VitalSignsData::ESpecialisation::None, 0.75f, VitalSignsData::E_HEALTH_ALIVE, 0.5f);
-                    AddPreviewItem("Preview 3", VitalSignsData::EProfession::Guardian, VitalSignsData::ESpecialisation::None, 0.5f, VitalSignsData::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem("Preview 4", VitalSignsData::EProfession::Mesmer, VitalSignsData::ESpecialisation::None, 0.25f, VitalSignsData::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem("Preview 5", VitalSignsData::EProfession::Necromancer, VitalSignsData::ESpecialisation::None, 1.0f, VitalSignsData::E_HEALTH_ALIVE, 0.5f);
-                    AddPreviewItem("Preview 6", VitalSignsData::EProfession::Necromancer, VitalSignsData::ESpecialisation::None, 0.75f, VitalSignsData::E_HEALTH_SHROUD_NECROMANCER, 0.25f);
-                    AddPreviewItem("Preview 7", VitalSignsData::EProfession::Ranger, VitalSignsData::ESpecialisation::None, 0.75f, VitalSignsData::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem("Preview 8", VitalSignsData::EProfession::Revenant, VitalSignsData::ESpecialisation::None, 0.5f, VitalSignsData::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem("Preview 9", VitalSignsData::EProfession::Thief, VitalSignsData::ESpecialisation::None, 0.5f, VitalSignsData::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem("Preview 10", VitalSignsData::EProfession::Warrior, VitalSignsData::ESpecialisation::None, 0.75f, VitalSignsData::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem("Preview 11", VitalSignsData::EProfession::Thief, VitalSignsData::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsData::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem("Preview 12", VitalSignsData::EProfession::Thief, VitalSignsData::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsData::E_HEALTH_SHROUD_SPECTER, 0.25f);
-                    AddPreviewItem("Preview 13", VitalSignsData::EProfession::Thief, VitalSignsData::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsData::E_HEALTH_DOWNED, 0.25f);
-                    AddPreviewItem("Preview 14", VitalSignsData::EProfession::Thief, VitalSignsData::ESpecialisation::ThiefSpecter, 0.25f, VitalSignsData::E_HEALTH_DEFEATED, 0.0f);
-                    AddPreviewItem("Preview 15", VitalSignsData::EProfession::Thief, VitalSignsData::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsData::E_HEALTH_ALIVE, 0.25f);
+                    AddPreviewItem("Preview 1", VitalSignsDataLink::EProfession::Elementalist, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
+                    AddPreviewItem("Preview 2", VitalSignsDataLink::EProfession::Engineer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.5f);
+                    AddPreviewItem("Preview 3", VitalSignsDataLink::EProfession::Guardian, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
+                    AddPreviewItem("Preview 4", VitalSignsDataLink::EProfession::Mesmer, VitalSignsDataLink::ESpecialisation::None, 0.25f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
+                    AddPreviewItem("Preview 5", VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.5f);
+                    AddPreviewItem("Preview 6", VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER, 0.25f);
+                    AddPreviewItem("Preview 7", VitalSignsDataLink::EProfession::Ranger, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
+                    AddPreviewItem("Preview 8", VitalSignsDataLink::EProfession::Revenant, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
+                    AddPreviewItem("Preview 9", VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
+                    AddPreviewItem("Preview 10", VitalSignsDataLink::EProfession::Warrior, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
+                    AddPreviewItem("Preview 11", VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
+                    AddPreviewItem("Preview 12", VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER, 0.25f);
+                    AddPreviewItem("Preview 13", VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::E_HEALTH_DOWNED, 0.25f);
+                    AddPreviewItem("Preview 14", VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.25f, VitalSignsDataLink::E_HEALTH_DEFEATED, 0.0f);
+                    AddPreviewItem("Preview 15", VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
                     UI::Grid::EndGridMenu();
                 }
 

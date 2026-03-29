@@ -3,7 +3,7 @@
 
 #include "nexus/Nexus.h"
 #include "mumble/Mumble.h"
-#include "interface/vital_signs_interface.h"
+#include "data_link/data_link.h"
 #include "imgui/imgui.h"
 #include "imgui_extensions.h"
 
@@ -69,7 +69,7 @@ void AddonLoad(AddonAPI* aApi)
     ImGui::SetCurrentContext((ImGuiContext*)APIDefs->ImguiContext);
     ImGui::SetAllocatorFunctions((void* (*)(size_t, void*))APIDefs->ImguiMalloc, (void(*)(void*, void*))APIDefs->ImguiFree); // on imgui 1.80+
 
-    VitalsData = VitalSignsData::create(APIDefs);
+    VitalsData = VitalSignsDataLink::create(APIDefs);
 	if (VitalsData->isInitialised())
 	{
 		APIDefs->Renderer.Register(ERenderType_Render, Addon::Render);
@@ -181,6 +181,7 @@ void AddonUnload()
         APIDefs->Renderer.Deregister(Addon::Render);
     }
     VitalsData->destroy();
+    VitalsData = nullptr;
 
     utils::font::ReleaseFonts();
 

@@ -9,7 +9,7 @@ AddonAPI* APIDefs = nullptr;
 Mumble::Data* MumbleLink = nullptr;
 Mumble::Identity* MumbleIdentity = nullptr;
 NexusLinkData* NexusLink = nullptr;
-VitalSignsData* VitalsData = nullptr;
+VitalSignsDataLink* VitalsData = nullptr;
 
 std::filesystem::path GameDir{};
 std::filesystem::path AddonDir{};
