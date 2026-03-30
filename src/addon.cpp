@@ -108,19 +108,25 @@ namespace Addon {
         switch (groupType)
         {
             case VitalSignsDataLink::E_GROUP_PARTY:
-                if (IsFrameHidden(ConfigGeneral.partyVisibility)) {
+                VitalsData->setPartyFrameVisibility(!ConfigGeneral.isHiddenNativeParty);
+                if (IsFrameHidden(ConfigGeneral.partyVisibility))
+                {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.partyLayout;
                 break;
             case VitalSignsDataLink::E_GROUP_SQUAD_10:
-                if (IsFrameHidden(ConfigGeneral.raidVisibility)) {
+                VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeRaid);
+                if (IsFrameHidden(ConfigGeneral.raidVisibility))
+                {
                     return;
-                }    
-            activeLayoutName = ConfigGeneral.raidLayout;
+                }
+                activeLayoutName = ConfigGeneral.raidLayout;
                 break;
             case VitalSignsDataLink::E_GROUP_SQUAD_50:
-                if (IsFrameHidden(ConfigGeneral.squadVisibility)) {
+                VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeSquad);
+                if (IsFrameHidden(ConfigGeneral.squadVisibility))
+                {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.squadLayout;
@@ -247,9 +253,7 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.partyLayout);
             form_Visibility(ConfigGeneral.partyVisibility);
-            ImGui::BeginDisabled();            
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeParty);
-            ImGui::EndDisabled();
         }
         ImGui::PopID();
         
@@ -259,9 +263,7 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.raidLayout);
             form_Visibility(ConfigGeneral.raidVisibility);
-            ImGui::BeginDisabled();            
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeRaid);
-            ImGui::EndDisabled();
         }
         ImGui::PopID();
 
@@ -271,9 +273,7 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.squadLayout);
             form_Visibility(ConfigGeneral.squadVisibility);
-            ImGui::BeginDisabled();            
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
-            ImGui::EndDisabled();
         }
         ImGui::PopID();
     }
