@@ -155,13 +155,16 @@ namespace Addon {
         {
             if (UI::Grid::BeginGridMenu("VitalSigns##Grid", *activeLayout, ColourPresets, BorderPresets, true /** TODO: isInCombat() */))
             {
-                for (auto &user : VitalsData->getUsers())
+                for (const auto &subgroup : VitalsData->getUsers())
                 {
-                    auto userData = VitalsData->getUserData(user);
-    
-                    if (UI::Grid::GridMenuItem(userData))
+                    for (const auto &user : subgroup.second)
                     {
-                        VitalsData->setLockedSelection(user);
+                        auto userData = VitalsData->getUserData(user);
+            
+                        if (UI::Grid::GridMenuItem(userData))
+                        {
+                            VitalsData->setLockedSelection(user);
+                        }
                     }
                 }
     
@@ -172,13 +175,16 @@ namespace Addon {
         {
             if (UI::Radial::BeginRadialMenu("VitalSigns##Radial", activeLayout->position, activeLayout->layout, activeLayout->colors, ColourPresets, isRadialMenuActive))
             {
-                for (auto &user : VitalsData->getUsers())
+                for (const auto &subgroup : VitalsData->getUsers())
                 {
-                    auto userData = VitalsData->getUserData(user);
-
-                    if (UI::Radial::RadialMenuItem(userData))
+                    for (const auto &user : subgroup.second)
                     {
-                        VitalsData->setLockedSelection(user);
+                        auto userData = VitalsData->getUserData(user);
+
+                        if (UI::Radial::RadialMenuItem(userData))
+                        {
+                            VitalsData->setLockedSelection(user);
+                        }
                     }
                 }
 

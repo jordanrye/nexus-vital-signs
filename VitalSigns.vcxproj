@@ -164,6 +164,7 @@
     <ClCompile Include="src\addon.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Frame\Frame.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Frame\FrameApi.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Squad\SquadContext.cpp" />
     <ClCompile Include="src\forms\icon_text.cpp" />
     <ClCompile Include="src\forms\visibility.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.cpp" />
