@@ -161,7 +161,7 @@ namespace Addon {
                     {
                         auto userData = VitalsData->getUserData(user);
             
-                        if (UI::Grid::GridMenuItem(userData))
+                        if (UI::Grid::GridMenuItem(userData, user, subgroup.first))
                         {
                             VitalsData->setLockedSelection(user);
                         }
@@ -314,6 +314,9 @@ namespace Addon {
                 if (UI::Grid::BeginGridMenu("Preview##Grid", *layout, ColourPresets, BorderPresets, true))
                 {
                     VitalSignsDataLink::Effects_t dummyEffects{};
+                    VitalSignsDataLink::UserId_t dummyUserId{};
+                    VitalSignsDataLink::SubgroupId_t dummySubgroupId = 1;
+                    int previewCount = 0;
                     auto AddPreviewItem = [&](const char* name, VitalSignsDataLink::EProfession prof, VitalSignsDataLink::ESpecialisation spec, float hp, VitalSignsDataLink::E_HEALTH_TYPE hpType, float barrier) {
                         VitalSignsDataLink::UserData_t user;
                         user.CharacterName = name;
@@ -324,7 +327,9 @@ namespace Addon {
                         user.Barrier = VitalSignsDataLink::Resource_t(barrier, 1.0f);
                         user.Shroud = VitalSignsDataLink::Resource_t(hp, 1.0f);
                         user.Effects = dummyEffects;
-                        UI::Grid::GridMenuItem(user);
+                        dummySubgroupId = (previewCount / 5) + 1;
+                        UI::Grid::GridMenuItem(user, dummyUserId, dummySubgroupId);
+                        previewCount++;
                     };
 
                     AddPreviewItem("Preview 1", VitalSignsDataLink::EProfession::Elementalist, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
