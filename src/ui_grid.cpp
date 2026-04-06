@@ -1033,13 +1033,13 @@ namespace UI::Grid {
         ImGui::End(); // Begin in `BeginGridMenu`
     }
 
-    bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData, VitalSignsDataLink::UserId_t userId, VitalSignsDataLink::SubgroupId_t subgroupId)
+    bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData)
     {
         bool isSelected = false;
 
         int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
         
-        if (context.index > 0 && context.lastSubgroupId != subgroupId)
+        if (context.index > 0 && context.lastSubgroupId != userData.SubgroupId)
         {
             if (context.index % cellDirectionMax != 0)
             {
@@ -1052,10 +1052,10 @@ namespace UI::Grid {
         if (context.index < min(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT))
         {
             context.isValid[context.index] = true;
-            context.userId[context.index] = userId;
-            context.subgroupId[context.index] = subgroupId;
-            context.subgroupMap[current_s] = subgroupId;
-            context.lastSubgroupId = subgroupId;
+            context.userId[context.index] = userData.UserId;
+            context.subgroupId[context.index] = userData.SubgroupId;
+            context.subgroupMap[current_s] = userData.SubgroupId;
+            context.lastSubgroupId = userData.SubgroupId;
 
             std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
             float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);

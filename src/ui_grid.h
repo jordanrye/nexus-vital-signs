@@ -11,7 +11,7 @@ namespace UI::Grid {
 
     bool BeginGridMenu(const char* name, const LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive);
     void EndGridMenu();
-    bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData, VitalSignsDataLink::UserId_t userId, VitalSignsDataLink::SubgroupId_t subgroupId);
+    bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData);
 
 } // namespace UI::Grid
 
