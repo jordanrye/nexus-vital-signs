@@ -120,25 +120,32 @@ namespace font {
 
     ImFont* GetFont(const std::string& fontFilePath, float fontSize)
     {
-        if (fontFilePath.empty()) return nullptr;
-
-        std::string key = fontFilePath + "_" + std::to_string(fontSize) + "px";
-        if (m_FontsCache.find(key) != m_FontsCache.end())
-        {
-            return m_FontsCache[key];
-        }
-
         ImFont* font = nullptr;
-        std::filesystem::path path(fontFilePath);
-        if (path.is_relative())
-        {
-            path = GameDir / path;
-        }
 
-        if (std::filesystem::exists(path))
+        if ((nullptr != APIDefs) && !fontFilePath.empty())
         {
-            m_FontsCache[key] = nullptr;
-            APIDefs->Fonts.AddFromFile(key.c_str(), fontSize, path.string().c_str(), ReceiveFont, nullptr);
+            std::string key = fontFilePath + "_" + std::to_string(fontSize) + "px";
+            
+            if (m_FontsCache.find(key) != m_FontsCache.end())
+            {
+                font = m_FontsCache[key];
+            }
+            else
+            {
+                std::filesystem::path path(fontFilePath);
+
+                if (path.is_relative())
+                {
+                    path = GameDir / path;
+                }
+        
+                if (std::filesystem::exists(path))
+                {
+                    m_FontsCache[key] = nullptr;
+                    APIDefs->Fonts.AddFromFile(key.c_str(), fontSize, path.string().c_str(), ReceiveFont, nullptr);
+                }
+            }
+
         }
 
         return font;
