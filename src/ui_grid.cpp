@@ -804,19 +804,19 @@ namespace UI::Grid {
         /* Frame properties */
         CellDrawProperties_t frameDrawProperties;
         frameDrawProperties.size = ImVec2(
-            (float)(context.layoutConfig.layout.grid.cellWidth - (2 * context.layoutConfig.layout.itemBorder)), 
-            (float)(context.layoutConfig.layout.grid.cellHeight - (2 * context.layoutConfig.layout.itemBorder)));
-        frameDrawProperties.padding = _ImVec4((float)context.layoutConfig.layout.itemBorder);
-        frameDrawProperties.spacing = (float)(context.layoutConfig.layout.itemSpacing + context.layoutConfig.layout.itemBorder);
+            max(1.0f, static_cast<float>(context.layoutConfig.layout.grid.cellWidth - (2 * context.layoutConfig.layout.itemBorder))), 
+            max(1.0f, static_cast<float>(context.layoutConfig.layout.grid.cellHeight - (2 * context.layoutConfig.layout.itemBorder))));
+        frameDrawProperties.padding = _ImVec4(static_cast<float>(context.layoutConfig.layout.itemBorder));
+        frameDrawProperties.spacing = static_cast<float>(context.layoutConfig.layout.itemSpacing + context.layoutConfig.layout.itemBorder);
         frameDrawProperties.rounding = ImMax(context.layoutConfig.layout.grid.cellRounding, context.layoutConfig.layout.grid.cellRounding - context.layoutConfig.layout.itemBorder);
         
         /* Frame border properties */
         CellDrawProperties_t borderDrawProperties;
         borderDrawProperties.size = ImVec2(
-            (float)context.layoutConfig.layout.grid.cellWidth, 
-            (float)context.layoutConfig.layout.grid.cellHeight);
+            static_cast<float>(context.layoutConfig.layout.grid.cellWidth), 
+            static_cast<float>(context.layoutConfig.layout.grid.cellHeight));
         borderDrawProperties.padding = _ImVec4(0.f);
-        borderDrawProperties.spacing = (float)context.layoutConfig.layout.itemSpacing;
+        borderDrawProperties.spacing = static_cast<float>(context.layoutConfig.layout.itemSpacing);
         borderDrawProperties.rounding = context.layoutConfig.layout.grid.cellRounding;
 
         /**
