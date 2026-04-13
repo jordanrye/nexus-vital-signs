@@ -11,15 +11,20 @@ struct GeneralConfig_t
     std::string partyLayout;
     std::string partyVisibility = "Always show";
     bool isHiddenNativeParty = false;
+    bool isHiddenSelfParty = false;
     
     /* Raid (10 Players) */
     std::string raidLayout;
     std::string raidVisibility = "Always show";
+    bool isHiddenSubgroupsRaid = false;
+    bool isHiddenSelfRaid = false;
     bool isHiddenNativeRaid = false;
 
     /* Squad (50 Players) */
     std::string squadLayout;
     std::string squadVisibility = "Always show";
+    bool isHiddenSubgroupsSquad = false;
+    bool isHiddenSelfSquad = false;
     bool isHiddenNativeSquad = false;
 
     /* Solo (No Group) */

@@ -809,7 +809,7 @@ namespace UI::Grid {
         frameDrawProperties.padding = _ImVec4(static_cast<float>(context.layoutConfig.layout.itemBorder));
         frameDrawProperties.spacing = static_cast<float>(context.layoutConfig.layout.itemSpacing + context.layoutConfig.layout.itemBorder);
         frameDrawProperties.rounding = ImMax(context.layoutConfig.layout.grid.cellRounding, context.layoutConfig.layout.grid.cellRounding - context.layoutConfig.layout.itemBorder);
-        
+
         /* Frame border properties */
         CellDrawProperties_t borderDrawProperties;
         borderDrawProperties.size = ImVec2(

@@ -104,6 +104,8 @@ namespace Addon {
         const VitalSignsDataLink::E_GROUP_TYPE groupType = VitalsData->getGroupType();
         std::string activeLayoutName = ConfigGeneral.soloLayout;
         LayoutConfig_t* activeLayout = nullptr;
+        bool hideSelf = false;
+        bool hideSubgroups = false;
 
         switch (groupType)
         {
@@ -114,6 +116,7 @@ namespace Addon {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.partyLayout;
+                hideSelf = ConfigGeneral.isHiddenSelfParty;
                 break;
             case VitalSignsDataLink::E_GROUP_SQUAD_10:
                 VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeRaid);
@@ -122,6 +125,8 @@ namespace Addon {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.raidLayout;
+                hideSelf = ConfigGeneral.isHiddenSelfRaid;
+                hideSubgroups = ConfigGeneral.isHiddenSubgroupsRaid;
                 break;
             case VitalSignsDataLink::E_GROUP_SQUAD_50:
                 VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeSquad);
@@ -130,6 +135,8 @@ namespace Addon {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.squadLayout;
+                hideSelf = ConfigGeneral.isHiddenSelfSquad;
+                hideSubgroups = ConfigGeneral.isHiddenSubgroupsSquad;
                 break;
             case VitalSignsDataLink::E_GROUP_NONE:
             default:
@@ -155,10 +162,23 @@ namespace Addon {
         {
             if (UI::Grid::BeginGridMenu("VitalSigns##Grid", *activeLayout, ColourPresets, BorderPresets, true /** TODO: isInCombat() */))
             {
+                auto clientId = VitalsData->getClientId();
+                auto clientSubgroupId = VitalsData->getSubgroupId();
+
                 for (const auto &subgroup : VitalsData->getUsers())
                 {
+                    if (hideSubgroups && subgroup.first != clientSubgroupId)
+                    {
+                        continue;
+                    }
+
                     for (const auto &user : subgroup.second)
                     {
+                        if (hideSelf && user == clientId)
+                        {
+                            continue;
+                        }
+
                         auto userData = VitalsData->getUserData(user);
             
                         if (UI::Grid::GridMenuItem(userData))
@@ -175,10 +195,23 @@ namespace Addon {
         {
             if (UI::Radial::BeginRadialMenu("VitalSigns##Radial", activeLayout->position, activeLayout->layout, activeLayout->colors, ColourPresets, isRadialMenuActive))
             {
+                auto clientId = VitalsData->getClientId();
+                auto clientSubgroupId = VitalsData->getSubgroupId();
+
                 for (const auto &subgroup : VitalsData->getUsers())
                 {
+                    if (hideSubgroups && subgroup.first != clientSubgroupId)
+                    {
+                        continue;
+                    }
+
                     for (const auto &user : subgroup.second)
                     {
+                        if (hideSelf && user == clientId)
+                        {
+                            continue;
+                        }
+
                         auto userData = VitalsData->getUserData(user);
 
                         if (UI::Radial::RadialMenuItem(userData))
@@ -259,6 +292,7 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.partyLayout);
             form_Visibility(ConfigGeneral.partyVisibility);
+            ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfParty);
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeParty);
         }
         ImGui::PopID();
@@ -269,6 +303,8 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.raidLayout);
             form_Visibility(ConfigGeneral.raidVisibility);
+            ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfRaid);
+            ImGui::Checkbox("Hide subgroups", &ConfigGeneral.isHiddenSubgroupsRaid);
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeRaid);
         }
         ImGui::PopID();
@@ -279,6 +315,8 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.squadLayout);
             form_Visibility(ConfigGeneral.squadVisibility);
+            ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfSquad);
+            ImGui::Checkbox("Hide subgroups", &ConfigGeneral.isHiddenSubgroupsSquad);
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
         }
         ImGui::PopID();
