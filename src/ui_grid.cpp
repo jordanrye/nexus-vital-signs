@@ -31,8 +31,6 @@ namespace UI::Grid {
         bool isValid[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::UserId_t userId[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::SubgroupId_t subgroupId[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::SubgroupId_t subgroupMap[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::SubgroupId_t lastSubgroupId;
         std::string charName[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::EProfession profession[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::ESpecialisation specialisation[SQUAD_MEMBER_LIMIT];
@@ -354,18 +352,18 @@ namespace UI::Grid {
 
             int rows, columns;
             int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
-            int cellMax = min(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT);
+            int requiredCells = context.layoutConfig.layout.grid.rowColMax + 1;
 
             if ((context.layoutConfig.layout.grid.cellDirection == "Left-to-right") || 
                 (context.layoutConfig.layout.grid.cellDirection == "Right-to-left"))
             {
-                rows = (cellMax + cellDirectionMax - 1) / cellDirectionMax;
+                rows = requiredCells;
                 columns = cellDirectionMax;
             }
             else
             {
                 rows = cellDirectionMax;
-                columns = (cellMax + cellDirectionMax - 1) / cellDirectionMax;
+                columns = requiredCells;
             }
 
             float menuWidth = (float)(columns * context.layoutConfig.layout.grid.cellWidth + (columns - 1) * context.layoutConfig.layout.itemSpacing);
@@ -395,10 +393,8 @@ namespace UI::Grid {
                 }
                 
                 context.index = 0;
-                context.lastSubgroupId = 255;
                 memset(context.isValid, 0, sizeof(context.isValid));
                 memset(context.subgroupId, 0, sizeof(context.subgroupId));
-                memset(context.subgroupMap, 255, sizeof(context.subgroupMap));
 
                 isOpen = true;
             }
@@ -785,18 +781,18 @@ namespace UI::Grid {
         gridDrawProperties.position = context.menuPosition;
 
         int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
-        int cellMax = min(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT);
+        int requiredCells = context.layoutConfig.layout.grid.rowColMax + 1;
 
         if ((context.layoutConfig.layout.grid.cellDirection == "Left-to-right") || 
             (context.layoutConfig.layout.grid.cellDirection == "Right-to-left"))
         {
-            gridDrawProperties.rows = (cellMax + cellDirectionMax - 1) / cellDirectionMax;
+            gridDrawProperties.rows = requiredCells;
             gridDrawProperties.columns = cellDirectionMax;
         }
         else
         {
             gridDrawProperties.rows = cellDirectionMax;
-            gridDrawProperties.columns = (cellMax + cellDirectionMax - 1) / cellDirectionMax;
+            gridDrawProperties.columns = requiredCells;
         }
 
         gridDrawProperties.direction = context.layoutConfig.layout.grid.cellDirection;
@@ -827,48 +823,35 @@ namespace UI::Grid {
         context.indexHovered = -1;
 
         ImDrawList* drawList = ImGui::GetForegroundDrawList();
-        
-        int last_populated_s = (context.index == 0) ? -1 : ((context.index - 1) / cellDirectionMax);
-        int num_drop_targets = last_populated_s + 2;
-        if (num_drop_targets > SQUAD_MEMBER_LIMIT) {
-            num_drop_targets = SQUAD_MEMBER_LIMIT;
-        }
 
-        /* Determine used subgroups and first empty subgroup */
-        bool used_subgroups[15] = { false };
-        for (int s = 0; s <= last_populated_s; s++) {
-            if (context.subgroupMap[s] != 255 && context.subgroupMap[s] < 15) {
-                used_subgroups[context.subgroupMap[s]] = true;
-            }
-        }
-
-        VitalSignsDataLink::SubgroupId_t first_empty_subgroup = 15;
-        for (VitalSignsDataLink::SubgroupId_t id = 0; id < 15; id++) {
-            if (!used_subgroups[id]) {
-                first_empty_subgroup = id;
-                break;
-            }
-        }
-        if (first_empty_subgroup >= 15) {
-            first_empty_subgroup = 14;
-        }
+        int lastPopulatedGroupIndex = (context.index == 0) ? -1 : ((context.index - 1) / cellDirectionMax);
 
         /* Map the new drop target column */
-        if (last_populated_s + 1 < SQUAD_MEMBER_LIMIT) {
-            context.subgroupMap[last_populated_s + 1] = first_empty_subgroup;
+        int newGroupIndex = lastPopulatedGroupIndex + 1;
+        if (newGroupIndex < context.layoutConfig.layout.grid.rowColMax + 1 && (newGroupIndex * cellDirectionMax) < SQUAD_MEMBER_LIMIT) {
+            lastPopulatedGroupIndex = newGroupIndex;
         }
-
+        
         /* Draw drop targets and highlights */
-        for (int s = 0; s < num_drop_targets; s++)
+        int groupIndex = 0;
+        while (groupIndex <= lastPopulatedGroupIndex)
         {
-            DrawProperties_t firstCell = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, s * cellDirectionMax);
-            DrawProperties_t lastCell = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, s * cellDirectionMax + cellDirectionMax - 1);
+            VitalSignsDataLink::SubgroupId_t droppedSubgroupId = (groupIndex == newGroupIndex) ? (VitalSignsDataLink::SubgroupId_t)-1 : context.subgroupId[groupIndex * cellDirectionMax];
+            int startGroupIndex = groupIndex;
+            while (groupIndex <= lastPopulatedGroupIndex && ((groupIndex == newGroupIndex) ? (VitalSignsDataLink::SubgroupId_t)-1 : context.subgroupId[groupIndex * cellDirectionMax]) == droppedSubgroupId)
+            {
+                groupIndex++;
+            }
+            int endGroupIndex = groupIndex - 1;
+
+            DrawProperties_t firstCellProps = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, startGroupIndex * cellDirectionMax);
+            DrawProperties_t lastCellProps = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, endGroupIndex * cellDirectionMax + cellDirectionMax - 1);
             
-            ImVec2 p_min(ImMin(firstCell.position.x, lastCell.position.x), ImMin(firstCell.position.y, lastCell.position.y));
-            ImVec2 p_max(ImMax(firstCell.position.x + firstCell.width, lastCell.position.x + lastCell.width), ImMax(firstCell.position.y + firstCell.height, lastCell.position.y + lastCell.height));
+            ImVec2 p_min(ImMin(firstCellProps.position.x, lastCellProps.position.x), ImMin(firstCellProps.position.y, lastCellProps.position.y));
+            ImVec2 p_max(ImMax(firstCellProps.position.x + firstCellProps.width, lastCellProps.position.x + lastCellProps.width), ImMax(firstCellProps.position.y + firstCellProps.height, lastCellProps.position.y + lastCellProps.height));
             
             ImGui::SetCursorScreenPos(p_min);
-            ImGui::PushID(s + 10000);
+            ImGui::PushID(std::string("DragAndDrop" + std::to_string(groupIndex)).c_str());
             ImGui::InvisibleButton("SubgroupTarget", ImVec2(p_max.x - p_min.x, p_max.y - p_min.y));
             ImGui::SetItemAllowOverlap();
 
@@ -880,8 +863,8 @@ namespace UI::Grid {
                 {
                     if (payload->IsDelivery())
                     {
-                        VitalSignsDataLink::UserId_t draggedId = *(const VitalSignsDataLink::UserId_t*)payload->Data;
-                        VitalsData->assignSubgroup(draggedId, context.subgroupMap[s]);
+                        VitalSignsDataLink::UserId_t draggedUserId = *(const VitalSignsDataLink::UserId_t*)payload->Data;
+                        VitalsData->assignSubgroup(draggedUserId, droppedSubgroupId);
                     }    
                 }
                 ImGui::EndDragDropTarget();
@@ -1039,7 +1022,7 @@ namespace UI::Grid {
 
         int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
         
-        if (context.index > 0 && context.lastSubgroupId != userData.SubgroupId)
+        if (context.index > 0 && context.subgroupId[context.index - 1] != userData.SubgroupId)
         {
             if (context.index % cellDirectionMax != 0)
             {
@@ -1049,13 +1032,11 @@ namespace UI::Grid {
 
         int current_s = context.index / cellDirectionMax;
 
-        if (context.index < min(context.layoutConfig.layout.grid.cellMax, SQUAD_MEMBER_LIMIT))
+        if ((context.index < SQUAD_MEMBER_LIMIT) && (current_s < context.layoutConfig.layout.grid.rowColMax))
         {
             context.isValid[context.index] = true;
             context.userId[context.index] = userData.UserId;
             context.subgroupId[context.index] = userData.SubgroupId;
-            context.subgroupMap[current_s] = userData.SubgroupId;
-            context.lastSubgroupId = userData.SubgroupId;
 
             std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
             float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);

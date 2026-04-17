@@ -577,7 +577,7 @@ namespace Addon {
             {
                 form_Direction(layout.grid.cellDirection);
 
-                std::string label = ((layout.grid.cellDirection == "Top-to-bottom" || layout.grid.cellDirection == "Bottom-to-top") ? "Row" : "Column");
+                std::string label = ((layout.grid.cellDirection == "Top-to-bottom" || layout.grid.cellDirection == "Bottom-to-top") ? "Column" : "Row");
                 if (ImGui::SliderInt(std::string("Max Cells Per " + label + "##CELL_DIRECTION_MAX").c_str(), &layout.grid.cellDirectionMax, 1, UI::SQUAD_MEMBER_LIMIT))
                 {
                     if (layout.grid.cellDirectionMax < 1)
@@ -586,15 +586,16 @@ namespace Addon {
                     }
                 }
 
-                if (ImGui::SliderInt("Max Cells##CELL_MAX", &layout.grid.cellMax, 1, UI::SQUAD_MEMBER_LIMIT))
+                std::string maxLabel = ((layout.grid.cellDirection == "Top-to-bottom" || layout.grid.cellDirection == "Bottom-to-top") ? "Max Columns" : "Max Rows");
+                if (ImGui::SliderInt(std::string(maxLabel + "##ROW_COL_MAX").c_str(), &layout.grid.rowColMax, 1, 15))
                 {
-                    if (layout.grid.cellMax < 1)
+                    if (layout.grid.rowColMax < 1)
                     {
-                        layout.grid.cellMax = 1;
+                        layout.grid.rowColMax = 1;
                     }
-                    if (layout.grid.cellMax > UI::SQUAD_MEMBER_LIMIT)
+                    if (layout.grid.rowColMax > UI::SQUAD_MEMBER_LIMIT)
                     {
-                        layout.grid.cellMax = UI::SQUAD_MEMBER_LIMIT;
+                        layout.grid.rowColMax = UI::SQUAD_MEMBER_LIMIT;
                     }
                 }
                 

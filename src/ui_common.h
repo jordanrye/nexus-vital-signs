@@ -7,7 +7,7 @@
 
 namespace UI {
 
-    const int SQUAD_MEMBER_LIMIT = 10; // max items in the radial menu
+    const int SQUAD_MEMBER_LIMIT = 50; // max number of player frames
     const int BOON_LIMIT = 12; // max number of boons
     const int CONDITION_LIMIT = 14; // max number of conditions
 

@@ -45,7 +45,7 @@ struct GridProperties_t
 {
     std::string cellDirection = "Left-to-right";
     int cellDirectionMax = 5;
-    int cellMax = 10;
+    int rowColMax = 50;
     int cellWidth = 200;
     int cellHeight = 60;
     int cellRounding = 4;
