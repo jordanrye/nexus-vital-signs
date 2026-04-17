@@ -367,20 +367,11 @@ namespace UI::Radial {
 
         if (context.index < context.layoutConfig.radial.sectorCountMax)
         {
-            std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
-            float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);
-            float barrier = ((userData.Health.Max > 0.0f) ? (userData.Barrier.Current / userData.Health.Max) : 0.0f);
-            if ((VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER == userData.HealthType) ||
-                (VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER == userData.HealthType))
-            {
-                health = ((userData.Shroud.Max > 0.0f) ? (userData.Shroud.Current / userData.Shroud.Max) : 0.0f);
-            }
-
-            context.charName[context.index] = name;
+            context.charName[context.index] = userData.GetDisplayName();
             context.profession[context.index] = userData.Profession;
-            context.health[context.index] = health;
+            context.health[context.index] = userData.GetHealthRatio();
             context.healthType[context.index] = userData.HealthType;
-            context.barrier[context.index] = barrier;
+            context.barrier[context.index] = userData.GetBarrierRatio();
             context.effects[context.index] = userData.Effects;
     
             if (context.index == context.indexHovered)

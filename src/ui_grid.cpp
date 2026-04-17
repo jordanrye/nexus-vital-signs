@@ -29,15 +29,7 @@ namespace UI::Grid {
 
         // Item state
         bool isValid[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::UserId_t userId[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::SubgroupId_t subgroupId[SQUAD_MEMBER_LIMIT];
-        std::string charName[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::EProfession profession[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::ESpecialisation specialisation[SQUAD_MEMBER_LIMIT];
-        float health[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
-        float barrier[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::Effects_t effects[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::UserData_t userData[SQUAD_MEMBER_LIMIT];
     } context;
 
     struct GridDrawProperties_t 
@@ -394,7 +386,6 @@ namespace UI::Grid {
                 
                 context.index = 0;
                 memset(context.isValid, 0, sizeof(context.isValid));
-                memset(context.subgroupId, 0, sizeof(context.subgroupId));
 
                 isOpen = true;
             }
@@ -414,7 +405,7 @@ namespace UI::Grid {
         return (context.layoutConfig.previewNodeId != TreeNodeUID::NONE);
     }
 
-    static bool IsTriggerMet(const Trigger_t& trigger, int userIndex, bool isPreview = false)
+    static bool IsTriggerMet(const Trigger_t& trigger, VitalSignsDataLink::UserData_t& userData, bool isPreview = false)
     {
         if (isPreview)
         {
@@ -431,13 +422,13 @@ namespace UI::Grid {
             return true;
         }
 
-        if ((trigger.category == "Professions") && (trigger.effect == VitalSignsDataLink::getProfessionString(context.profession[userIndex], context.specialisation[userIndex])))
+        if ((trigger.category == "Professions") && (trigger.effect == VitalSignsDataLink::getProfessionString(userData.Profession, userData.Specialisation)))
         {
             return true;
         }
 
-        auto currStacks = context.effects[userIndex][trigger.effect].stacks;
-        auto currDuration = context.effects[userIndex][trigger.effect].duration / 1000.0f;
+        auto currStacks = userData.Effects[trigger.effect].stacks;
+        auto currDuration = userData.Effects[trigger.effect].duration / 1000.0f;
 
         if ((trigger.condition == "Status: Active" && currStacks >= 1U) ||
             (trigger.condition == "Status: Inactive" && currStacks == 0U) ||
@@ -473,7 +464,7 @@ namespace UI::Grid {
         return false;
     }
 
-    static bool ProcessIndicatorsDFS(const std::vector<Indicator_t>& indicators, int userIndex, bool isPriorityList, bool isParentPreviewed, ImColor* outColor, const Indicator_t** outBorder, std::vector<std::pair<const Indicator_t*, bool>>& outDrawables)
+    static bool ProcessIndicatorsDFS(const std::vector<Indicator_t>& indicators, VitalSignsDataLink::UserData_t& userData, bool isPriorityList, bool isParentPreviewed, ImColor* outColor, const Indicator_t** outBorder, std::vector<std::pair<const Indicator_t*, bool>>& outDrawables)
     {
         bool isAnyApplied = false;
         
@@ -489,9 +480,9 @@ namespace UI::Grid {
 
                 if (indicator.type == "Group")
                 {
-                    if (IsTriggerMet(indicator.group.trigger, userIndex, isPreviewed) || isTraversalForced)
+                    if (IsTriggerMet(indicator.group.trigger, userData, isPreviewed) || isTraversalForced)
                     {
-                        if (ProcessIndicatorsDFS(indicator.group.indicators, userIndex, indicator.group.priorityGroup, isPreviewed, outColor, outBorder, outDrawables))
+                        if (ProcessIndicatorsDFS(indicator.group.indicators, userData, indicator.group.priorityGroup, isPreviewed, outColor, outBorder, outDrawables))
                         {
                             isApplied = true;
                         }
@@ -499,7 +490,7 @@ namespace UI::Grid {
                 }
                 else if (indicator.type == "Colour")
                 {
-                    if (IsTriggerMet(indicator.colour.trigger, userIndex, isPreviewed) || isTraversalForced)
+                    if (IsTriggerMet(indicator.colour.trigger, userData, isPreviewed) || isTraversalForced)
                     {
                         if (outColor) *outColor = indicator.colour.color;
                         isApplied = true;
@@ -507,7 +498,7 @@ namespace UI::Grid {
                 }
                 else if (indicator.type == "Border")
                 {
-                    if (IsTriggerMet(indicator.border.trigger, userIndex, isPreviewed) || isTraversalForced)
+                    if (IsTriggerMet(indicator.border.trigger, userData, isPreviewed) || isTraversalForced)
                     {
                         if (outBorder) *outBorder = &indicator;
                         isApplied = true;
@@ -515,7 +506,7 @@ namespace UI::Grid {
                 }
                 else if (indicator.type == "Highlight")
                 {
-                    if (IsTriggerMet(indicator.highlight.trigger, userIndex, isPreviewed) || isTraversalForced)
+                    if (IsTriggerMet(indicator.highlight.trigger, userData, isPreviewed) || isTraversalForced)
                     {
                         outDrawables.push_back({ &indicator, isPreviewed });
                         isApplied = true;
@@ -523,7 +514,7 @@ namespace UI::Grid {
                 }
                 else if (indicator.type == "Icon")
                 {
-                    if (IsTriggerMet(indicator.iconSingle.icon.trigger, userIndex, isPreviewed) || isTraversalForced)
+                    if (IsTriggerMet(indicator.iconSingle.icon.trigger, userData, isPreviewed) || isTraversalForced)
                     {
                         outDrawables.push_back({ &indicator, isPreviewed });
                         isApplied = true;
@@ -535,7 +526,7 @@ namespace UI::Grid {
                     {
                         bool isIconForced = isPreviewed || (icon.id == context.layoutConfig.previewNodeId);
 
-                        if (IsTriggerMet(icon.trigger, userIndex, isIconForced))
+                        if (IsTriggerMet(icon.trigger, userData, isIconForced))
                         {
                             isApplied = true;
                             break;
@@ -549,7 +540,7 @@ namespace UI::Grid {
                 }
                 else if (indicator.type == "Text")
                 {
-                    if (IsTriggerMet(indicator.text.trigger, userIndex, isPreviewed) || isTraversalForced)
+                    if (IsTriggerMet(indicator.text.trigger, userData, isPreviewed) || isTraversalForced)
                     {
                         outDrawables.push_back({ &indicator, isPreviewed });
                         isApplied = true;
@@ -573,7 +564,7 @@ namespace UI::Grid {
         return isAnyApplied;
     }
 
-    static void DrawIndicator(ImDrawList* const drawList, const DrawProperties_t& parentProperties, const DrawProperties_t& contentProperties, const Indicator_t* indicator, int userIndex, bool isPreviewed)
+    static void DrawIndicator(ImDrawList* const drawList, const DrawProperties_t& parentProperties, const DrawProperties_t& contentProperties, const Indicator_t* indicator, VitalSignsDataLink::UserData_t& userData, bool isPreviewed)
     {
         if (indicator->type == "Highlight")
         {
@@ -626,8 +617,8 @@ namespace UI::Grid {
         else if (indicator->type == "Icon")
         {
             Texture* texture = UI::GetOrCreateTexture(indicator->iconSingle.icon.source, indicator->iconSingle.icon.path);
-            float duration = context.effects[userIndex][indicator->iconSingle.icon.trigger.effect].duration;
-            unsigned int stacks = context.effects[userIndex][indicator->iconSingle.icon.trigger.effect].stacks;
+            float duration = userData.Effects[indicator->iconSingle.icon.trigger.effect].duration;
+            unsigned int stacks = userData.Effects[indicator->iconSingle.icon.trigger.effect].stacks;
             DrawIcon(drawList, parentProperties, texture, indicator->iconSingle.size, indicator->iconSingle.position.anchor, indicator->iconSingle.position.offset, indicator->iconSingle.showDuration, duration, indicator->iconSingle.durationText, indicator->iconSingle.showStacks, stacks, indicator->iconSingle.stacksText);
         }
         else if (indicator->type == "Icon List")
@@ -654,13 +645,13 @@ namespace UI::Grid {
             int i = 0;
             for (const auto& icon : indicator->iconList.list)
             {
-                if (IsTriggerMet(icon.trigger, userIndex, isPreviewed))
+                if (IsTriggerMet(icon.trigger, userData, isPreviewed))
                 {
                     Coordinate_t iconOffset((iconSpacing.x * i + indicator->iconList.position.offset.x), (iconSpacing.y * i + indicator->iconList.position.offset.y));
                         
                     Texture* texture = UI::GetOrCreateTexture(icon.source, icon.path);
-                    float duration = context.effects[userIndex][icon.trigger.effect].duration;
-                    unsigned int stacks = context.effects[userIndex][icon.trigger.effect].stacks;
+                    float duration = userData.Effects[icon.trigger.effect].duration;
+                    unsigned int stacks = userData.Effects[icon.trigger.effect].stacks;
                     DrawIcon(drawList, parentProperties, texture, indicator->iconList.size, indicator->iconList.position.anchor, iconOffset, indicator->iconList.showDuration, duration, indicator->iconList.durationText, indicator->iconList.showStacks, stacks, indicator->iconList.stacksText);
 
                     if (indicator->iconList.listLength == "Dynamic")
@@ -680,11 +671,11 @@ namespace UI::Grid {
             std::string text;
             if (indicator->text.textContent == "Character name")
             {
-                text = context.charName[userIndex];
+                text = userData.GetDisplayName();
             } 
             else if (indicator->text.textContent == "Health percentage")
             {
-                text = std::to_string(max(static_cast<int>(context.health[userIndex] * 100.0f), 0)) + "%";
+                text = std::to_string(max(static_cast<int>(userData.GetHealthRatio() * 100.0f), 0)) + "%";
             } 
             else
             {
@@ -832,13 +823,17 @@ namespace UI::Grid {
             lastPopulatedGroupIndex = newGroupIndex;
         }
         
+        auto getSubgroupId = [&](int idx) -> VitalSignsDataLink::SubgroupId_t {
+            return (idx == newGroupIndex) ? static_cast<VitalSignsDataLink::SubgroupId_t>(-1) : context.userData[idx * cellDirectionMax].SubgroupId;
+        };
+
         /* Draw drop targets and highlights */
         int groupIndex = 0;
         while (groupIndex <= lastPopulatedGroupIndex)
         {
-            VitalSignsDataLink::SubgroupId_t droppedSubgroupId = (groupIndex == newGroupIndex) ? (VitalSignsDataLink::SubgroupId_t)-1 : context.subgroupId[groupIndex * cellDirectionMax];
+            VitalSignsDataLink::SubgroupId_t droppedSubgroupId = getSubgroupId(groupIndex);
             int startGroupIndex = groupIndex;
-            while (groupIndex <= lastPopulatedGroupIndex && ((groupIndex == newGroupIndex) ? (VitalSignsDataLink::SubgroupId_t)-1 : context.subgroupId[groupIndex * cellDirectionMax]) == droppedSubgroupId)
+            while (groupIndex <= lastPopulatedGroupIndex && getSubgroupId(groupIndex) == droppedSubgroupId)
             {
                 groupIndex++;
             }
@@ -880,6 +875,8 @@ namespace UI::Grid {
                 continue;
             }
 
+            VitalSignsDataLink::UserData_t& userData = context.userData[i];
+
             ImGui::PushID(i);
             {
                 std::vector<std::pair<const Indicator_t*, bool>> drawables;
@@ -892,23 +889,23 @@ namespace UI::Grid {
 
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    ImGui::SetDragDropPayload("VS_USER_ID", &context.userId[i], sizeof(VitalSignsDataLink::UserId_t));
-                    ImGui::Text("%s", context.charName[i].c_str());
+                    ImGui::SetDragDropPayload("VS_USER_ID", &userData.UserId, sizeof(userData.UserId));
+                    ImGui::Text("%s", userData.GetDisplayName().c_str());
                     ImGui::EndDragDropSource();
                 }
 
                 const bool isHovered = IsItemHovered(parentProperties);
                 const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig.colors);
-                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig.colors, context.healthType[i], context.profession[i]);
+                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig.colors, userData.HealthType, userData.Profession);
                 const ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig.colors);
                 const Indicator_t* borderStyle = nullptr;
     
                 /* Process indicators (returns a list of drawable items) */
-                ProcessIndicatorsDFS(context.layoutConfig.indicators, i, false, false, &healthColour, &borderStyle, drawables);
+                ProcessIndicatorsDFS(context.layoutConfig.indicators, userData, false, false, &healthColour, &borderStyle, drawables);
                 if ((context.layoutConfig.previewNodeId != TreeNodeUID::NONE) && (context.layoutConfig.previewNodeId == context.layoutConfig.id))
                 {
                     /* Preview mode */
-                    ProcessIndicatorsDFS(context.layoutConfig.indicators, i, false, true, &healthColour, &borderStyle, drawables);
+                    ProcessIndicatorsDFS(context.layoutConfig.indicators, userData, false, true, &healthColour, &borderStyle, drawables);
                 }
     
                 /* Border */
@@ -939,9 +936,12 @@ namespace UI::Grid {
                 DrawCell(drawList, contentProps, backgroundColour);
                 
                 /* Health */
-                if (context.health[i] > 0.001f)
+                float health = userData.GetHealthRatio();
+                float barrier = userData.GetBarrierRatio();
+
+                if (health > 0.001f)
                 {
-                    float healthWidth = contentProps.width * context.health[i];
+                    float healthWidth = contentProps.width * health;
                     ImDrawCornerFlags roundingCorners = ((contentProps.width - healthWidth) < (float)contentProps.rounding) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
                     DrawProperties_t properties = contentProps;
                     properties.width = healthWidth;
@@ -956,13 +956,13 @@ namespace UI::Grid {
                 }
                 
                 /* Barrier */
-                if (context.barrier[i] > 0.001f)
+                if (barrier > 0.001f)
                 {
-                    float barrierWidth = contentProps.width * context.barrier[i];
+                    float barrierWidth = contentProps.width * barrier;
                     DrawProperties_t properties = contentProps;
                     properties.width = barrierWidth;
     
-                    if ((context.barrier[i] + context.health[i]) > 0.999f)
+                    if ((barrier + health) > 0.999f)
                     {
                         /* Overflow barrier */
                         properties.position.x += contentProps.width - barrierWidth;
@@ -972,7 +972,7 @@ namespace UI::Grid {
                     else
                     {
                         /* Padding barrier */
-                        float healthWidth = contentProps.width * context.health[i];
+                        float healthWidth = contentProps.width * health;
                         ImDrawCornerFlags roundingCorners = ((healthWidth + barrierWidth) < (contentProps.width - (float)contentProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_Right;
                         properties.position.x += healthWidth;
                         properties.roundingCorners = roundingCorners;
@@ -983,7 +983,7 @@ namespace UI::Grid {
                 /* Indicators */
                 for (const auto& pair : drawables)
                 {
-                    DrawIndicator(drawList, parentProperties, contentProps, pair.first, i, pair.second);
+                    DrawIndicator(drawList, parentProperties, contentProps, pair.first, userData, pair.second);
                 }
     
                 if (isHovered)
@@ -1022,7 +1022,7 @@ namespace UI::Grid {
 
         int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
         
-        if (context.index > 0 && context.subgroupId[context.index - 1] != userData.SubgroupId)
+        if ((context.index > 0) && (context.userData[context.index - 1].SubgroupId != userData.SubgroupId))
         {
             if (context.index % cellDirectionMax != 0)
             {
@@ -1035,25 +1035,7 @@ namespace UI::Grid {
         if ((context.index < SQUAD_MEMBER_LIMIT) && (current_s < context.layoutConfig.layout.grid.rowColMax))
         {
             context.isValid[context.index] = true;
-            context.userId[context.index] = userData.UserId;
-            context.subgroupId[context.index] = userData.SubgroupId;
-
-            std::string name = (userData.CharacterName.empty() ? userData.AccountName : userData.CharacterName);
-            float health = ((userData.Health.Max > 0.0f) ? (userData.Health.Current / userData.Health.Max) : 0.0f);
-            float barrier = ((userData.Health.Max > 0.0f) ? (userData.Barrier.Current / userData.Health.Max) : 0.0f);
-            if ((VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER == userData.HealthType) ||
-                (VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER == userData.HealthType))
-            {
-                health = ((userData.Shroud.Max > 0.0f) ? (userData.Shroud.Current / userData.Shroud.Max) : 0.0f);
-            }
-
-            context.charName[context.index] = name;
-            context.profession[context.index] = userData.Profession;
-            context.specialisation[context.index] = userData.Specialisation;
-            context.health[context.index] = health;
-            context.healthType[context.index] = userData.HealthType;
-            context.barrier[context.index] = barrier;
-            context.effects[context.index] = userData.Effects;
+            context.userData[context.index] = userData;
     
             if ((context.index == context.indexHovered) && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
             {
