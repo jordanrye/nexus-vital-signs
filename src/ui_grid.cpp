@@ -813,7 +813,8 @@ namespace UI::Grid {
          **/
         context.indexHovered = -1;
 
-        ImDrawList* drawList = ImGui::GetForegroundDrawList();
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->PushClipRectFullScreen(); // Required to prevent clipping
 
         int lastPopulatedGroupIndex = (context.index == 0) ? -1 : ((context.index - 1) / cellDirectionMax);
 
@@ -845,6 +846,12 @@ namespace UI::Grid {
             ImVec2 p_min(ImMin(firstCellProps.position.x, lastCellProps.position.x), ImMin(firstCellProps.position.y, lastCellProps.position.y));
             ImVec2 p_max(ImMax(firstCellProps.position.x + firstCellProps.width, lastCellProps.position.x + lastCellProps.width), ImMax(firstCellProps.position.y + firstCellProps.height, lastCellProps.position.y + lastCellProps.height));
             
+            /// TODO: Make this more elegant 
+            p_min.x -= (context.layoutConfig.layout.itemSpacing / 2.f);
+            p_min.y -= (context.layoutConfig.layout.itemSpacing / 2.f);
+            p_max.x += (context.layoutConfig.layout.itemSpacing / 2.f);
+            p_max.y += (context.layoutConfig.layout.itemSpacing / 2.f);
+
             ImGui::SetCursorScreenPos(p_min);
             ImGui::PushID(std::string("DragAndDrop" + std::to_string(groupIndex)).c_str());
             ImGui::InvisibleButton("SubgroupTarget", ImVec2(p_max.x - p_min.x, p_max.y - p_min.y));
@@ -886,13 +893,6 @@ namespace UI::Grid {
                 /* Invisible button (creates clickable region) */
                 ImGui::SetCursorScreenPos(parentProperties.position);
                 ImGui::InvisibleButton("", ImVec2(parentProperties.width, parentProperties.height));
-
-                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-                {
-                    ImGui::SetDragDropPayload("VS_USER_ID", &userData.UserId, sizeof(userData.UserId));
-                    ImGui::Text("%s", userData.GetDisplayName().c_str());
-                    ImGui::EndDragDropSource();
-                }
 
                 const bool isHovered = IsItemHovered(parentProperties);
                 const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig.colors);
@@ -985,6 +985,14 @@ namespace UI::Grid {
                 {
                     DrawIndicator(drawList, parentProperties, contentProps, pair.first, userData, pair.second);
                 }
+
+                /* Drag-and-drop */
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    ImGui::SetDragDropPayload("VS_USER_ID", &userData.UserId, sizeof(userData.UserId));
+                    ImGui::Text("%s", userData.GetDisplayName().c_str());
+                    ImGui::EndDragDropSource();
+                }
     
                 if (isHovered)
                 {
@@ -995,6 +1003,8 @@ namespace UI::Grid {
             }
             ImGui::PopID();
         }
+
+        drawList->PopClipRect();
 
         if (ImGui::IsWindowHovered() && (context.indexHovered == -1))
         {
