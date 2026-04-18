@@ -866,7 +866,7 @@ namespace UI::Grid {
                     if (payload->IsDelivery())
                     {
                         VitalSignsDataLink::UserId_t draggedUserId = *(const VitalSignsDataLink::UserId_t*)payload->Data;
-                        VitalsData->assignSubgroup(draggedUserId, droppedSubgroupId);
+                        VitalsData->setSubgroup(draggedUserId, droppedSubgroupId);
                     }    
                 }
                 ImGui::EndDragDropTarget();
@@ -893,6 +893,19 @@ namespace UI::Grid {
                 /* Invisible button (creates clickable region) */
                 ImGui::SetCursorScreenPos(parentProperties.position);
                 ImGui::InvisibleButton("", ImVec2(parentProperties.width, parentProperties.height));
+
+                if (ImGui::BeginPopupContextItem())
+                {
+                    ImGui::Text(userData.GetDisplayName().c_str());
+                    ImGui::Separator();
+                    if (ImGui::Button("Add Friend")) { VitalsData->addFriend(userData.UserId); }
+                    if (ImGui::Button("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
+                    ImGui::Separator();
+                    if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
+                    if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
+
+                    ImGui::EndPopup();
+                }
 
                 const bool isHovered = IsItemHovered(parentProperties);
                 const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig.colors);
