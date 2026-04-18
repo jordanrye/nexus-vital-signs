@@ -896,13 +896,29 @@ namespace UI::Grid {
 
                 if (ImGui::BeginPopupContextItem())
                 {
+                    ImGui::TextDisabled(userData.AccountName.c_str());
                     ImGui::Text(userData.GetDisplayName().c_str());
+
                     ImGui::Separator();
                     if (ImGui::Button("Add Friend")) { VitalsData->addFriend(userData.UserId); }
                     if (ImGui::Button("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
-                    ImGui::Separator();
-                    if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
-                    if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
+
+                    if ((VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_10) ||
+                        (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_50))
+                    {
+                        ImGui::Separator();
+                        if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
+                        if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
+                        if (ImGui::Button("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
+                        if (ImGui::Button("Leave Squad")) { VitalsData->leaveGroup(); }
+                    }
+
+                    if (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_PARTY)
+                    {
+                        ImGui::Separator();
+                        if (ImGui::Button("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
+                        if (ImGui::Button("Leave Party")) { VitalsData->leaveGroup(); }
+                    }
 
                     ImGui::EndPopup();
                 }
