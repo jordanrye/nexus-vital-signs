@@ -909,6 +909,7 @@ namespace UI::Grid {
                         (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_50))
                     {
                         ImGui::Separator();
+                        if (ImGui::Button("Appoint Commander")) { VitalsData->setCommander(userData.UserId); }
                         if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
                         if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
                         if (ImGui::Button("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
