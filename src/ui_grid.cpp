@@ -896,30 +896,54 @@ namespace UI::Grid {
 
                 if (ImGui::BeginPopupContextItem())
                 {
+                    const auto clientId = VitalsData->getClientId();
+                    const auto clientRole = VitalsData->getUserData(clientId).SquadRole;
+
                     ImGui::TextDisabled(userData.AccountName.c_str());
                     ImGui::Text(userData.GetDisplayName().c_str());
 
-                    ImGui::Separator();
-                    if (ImGui::Button("Add Friend")) { VitalsData->addFriend(userData.UserId); }
-                    if (ImGui::Button("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
-                    if (ImGui::Button("Block")) { VitalsData->blockUser(userData.UserId); }
-                    if (ImGui::Button("Unblock")) { VitalsData->unblockUser(userData.UserId); }
+                    if (clientId != userData.UserId)
+                    {
+                        ImGui::Separator();
+                        if (ImGui::Button("Add Friend")) { VitalsData->addFriend(userData.UserId); }
+                        if (ImGui::Button("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
+                        if (ImGui::Button("Block")) { VitalsData->blockUser(userData.UserId); }
+                        if (ImGui::Button("Unblock")) { VitalsData->unblockUser(userData.UserId); }
+                    }
 
                     if ((VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_10) ||
                         (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_50))
                     {
                         ImGui::Separator();
-                        if (ImGui::Button("Appoint Commander")) { VitalsData->setCommander(userData.UserId); }
-                        if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
-                        if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
-                        if (ImGui::Button("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
+                        if (clientId != userData.UserId)
+                        {
+                            if (clientRole == VitalSignsDataLink::ESquadRole::Commander)
+                            {
+                                if (ImGui::Button("Appoint Commander")) { VitalsData->setCommander(userData.UserId); }
+                                if (userData.SquadRole == VitalSignsDataLink::ESquadRole::None)
+                                {
+                                    if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
+                                }
+                                if (userData.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant)
+                                {
+                                    if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
+                                }
+                            }
+                            if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
+                            {
+                                if (ImGui::Button("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
+                            }
+                        }
                         if (ImGui::Button("Leave Squad")) { VitalsData->leaveGroup(); }
                     }
 
                     if (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_PARTY)
                     {
                         ImGui::Separator();
-                        if (ImGui::Button("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
+                        if (clientId != userData.UserId)
+                        {
+                            if (ImGui::Button("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
+                        }
                         if (ImGui::Button("Leave Party")) { VitalsData->leaveGroup(); }
                     }
 

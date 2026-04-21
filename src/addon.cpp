@@ -163,7 +163,7 @@ namespace Addon {
             if (UI::Grid::BeginGridMenu("VitalSigns##Grid", *activeLayout, ColourPresets, BorderPresets, true /** TODO: isInCombat() */))
             {
                 auto clientId = VitalsData->getClientId();
-                auto clientSubgroupId = VitalsData->getSubgroupId();
+                auto clientSubgroupId = VitalsData->getUserData(clientId).SubgroupId;
 
                 for (const auto &subgroup : VitalsData->getUsers())
                 {
@@ -196,7 +196,7 @@ namespace Addon {
             if (UI::Radial::BeginRadialMenu("VitalSigns##Radial", activeLayout->position, activeLayout->layout, activeLayout->colors, ColourPresets, isRadialMenuActive))
             {
                 auto clientId = VitalsData->getClientId();
-                auto clientSubgroupId = VitalsData->getSubgroupId();
+                auto clientSubgroupId = VitalsData->getUserData(clientId).SubgroupId;
 
                 for (const auto &subgroup : VitalsData->getUsers())
                 {
