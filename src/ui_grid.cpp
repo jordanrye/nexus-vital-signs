@@ -905,10 +905,22 @@ namespace UI::Grid {
                     if (clientId != userData.UserId)
                     {
                         ImGui::Separator();
-                        if (ImGui::Button("Add Friend")) { VitalsData->addFriend(userData.UserId); }
-                        if (ImGui::Button("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
-                        if (ImGui::Button("Block")) { VitalsData->blockUser(userData.UserId); }
-                        if (ImGui::Button("Unblock")) { VitalsData->unblockUser(userData.UserId); }
+                        if (userData.ContactType != VitalSignsDataLink::EContactType::Friend)
+                        {
+                            if (ImGui::Button("Add Friend")) { VitalsData->addFriend(userData.UserId); }
+                        }
+                        else
+                        {
+                            if (ImGui::Button("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
+                        }
+                        if (userData.ContactType != VitalSignsDataLink::EContactType::Blocked)
+                        {
+                            if (ImGui::Button("Block")) { VitalsData->blockUser(userData.UserId); }
+                        }
+                        else
+                        {
+                            if (ImGui::Button("Unblock")) { VitalsData->unblockUser(userData.UserId); }
+                        }
                     }
 
                     if ((VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_10) ||
