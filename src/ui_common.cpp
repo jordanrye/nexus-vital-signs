@@ -124,37 +124,42 @@ namespace UI {
 
     Texture* GetOrCreateTexture(const std::string& textureSource, const std::string& texturePath)
     {
-        Texture* texture = APIDefs->Textures.Get(texturePath.c_str());
-
-        // Create the Texture if it does not exist.
-        if (texture == nullptr && !texturePath.empty())
+        Texture* texture = nullptr;
+        
+        if (APIDefs)
         {
-            if (textureSource == "File")
+            APIDefs->Textures.Get(texturePath.c_str());
+
+            // Create the Texture if it does not exist.
+            if (texture == nullptr && !texturePath.empty())
             {
-                if (texturePath != "")
+                if (textureSource == "File")
                 {
-                    if (std::filesystem::path(texturePath).is_relative())
+                    if (texturePath != "")
                     {
-                        texture = APIDefs->Textures.GetOrCreateFromFile(texturePath.c_str(), (GameDir / texturePath).string().c_str());
-                    }
-                    else
-                    {
-                        texture = APIDefs->Textures.GetOrCreateFromFile(texturePath.c_str(), texturePath.c_str());
+                        if (std::filesystem::path(texturePath).is_relative())
+                        {
+                            texture = APIDefs->Textures.GetOrCreateFromFile(texturePath.c_str(), (GameDir / texturePath).string().c_str());
+                        }
+                        else
+                        {
+                            texture = APIDefs->Textures.GetOrCreateFromFile(texturePath.c_str(), texturePath.c_str());
+                        }
                     }
                 }
-            }
-            else if (textureSource == "URL")
-            {
-                if (texturePath != "")
+                else if (textureSource == "URL")
                 {
-                    std::string url = texturePath;
-                    std::string scheme = url_utils::getScheme(url);
-                    std::string domain = url_utils::getDomain(url);
-                    std::string path = url_utils::getPath(url);
-
-                    if ((scheme.length() != 0) && (domain.length() != 0) && (path.length() != 0))
+                    if (texturePath != "")
                     {
-                        texture = APIDefs->Textures.GetOrCreateFromURL(url.c_str(), std::string(scheme + domain).c_str(), path.c_str());
+                        std::string url = texturePath;
+                        std::string scheme = url_utils::getScheme(url);
+                        std::string domain = url_utils::getDomain(url);
+                        std::string path = url_utils::getPath(url);
+
+                        if ((scheme.length() != 0) && (domain.length() != 0) && (path.length() != 0))
+                        {
+                            texture = APIDefs->Textures.GetOrCreateFromURL(url.c_str(), std::string(scheme + domain).c_str(), path.c_str());
+                        }
                     }
                 }
             }
