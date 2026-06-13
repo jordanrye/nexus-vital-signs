@@ -37,7 +37,6 @@ namespace UI::Grid {
         ImVec2 position;
         int rows;
         int columns;
-        std::string direction;
     };
 
     struct CellDrawProperties_t 
@@ -63,9 +62,6 @@ namespace UI::Grid {
 
         if (context.isActive)
         {
-            /* Get mouse position */
-            const ImVec2 mousePos = ImGui::GetIO().MousePos;
-            
             /* Get cell region */
             ImVec2 r_min(properties.position);
             ImVec2 r_max(r_min.x + properties.width, r_min.y + properties.height);
@@ -275,49 +271,70 @@ namespace UI::Grid {
         }
     }
 
+    static void CalcGridDimensions(int itemCount, const GridProperties_t& gridLayout, int& outRows, int& outColumns)
+    {
+        int requiredSubgroups = ImMax(1, (itemCount + gridLayout.cellDirectionMax - 1) / gridLayout.cellDirectionMax);
+
+        // Reserve an extra subgroup block if the user is currently holding a valid drag-and-drop player payload
+        const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+        if (payload && payload->IsDataType("VS_USER_ID") && (requiredSubgroups < gridLayout.rowColMax + 1))
+        {
+            requiredSubgroups++;
+        }
+
+        outRows = 1;
+        outColumns = 1;
+
+        // Internal growth (cells)
+        if (gridLayout.cellDirection == "Left-to-right" || gridLayout.cellDirection == "Right-to-left") outColumns = gridLayout.cellDirectionMax;
+        else outRows = gridLayout.cellDirectionMax;
+
+        // External growth (subgroups)
+        if (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left") outColumns *= requiredSubgroups;
+        else outRows *= requiredSubgroups;
+    }
+
     DrawProperties_t CalcDrawProperties(float width, float height, const CellDrawProperties_t& cellDraw, ImDrawCornerFlags cellRoundingCorners, const GridDrawProperties_t& gridDraw, int index)
     {
-        int indexRow = 0;
+        // Layout configuration
+        const int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
+        const std::string& direction = context.layoutConfig.layout.grid.cellDirection;
+        const std::string& squadDirection = context.layoutConfig.layout.grid.squadDirection;
+
+        // Target indices
+        const int subgroup_index = index / cellDirectionMax;
+        const int member_index = index % cellDirectionMax;
+
+        // Determine relative dimensions for the layout block
+        int cellCols = (direction == "Left-to-right" || direction == "Right-to-left") ? cellDirectionMax : 1;
+        int cellRows = (direction == "Top-to-bottom" || direction == "Bottom-to-top") ? cellDirectionMax : 1;
+        
+        int squadCols = gridDraw.columns / cellCols;
+        int squadRows = gridDraw.rows / cellRows;
+
         int indexColumn = 0;
+        int indexRow = 0;
 
-        if (gridDraw.direction == "Top-to-bottom")
-        {
-            if (gridDraw.rows > 0)
-            {
-                indexRow = index % gridDraw.rows;
-                indexColumn = index / gridDraw.rows;
-            }
-        }
-        else if (gridDraw.direction == "Right-to-left")
-        {
-            if (gridDraw.columns > 0)
-            {
-                indexColumn = (gridDraw.columns - 1) - (index % gridDraw.columns);
-                indexRow = index / gridDraw.columns;
-            }
-        }
-        else if (gridDraw.direction == "Bottom-to-top")
-        {
-            if (gridDraw.rows > 0)
-            {
-                indexRow = (gridDraw.rows - 1) - (index % gridDraw.rows);
-                indexColumn = index / gridDraw.rows;
-            }
-        }
-        else
-        {
-            /* Default: Left-to-right */
-            if (gridDraw.columns > 0)
-            {
-                indexRow = index / gridDraw.columns;
-                indexColumn = index % gridDraw.columns;
-            }
-        }
+        // Apply squad offset (external growth)
+        // Shifts the entire subgroup relative to previous subgroups based on the squad direction
+        if (squadDirection == "Left-to-right") indexColumn += subgroup_index * cellCols;
+        else if (squadDirection == "Right-to-left") indexColumn += (squadCols - 1 - subgroup_index) * cellCols;
+        else if (squadDirection == "Top-to-bottom") indexRow += subgroup_index * cellRows;
+        else if (squadDirection == "Bottom-to-top") indexRow += (squadRows - 1 - subgroup_index) * cellRows;
 
+        // Apply cell offset (internal growth)
+        // Shifts the individual member relative to its subgroup origin based on the cell direction
+        if (direction == "Left-to-right") indexColumn += member_index;
+        else if (direction == "Right-to-left") indexColumn += (cellCols - 1 - member_index);
+        else if (direction == "Top-to-bottom") indexRow += member_index;
+        else if (direction == "Bottom-to-top") indexRow += (cellRows - 1 - member_index);
+
+        // Calculate the offset based on row/column index and padding/spacing setup
         float offsetRow = indexRow * (cellDraw.size.y + cellDraw.spacing + cellDraw.padding.x);
         float offsetColumn = indexColumn * (cellDraw.size.x + cellDraw.spacing + cellDraw.padding.w) + (indexColumn * cellDraw.padding.y) - (indexColumn * cellDraw.padding.w);
         ImVec2 cellOffset(offsetColumn, offsetRow);
 
+        // Finalise draw properties using the grid's anchor position
         DrawProperties_t properties{};
         properties.position.x = gridDraw.position.x + cellOffset.x + cellDraw.padding.w;
         properties.position.y = gridDraw.position.y + cellOffset.y + cellDraw.padding.x;
@@ -342,38 +359,45 @@ namespace UI::Grid {
             context.isActive = isActive;
             context.isClose = false;
 
+            // Cache layout settings locally to keep calculations readable
+            const auto& gridLayout = context.layoutConfig.layout.grid;
+            const auto& posConfig = context.layoutConfig.position;
+
+            // Calculate maximum rendered bounds (in columns/rows)
             int rows, columns;
-            int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
-            int requiredCells = context.layoutConfig.layout.grid.rowColMax + 1;
+            CalcGridDimensions(context.index, gridLayout, rows, columns);
 
-            if ((context.layoutConfig.layout.grid.cellDirection == "Left-to-right") || 
-                (context.layoutConfig.layout.grid.cellDirection == "Right-to-left"))
-            {
-                rows = requiredCells;
-                columns = cellDirectionMax;
-            }
-            else
-            {
-                rows = cellDirectionMax;
-                columns = requiredCells;
-            }
-
-            float menuWidth = (float)(columns * context.layoutConfig.layout.grid.cellWidth + (columns - 1) * context.layoutConfig.layout.itemSpacing);
-            float menuHeight = (float)(rows * context.layoutConfig.layout.grid.cellHeight + (rows - 1) * context.layoutConfig.layout.itemSpacing);
+            // Convert abstract rows/cols to absolute pixel dimensions
+            float menuWidth = (float)(columns * gridLayout.cellWidth + (columns - 1) * context.layoutConfig.layout.itemSpacing);
+            float menuHeight = (float)(rows * gridLayout.cellHeight + (rows - 1) * context.layoutConfig.layout.itemSpacing);
             
             DrawProperties_t displayProps{};
             displayProps.position = ImVec2(0.f, 0.f);
             displayProps.width = ImGui::GetIO().DisplaySize.x;
             displayProps.height = ImGui::GetIO().DisplaySize.y;
 
-            context.menuPosition = CalcItemPosition(displayProps, ImVec2(menuWidth, menuHeight), context.layoutConfig.position.anchor, context.layoutConfig.position.offset);
+            // Determine the ImGui window pivot mapping for correct directional scaling against the anchor
+            ImVec2 pivot(0.0f, 0.0f);
+            if (posConfig.anchor == "Top-centre")         pivot = ImVec2(0.5f, 0.0f);
+            else if (posConfig.anchor == "Top-right")     pivot = ImVec2(1.0f, 0.0f);
+            else if (posConfig.anchor == "Centre-left")   pivot = ImVec2(0.0f, 0.5f);
+            else if (posConfig.anchor == "Centre")        pivot = ImVec2(0.5f, 0.5f);
+            else if (posConfig.anchor == "Centre-right")  pivot = ImVec2(1.0f, 0.5f);
+            else if (posConfig.anchor == "Bottom-left")   pivot = ImVec2(0.0f, 1.0f);
+            else if (posConfig.anchor == "Bottom-centre") pivot = ImVec2(0.5f, 1.0f);
+            else if (posConfig.anchor == "Bottom-right")  pivot = ImVec2(1.0f, 1.0f);
 
-            ImGui::SetNextWindowPos(context.menuPosition);
+            // Resolve the screen coordinates from the selected anchor strings and user offsets
+            ImVec2 screenPos = CalcItemPosition(displayProps, ImVec2(0.0f, 0.0f), posConfig.anchor, posConfig.offset);
+
+            ImGui::SetNextWindowPos(screenPos, ImGuiCond_Always, pivot);
             ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight));
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
             if (ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing))
             {
+                context.menuPosition = ImGui::GetWindowPos();
+
                 ImGui::PushID(name); // Popped in `EndGridMenu`
 
                 if (!context.isActive)
@@ -771,22 +795,10 @@ namespace UI::Grid {
         GridDrawProperties_t gridDrawProperties;
         gridDrawProperties.position = context.menuPosition;
 
-        int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
-        int requiredCells = context.layoutConfig.layout.grid.rowColMax + 1;
+        const auto& gridLayout = context.layoutConfig.layout.grid;
+        const int cellDirectionMax = gridLayout.cellDirectionMax;
 
-        if ((context.layoutConfig.layout.grid.cellDirection == "Left-to-right") || 
-            (context.layoutConfig.layout.grid.cellDirection == "Right-to-left"))
-        {
-            gridDrawProperties.rows = requiredCells;
-            gridDrawProperties.columns = cellDirectionMax;
-        }
-        else
-        {
-            gridDrawProperties.rows = cellDirectionMax;
-            gridDrawProperties.columns = requiredCells;
-        }
-
-        gridDrawProperties.direction = context.layoutConfig.layout.grid.cellDirection;
+        CalcGridDimensions(context.index, gridLayout, gridDrawProperties.rows, gridDrawProperties.columns);
 
         /* Frame properties */
         CellDrawProperties_t frameDrawProperties;

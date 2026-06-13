@@ -37,6 +37,7 @@ void dser_GridProperties_t(json& object, GridProperties_t& properties)
     if (!object.is_null())
     {
         dser_BasicType(object["cell-direction"], properties.cellDirection);
+        dser_BasicType(object["squad-direction"], properties.squadDirection);
         dser_BasicType(object["cell-direction-max"], properties.cellDirectionMax);
         dser_BasicType(object["row-col-max"], properties.rowColMax);
         dser_BasicType(object["cell-width"], properties.cellWidth);
@@ -340,6 +341,7 @@ json ser_GridProperties_t(const GridProperties_t& properties)
 {
     json object = json::object();
     object["cell-direction"] = properties.cellDirection;
+    object["squad-direction"] = properties.squadDirection;
     object["cell-direction-max"] = properties.cellDirectionMax;
     object["row-col-max"] = properties.rowColMax;
     object["cell-width"] = properties.cellWidth;

@@ -536,11 +536,11 @@ namespace Addon {
             }
         }
 
-        ImGui::TextDisabled("Layout");
-        ImGui::Separator();
+        /* Radial*/
+        if (0U == layoutSelection)
         {
-            /* Radial*/
-            if (0U == layoutSelection)
+            ImGui::TextDisabled("Layout");
+            ImGui::Separator();
             {
                 ImGui::InputFloat("Radius (Inner)##RADIUS_MIN", &layout.radial.sectorRadiusInner, 5.f, 10.f, "%.2f");
                 ImGui::InputFloat("Radius (Outer)##RADIUS_MAX", &layout.radial.sectorRadiusOuter, 5.f, 10.f, "%.2f");
@@ -571,23 +571,46 @@ namespace Addon {
                     }
                 }
             }
-            
-            /* Grid */
-            if (1U == layoutSelection)
+        }
+
+        /* Grid */
+        if (1U == layoutSelection)
+        {
+            ImGui::TextDisabled("Grid Properties");
+            ImGui::Separator();
             {
-                form_Direction(layout.grid.cellDirection);
+                form_Direction(layout.grid.cellDirection, "Frame Direction");
+                ImGui::SameLine();
+                ImGui::TextDisabled("(?)");
+                ImGui::TooltipGeneric(
+                    "Determines whether players in the same\n" \
+                    "subgroup fill down in a column or across\n" \
+                    "in a row.");
 
                 std::string label = ((layout.grid.cellDirection == "Top-to-bottom" || layout.grid.cellDirection == "Bottom-to-top") ? "Column" : "Row");
-                if (ImGui::SliderInt(std::string("Max Cells Per " + label + "##CELL_DIRECTION_MAX").c_str(), &layout.grid.cellDirectionMax, 1, UI::SQUAD_MEMBER_LIMIT))
+                if (ImGui::SliderInt(std::string("Max Frames Per " + label + "##CELL_DIRECTION_MAX").c_str(), &layout.grid.cellDirectionMax, 1, UI::SQUAD_MEMBER_LIMIT))
                 {
                     if (layout.grid.cellDirectionMax < 1)
                     {
                         layout.grid.cellDirectionMax = 1;
                     }
                 }
+                ImGui::SameLine();
+                ImGui::TextDisabled("(?)");
+                ImGui::TooltipGeneric(std::string(
+                    "Determines how many players can fit in a\n" \
+                    "subgroup's " + label + " before a new " + label + " is\n" \
+                    "started for that subgroup.").c_str());
 
-                std::string maxLabel = ((layout.grid.cellDirection == "Top-to-bottom" || layout.grid.cellDirection == "Bottom-to-top") ? "Max Columns" : "Max Rows");
-                if (ImGui::SliderInt(std::string(maxLabel + "##ROW_COL_MAX").c_str(), &layout.grid.rowColMax, 1, 15))
+                form_Direction(layout.grid.squadDirection, std::string(label + " Direction"));
+                ImGui::SameLine();
+                ImGui::TextDisabled("(?)");
+                ImGui::TooltipGeneric(
+                    "Determines where Subgroup 2 spawns\n" \
+                    "relative to Subgroup 1.");
+
+                std::string maxLabel = ((layout.grid.squadDirection == "Top-to-bottom" || layout.grid.squadDirection == "Bottom-to-top") ? "Rows" : "Columns");
+                if (ImGui::SliderInt(std::string("Max " + maxLabel + "##ROW_COL_MAX").c_str(), &layout.grid.rowColMax, 1, 15))
                 {
                     if (layout.grid.rowColMax < 1)
                     {
@@ -598,36 +621,45 @@ namespace Addon {
                         layout.grid.rowColMax = UI::SQUAD_MEMBER_LIMIT;
                     }
                 }
-                
-                if (ImGui::InputInt("Cell Width##CELL_WIDTH", &layout.grid.cellWidth, 1))
+                ImGui::SameLine();
+                ImGui::TextDisabled("(?)");
+                ImGui::TooltipGeneric(std::string(
+                    "Determines the maximum number of " + maxLabel + "\n" \
+                    "(not subgroups) that can be displayed.").c_str());
+            }
+
+            ImGui::TextDisabled("Frame Properties");
+            ImGui::Separator();
+            {
+                if (ImGui::InputInt("Width##CELL_WIDTH", &layout.grid.cellWidth))
                 {
                     if (layout.grid.cellWidth < 0)
                     {
                         layout.grid.cellWidth = 0;
                     }
                 }
-                if (ImGui::InputInt("Cell Height##CELL_HEIGHT", &layout.grid.cellHeight, 1))
+                if (ImGui::InputInt("Height##CELL_HEIGHT", &layout.grid.cellHeight))
                 {
                     if (layout.grid.cellHeight < 0)
                     {
                         layout.grid.cellHeight = 0;
                     }
                 }
-                if (ImGui::InputInt("Cell Rounding##CELL_ROUNDING", &layout.grid.cellRounding, 1))
+                if (ImGui::InputInt("Rounding##CELL_ROUNDING", &layout.grid.cellRounding))
                 {
                     if (layout.grid.cellRounding < 0)
                     {
                         layout.grid.cellRounding = 0;
                     }
                 }
-                if (ImGui::InputInt("Cell Border##CELL_BORDER", &layout.itemBorder, 1))
+                if (ImGui::InputInt("Border##CELL_BORDER", &layout.itemBorder))
                 {
                     if (layout.itemBorder < 0)
                     {
                         layout.itemBorder = 0;
                     }
                 }
-                if (ImGui::InputInt("Cell Spacing##CELL_SPACING", &layout.itemSpacing, 1))
+                if (ImGui::InputInt("Spacing##CELL_SPACING", &layout.itemSpacing))
                 {
                     if (layout.itemSpacing < -layout.itemBorder)
                     {

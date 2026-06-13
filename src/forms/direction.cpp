@@ -1,6 +1,6 @@
 #include "forms.h"
 
-void form_Direction(std::string& direction)
+void form_Direction(std::string& direction, const std::string label)
 {
     static const char* directionOptions[] {
         "Left-to-right",
@@ -15,6 +15,8 @@ void form_Direction(std::string& direction)
     else if (direction == "Right-to-left") option = 2;
     else if (direction == "Bottom-to-top") option = 3;
 
-    ImGui::Combo("Direction##Direction", &option, directionOptions, IM_ARRAYSIZE(directionOptions));
+    ImGui::PushID(label.c_str());
+    ImGui::Combo(label.c_str(), &option, directionOptions, IM_ARRAYSIZE(directionOptions));
     direction = directionOptions[option];
+    ImGui::PopID();
 }

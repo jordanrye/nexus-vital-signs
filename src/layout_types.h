@@ -44,6 +44,7 @@ struct TextStyle_t
 struct GridProperties_t
 {
     std::string cellDirection = "Left-to-right";
+    std::string squadDirection = "Top-to-bottom";
     int cellDirectionMax = 5;
     int rowColMax = 50;
     int cellWidth = 200;
