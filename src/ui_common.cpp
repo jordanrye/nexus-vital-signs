@@ -128,7 +128,7 @@ namespace UI {
         
         if (APIDefs)
         {
-            APIDefs->Textures.Get(texturePath.c_str());
+            texture = APIDefs->Textures.Get(texturePath.c_str());
 
             // Create the Texture if it does not exist.
             if (texture == nullptr && !texturePath.empty())

@@ -163,7 +163,6 @@ namespace UI::Grid {
         if (font)
         {
             ImGui::PushFont(font);
-            drawList->PushTextureID(font->ContainerAtlas->TexID);
         }
 
         ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
@@ -194,8 +193,10 @@ namespace UI::Grid {
         }
         drawList->AddText(font, fontSize, textPos, color, text.c_str());
 
-        if (font) drawList->PopTextureID();
-        if (font) ImGui::PopFont();
+        if (font)
+        {
+            ImGui::PopFont();
+        }
     }
 
     void DrawIcon(ImDrawList * const drawList, DrawProperties_t properties, Texture* icon, const Size_t& size, std::string anchor, Coordinate_t offset, bool showDuration, float duration, const IconText_t& durationConfig, bool showStacks, unsigned int stacks, const IconText_t& stacksConfig)
@@ -749,12 +750,6 @@ namespace UI::Grid {
                 }
             }
 
-            bool pushTexture = (font != nullptr);
-            if (pushTexture)
-            {
-                drawList->PushTextureID(font->ContainerAtlas->TexID);
-            }
-
             if (font) ImGui::PushFont(font);
             ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
             if (font) ImGui::PopFont();
@@ -781,11 +776,6 @@ namespace UI::Grid {
             }
                     
             drawList->AddText(font, fontSize, pos, color, text.c_str());
-
-            if (pushTexture)
-            {
-                drawList->PopTextureID();
-            }
         }
     }
 
