@@ -546,7 +546,7 @@ namespace Addon {
                 ImGui::InputFloat("Radius (Outer)##RADIUS_MAX", &layout.radial.sectorRadiusOuter, 5.f, 10.f, "%.2f");
                 ImGui::SliderInt("Items (Min)##ITEMS_MIN", &layout.radial.sectorCountMin, 2, 10);
                 ImGui::SliderInt("Items (Max)##ITEMS_MAX", &layout.radial.sectorCountMax, 4, UI::SQUAD_MEMBER_LIMIT);
-                if (ImGui::InputInt("Item Spacing##ITEM_INNER_SPACING", &layout.itemSpacing, 1, 2))
+                if (ImGui::InputInt("Item Spacing##ITEM_INNER_SPACING", &layout.itemSpacing, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     const float MAX_SPACING = (layout.radial.sectorRadiusOuter - layout.radial.sectorRadiusInner) / 2;
                     if (layout.itemSpacing > MAX_SPACING)
@@ -558,7 +558,7 @@ namespace Addon {
                         layout.itemSpacing = 0;
                     }
                 }
-                if (ImGui::InputInt("Item Border##ITEM_BORDER", &layout.itemBorder, 1, 2))
+                if (ImGui::InputInt("Item Border##ITEM_BORDER", &layout.itemBorder, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     const float MAX_BORDER = (layout.radial.sectorRadiusOuter - layout.radial.sectorRadiusInner) / 2;
                     if (layout.itemBorder > MAX_BORDER)
@@ -631,35 +631,35 @@ namespace Addon {
             ImGui::TextDisabled("Frame Properties");
             ImGui::Separator();
             {
-                if (ImGui::InputInt("Width##CELL_WIDTH", &layout.grid.cellWidth))
+                if (ImGui::InputInt("Width##CELL_WIDTH", &layout.grid.cellWidth, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.grid.cellWidth < 0)
                     {
                         layout.grid.cellWidth = 0;
                     }
                 }
-                if (ImGui::InputInt("Height##CELL_HEIGHT", &layout.grid.cellHeight))
+                if (ImGui::InputInt("Height##CELL_HEIGHT", &layout.grid.cellHeight, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.grid.cellHeight < 0)
                     {
                         layout.grid.cellHeight = 0;
                     }
                 }
-                if (ImGui::InputInt("Rounding##CELL_ROUNDING", &layout.grid.cellRounding))
+                if (ImGui::InputInt("Rounding##CELL_ROUNDING", &layout.grid.cellRounding, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.grid.cellRounding < 0)
                     {
                         layout.grid.cellRounding = 0;
                     }
                 }
-                if (ImGui::InputInt("Border##CELL_BORDER", &layout.itemBorder))
+                if (ImGui::InputInt("Border##CELL_BORDER", &layout.itemBorder, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.itemBorder < 0)
                     {
                         layout.itemBorder = 0;
                     }
                 }
-                if (ImGui::InputInt("Spacing##CELL_SPACING", &layout.itemSpacing))
+                if (ImGui::InputInt("Spacing##CELL_SPACING", &layout.itemSpacing, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.itemSpacing < -layout.itemBorder)
                     {
@@ -959,7 +959,7 @@ namespace Addon {
             ImGui::Separator();
             {
                 ImGui::ColorEdit4("Color##BORDER_COLOR", (float*)&indicator.border.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::InputInt("Thickness##BORDER_THICKNESS", &indicator.border.thickness);
+                ImGui::InputInt("Thickness##BORDER_THICKNESS", &indicator.border.thickness, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue);
             }
             
             ImGui::TextDisabled("Trigger");

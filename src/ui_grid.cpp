@@ -148,7 +148,7 @@ namespace UI::Grid {
         drawList->AddRect(p_min, p_max, colour, properties.rounding, properties.roundingCorners, thickness);
     }
 
-    void DrawIconText(ImDrawList* const drawList, const ImVec2& iconPosition, const ImVec2& iconSize, const std::string& text, const IconText_t& config, const IconText_t& globalConfig)
+    void DrawIconText(ImDrawList* const drawList, const ImVec2& iconPosition, const ImVec2& iconSize, const char* text, const IconText_t& config, const IconText_t& globalConfig)
     {
         std::string fontFilePath = ""; // Nexus font
         if (config.textStyle.fontSource == "Default font") fontFilePath = globalConfig.textStyle.font;
@@ -165,7 +165,7 @@ namespace UI::Grid {
             ImGui::PushFont(font);
         }
 
-        ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
+        ImVec2 textSize = ImGui::CalcTextSize(text);
 
         DrawProperties_t iconProps;
         iconProps.position = iconPosition;
@@ -184,14 +184,14 @@ namespace UI::Grid {
         bool useOutline = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outline : globalConfig.textStyle.outline;
         ImColor outlineColor = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outlineColor : globalConfig.textStyle.outlineColor;
 
-        if (useShadow) drawList->AddText(font, fontSize, textPos + ImVec2(1, 1), shadowColor, text.c_str());
+        if (useShadow) drawList->AddText(font, fontSize, textPos + ImVec2(1, 1), shadowColor, text);
         if (useOutline) {
-            drawList->AddText(font, fontSize, textPos + ImVec2(-1, 0), outlineColor, text.c_str());
-            drawList->AddText(font, fontSize, textPos + ImVec2(1, 0), outlineColor, text.c_str());
-            drawList->AddText(font, fontSize, textPos + ImVec2(0, -1), outlineColor, text.c_str());
-            drawList->AddText(font, fontSize, textPos + ImVec2(0, 1), outlineColor, text.c_str());
+            drawList->AddText(font, fontSize, textPos + ImVec2(-1, 0), outlineColor, text);
+            drawList->AddText(font, fontSize, textPos + ImVec2(1, 0), outlineColor, text);
+            drawList->AddText(font, fontSize, textPos + ImVec2(0, -1), outlineColor, text);
+            drawList->AddText(font, fontSize, textPos + ImVec2(0, 1), outlineColor, text);
         }
-        drawList->AddText(font, fontSize, textPos, color, text.c_str());
+        drawList->AddText(font, fontSize, textPos, color, text);
 
         if (font)
         {
@@ -832,6 +832,7 @@ namespace UI::Grid {
 
         /* Draw drop targets and highlights */
         int groupIndex = 0;
+        ImGui::PushID("DragAndDrop");
         while (groupIndex <= lastPopulatedGroupIndex)
         {
             VitalSignsDataLink::SubgroupId_t droppedSubgroupId = getSubgroupId(groupIndex);
@@ -855,7 +856,7 @@ namespace UI::Grid {
             p_max.y += (context.layoutConfig.layout.itemSpacing / 2.f);
 
             ImGui::SetCursorScreenPos(p_min);
-            ImGui::PushID(std::string("DragAndDrop" + std::to_string(groupIndex)).c_str());
+            ImGui::PushID(groupIndex);
             ImGui::InvisibleButton("SubgroupTarget", ImVec2(p_max.x - p_min.x, p_max.y - p_min.y));
             ImGui::SetItemAllowOverlap();
 
@@ -875,7 +876,10 @@ namespace UI::Grid {
             }
             ImGui::PopID();
         }
-        
+        ImGui::PopID();
+
+        std::vector<std::pair<const Indicator_t*, bool>> drawables;
+
         /* Draw items */
         for (int i = 0; i < context.index; i++)
         {
@@ -888,7 +892,7 @@ namespace UI::Grid {
 
             ImGui::PushID(i);
             {
-                std::vector<std::pair<const Indicator_t*, bool>> drawables;
+                drawables.clear();
 
                 DrawProperties_t parentProperties = CalcDrawProperties(frameDrawProperties.size.x, frameDrawProperties.size.y, frameDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, i);
     
