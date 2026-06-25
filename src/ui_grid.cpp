@@ -937,7 +937,10 @@ namespace UI::Grid {
                         {
                             if (clientRole == VitalSignsDataLink::ESquadRole::Commander)
                             {
-                                if (ImGui::Button("Appoint Commander")) { VitalsData->setCommander(userData.UserId); }
+                                if (userData.IsCommander)
+                                {
+                                    if (ImGui::Button("Appoint Squad Leader")) { VitalsData->setCommander(userData.UserId); }
+                                }
                                 if (userData.SquadRole == VitalSignsDataLink::ESquadRole::None)
                                 {
                                     if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
