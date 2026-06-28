@@ -904,9 +904,16 @@ namespace UI::Grid {
                 {
                     const auto clientId = VitalsData->getClientId();
                     const auto clientRole = VitalsData->getUserData(clientId).SquadRole;
+                    const auto clientMap = VitalsData->getUserData(clientId).MapName;
 
                     ImGui::TextDisabled(userData.AccountName.c_str());
                     ImGui::Text(userData.GetDisplayName().c_str());
+
+                    if (clientMap == userData.MapName && !userData.IsInInstance)
+                    {
+                        ImGui::Separator();
+                        if (ImGui::Button("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
+                    }
 
                     if (clientId != userData.UserId)
                     {
