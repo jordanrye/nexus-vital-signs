@@ -909,14 +909,20 @@ namespace UI::Grid {
                     ImGui::TextDisabled(userData.AccountName.c_str());
                     ImGui::Text(userData.GetDisplayName().c_str());
 
-                    if (clientMap == userData.MapName && !userData.IsInInstance)
-                    {
-                        ImGui::Separator();
-                        if (ImGui::Button("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
-                    }
-
                     if (clientId != userData.UserId)
                     {
+                        ImGui::Separator();
+                        // if (ImGui::Button("Whisper")) { /* ... */ }
+                        if (ImGui::Button("Send Mail")) { VitalsData->sendMail(userData.AccountName); }
+                        if (userData.IsInInstance)
+                        {
+                            if (ImGui::Button("Inspect Cosmetics")) { VitalsData->inspectCosmetics(userData.UserId); }
+                        }
+                        if (clientMap == userData.MapName && !userData.IsInInstance)
+                        {
+                            if (ImGui::Button("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
+                        }
+
                         ImGui::Separator();
                         if (userData.ContactType != VitalSignsDataLink::EContactType::Friend)
                         {
@@ -973,6 +979,12 @@ namespace UI::Grid {
                             if (ImGui::Button("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
                         }
                         if (ImGui::Button("Leave Party")) { VitalsData->leaveGroup(); }
+                    }
+
+                    if (clientId != userData.UserId)
+                    {
+                        ImGui::Separator();
+                        if (ImGui::Button("Report")) { VitalsData->reportUser(userData.UserId); }
                     }
 
                     ImGui::EndPopup();

@@ -96,6 +96,7 @@
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorOrder.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorSignal.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\ChCliOrder.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Dialog\DialogManager.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Frame\Frame.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Frame\FrameApi.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Map\EMapFlags.h" />
@@ -165,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\addon.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Dialog\DialogManager.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Frame\Frame.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Frame\FrameApi.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Portal\PlChannel.cpp" />
