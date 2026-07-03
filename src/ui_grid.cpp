@@ -912,7 +912,7 @@ namespace UI::Grid {
                     if (clientId != userData.UserId)
                     {
                         ImGui::Separator();
-                        // if (ImGui::Button("Whisper")) { /* ... */ }
+                        if (ImGui::Button("Whisper")) { VitalsData->whisperUser(userData.UserId); }
                         if (ImGui::Button("Send Mail")) { VitalsData->sendMail(userData.AccountName); }
                         if (userData.IsInInstance)
                         {
