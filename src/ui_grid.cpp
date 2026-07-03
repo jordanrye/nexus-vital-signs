@@ -698,6 +698,14 @@ namespace UI::Grid {
             {
                 text = userData.GetDisplayName();
             } 
+            else if (indicator->text.textContent == "Account name")
+            {
+                text = userData.GetAccountName();
+            }
+            else if (indicator->text.textContent == "Nickname")
+            {
+                text = userData.GetNickname();
+            }
             else if (indicator->text.textContent == "Health percentage")
             {
                 text = std::to_string(max(static_cast<int>(userData.GetHealthRatio() * 100.0f), 0)) + "%";
@@ -907,6 +915,7 @@ namespace UI::Grid {
                     const auto clientMap = VitalsData->getUserData(clientId).MapName;
 
                     ImGui::TextDisabled(userData.AccountName.c_str());
+                    ImGui::TextDisabled(userData.Nickname.c_str());
                     ImGui::Text(userData.GetDisplayName().c_str());
 
                     if (clientId != userData.UserId)
