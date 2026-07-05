@@ -4,6 +4,8 @@
 #include "shared.h"
 #include "ui_common.h"
 #include "utilities.h"
+#include <algorithm>
+#include <vector>
 
 inline ImVec4 _ImVec4(float p)
 {
@@ -811,6 +813,60 @@ namespace UI::Grid {
 
     void EndGridMenu()
     {
+        const auto clientId = VitalsData->getClientId();
+        
+        /// TODO: Encapsulate this function and add additional sort orders (e.g., role).
+        /* Sort players in each subgroup by squad rank */
+        int currentIdx = 0;
+        while (currentIdx < context.index)
+        {
+            if (!context.isValid[currentIdx])
+            {
+                currentIdx++;
+                continue;
+            }
+
+            auto currentSubgroupId = context.userData[currentIdx].SubgroupId;
+            
+            std::vector<VitalSignsDataLink::UserData_t> validUsers;
+            std::vector<int> subgroupIndices;
+            
+            int scanIdx = currentIdx;
+            while (scanIdx < context.index)
+            {
+                if (context.isValid[scanIdx])
+                {
+                    if (context.userData[scanIdx].SubgroupId == currentSubgroupId)
+                    {
+                        validUsers.push_back(context.userData[scanIdx]);
+                        subgroupIndices.push_back(scanIdx);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                scanIdx++;
+            }
+
+            std::stable_sort(validUsers.begin(), validUsers.end(), [clientId](const VitalSignsDataLink::UserData_t& a, const VitalSignsDataLink::UserData_t& b) {
+                auto getPriority = [clientId](const VitalSignsDataLink::UserData_t& user) -> int {
+                    if (user.SquadRole == VitalSignsDataLink::ESquadRole::Commander) return 0;
+                    if (user.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant) return 1;
+                    if (user.UserId == clientId) return 2;
+                    return 3;
+                };
+                return getPriority(a) < getPriority(b);
+            });
+
+            for (size_t i = 0; i < subgroupIndices.size(); i++)
+            {
+                context.userData[subgroupIndices[i]] = validUsers[i];
+            }
+
+            currentIdx = scanIdx;
+        }
+
         /* Grid properties */
         GridDrawProperties_t gridDrawProperties;
         gridDrawProperties.position = context.menuPosition;
@@ -932,7 +988,7 @@ namespace UI::Grid {
 
                 if (ImGui::BeginPopupContextItem())
                 {
-                    const auto clientId = VitalsData->getClientId();
+                    // const auto clientId = VitalsData->getClientId();
                     const auto clientRole = VitalsData->getUserData(clientId).SquadRole;
                     const auto clientMap = VitalsData->getUserData(clientId).MapName;
 
@@ -980,7 +1036,7 @@ namespace UI::Grid {
                         {
                             if (clientRole == VitalSignsDataLink::ESquadRole::Commander)
                             {
-                                if (userData.IsCommander)
+                                if (userData.IsCommanderUnlocked)
                                 {
                                     if (ImGui::Button("Appoint Squad Leader")) { VitalsData->setCommander(userData.UserId); }
                                 }
