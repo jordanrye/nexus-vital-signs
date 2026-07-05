@@ -47,6 +47,7 @@ struct TreeNode
     TreeNodeUID id;
     std::string labelName;
     std::string labelType;
+    bool enabled = true;
     std::vector<TreeNode> children;
     TreeNodeType type = TreeNodeType::LEAF;
 
@@ -79,6 +80,7 @@ public:
     void SetActiveNode(TreeNodeUID id) { m_selectedId = id; }
     TreeNodeUID GetActiveNode() const { return m_selectedId; }
     void UpdateNodeLabel(TreeNodeUID id, const std::string& new_label);
+    void UpdateNodeEnabled(TreeNodeUID id, bool enabled);
     void UpdateTreeViewHeader(const std::string& title) { m_title = title; }
 
     // Helper functions
@@ -96,5 +98,5 @@ private:
     // Internal helpers
     TreeNode* FindNode(std::vector<TreeNode>& nodes, TreeNodeUID id);
     void RenderNodes(std::vector<TreeNode>& nodes, TreeNodeUID parent_id, DeleteNodeCallback deleteCb, AddIndicatorCallback addCb, ReorderNodeCallback reorderCb);
-    bool RenderNode(const char* labelName, const char* labelType, TreeNodeUID id, ImGuiTreeNodeFlags flags, bool& is_clicked);
+    bool RenderNode(const char* labelName, const char* labelType, TreeNodeUID id, ImGuiTreeNodeFlags flags, bool& is_clicked, bool enabled);
 };

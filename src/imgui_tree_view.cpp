@@ -69,6 +69,15 @@ void TreeView::UpdateNodeLabel(TreeNodeUID id, const std::string& new_label)
     }
 }
 
+void TreeView::UpdateNodeEnabled(TreeNodeUID id, bool enabled)
+{
+    TreeNode* node = FindNode(Nodes, id);
+    if (node)
+    {
+        node->enabled = enabled;
+    }
+}
+
 void TreeView::RegisterContentView(TreeNodeUID id, ContentRenderer&& renderer)
 {
     Forms.insert_or_assign(id, std::move(renderer));
@@ -145,7 +154,7 @@ void TreeView::RenderNodes(std::vector<TreeNode>& nodes, TreeNodeUID parent_id, 
                 flags |= (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
             }
     
-            is_open = RenderNode(node.labelName.c_str(), node.labelType.c_str(), node.id, flags, is_tree_node_clicked);
+            is_open = RenderNode(node.labelName.c_str(), node.labelType.c_str(), node.id, flags, is_tree_node_clicked, node.enabled);
     
             /* Action buttons */
             {
@@ -309,7 +318,7 @@ void TreeView::RenderNodes(std::vector<TreeNode>& nodes, TreeNodeUID parent_id, 
     }
 }
 
-bool TreeView::RenderNode(const char* labelName, const char* labelType, TreeNodeUID id, ImGuiTreeNodeFlags flags, bool& is_clicked)
+bool TreeView::RenderNode(const char* labelName, const char* labelType, TreeNodeUID id, ImGuiTreeNodeFlags flags, bool& is_clicked, bool enabled)
 {
     bool is_open = false;
     bool is_selected = (m_selectedId == id);
@@ -333,11 +342,20 @@ bool TreeView::RenderNode(const char* labelName, const char* labelType, TreeNode
     auto& item_spacing = ImGui::GetStyle().ItemSpacing.x;
     if (labelType && *labelType)
     {
-        ImGui::SameLine(0, item_spacing); ImGui::TextDisabled(labelType);
+        ImGui::SameLine(0, item_spacing); 
+        ImGui::TextDisabled(labelType);
     }
     if (labelName && *labelName)
     {
-        ImGui::SameLine(0, item_spacing); ImGui::Text(labelName);
+        ImGui::SameLine(0, item_spacing);
+        if (enabled)
+        {
+            ImGui::Text(labelName);
+        }
+        else
+        {
+            ImGui::TextDisabled(labelName);
+        }
     }
 
 

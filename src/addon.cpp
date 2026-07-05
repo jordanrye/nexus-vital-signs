@@ -679,7 +679,10 @@ namespace Addon {
             memset(inputBuff_Name, 0, MAX_PATH);
             strcpy_s(inputBuff_Name, MAX_PATH, indicator.name.c_str());
 
-            ImGui::Checkbox("Enabled", &indicator.enabled);
+            if (ImGui::Checkbox("Enabled", &indicator.enabled))
+            {
+                g_LayoutEditor.UpdateNodeEnabled(g_LayoutEditor.GetActiveNode(), indicator.enabled);
+            }
             if (ImGui::InputText("Name", inputBuff_Name, IM_ARRAYSIZE(inputBuff_Name)))
             {
                 indicator.name = inputBuff_Name;
@@ -1076,7 +1079,8 @@ namespace Addon {
                 indicator.name, 
                 indicator.type,
                 std::move(children),
-                (indicator.type == "Group") ? TreeNodeType::BRANCH : TreeNodeType::LEAF
+                ((indicator.type == "Group") ? TreeNodeType::BRANCH : TreeNodeType::LEAF),
+                indicator.enabled
             });
         }
     }
