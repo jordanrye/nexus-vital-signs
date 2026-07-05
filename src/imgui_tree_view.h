@@ -47,9 +47,9 @@ struct TreeNode
     TreeNodeUID id;
     std::string labelName;
     std::string labelType;
-    bool enabled = true;
     std::vector<TreeNode> children;
     TreeNodeType type = TreeNodeType::LEAF;
+    bool enabled = true;
 
     /* Helpers to determine the type of node. */
     bool is_root() const { return (type == TreeNodeType::ROOT); }

@@ -475,7 +475,7 @@ namespace Addon {
     void ContentViewGeneral(std::string& name, std::string& colors, Position_t& position, Layout_t& layout)
     {
         static const char* colorsOptions[] {
-            "Generic Color Palette",
+            "Default Color Palette",
             "Profession Color Palette"
         };
         static const char* layoutOptions[] {
@@ -524,14 +524,14 @@ namespace Addon {
         ImGui::Separator();
         {
             static int colorsSelection = 0; // Default to "Centre"
-            if (colors == "Generic") colorsSelection = 0;
+            if (colors == "Default") colorsSelection = 0;
             else if (colors == "Role") colorsSelection = 1;
             else if (colors == "Profession") colorsSelection = 1;
             else if (colors == "Party") colorsSelection = 3;
 
             if (ImGui::Combo("Color Palette", &colorsSelection, colorsOptions, IM_ARRAYSIZE(colorsOptions)))
             {
-                if (colorsSelection == 0) colors = "Generic";
+                if (colorsSelection == 0) colors = "Default";
                 else if (colorsSelection == 1) colors = "Profession";
             }
         }
@@ -1127,8 +1127,8 @@ namespace Addon {
         TreeNodeUID coloursBranchId = g_PresetConfig.GenerateUID();
         g_PresetConfig.AppendNode(TreeNodeUID::NONE, coloursBranchId, "Colors", "", TreeNodeType::BRANCH);
 
-        AddPresetItem(coloursBranchId, "Colors", "Simple", []() {
-            ImGui::PushID("Colors/Simple");
+        AddPresetItem(coloursBranchId, "Colors", "Default", []() {
+            ImGui::PushID("Colors/Default");
             {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
@@ -1150,15 +1150,19 @@ namespace Addon {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
                 ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_PROF_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Elementalist", &(ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Engineer", &(ColourPresets.COLOUR_PROF_HEALTH_ENGINEER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Guardian", &(ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Mesmer", &(ColourPresets.COLOUR_PROF_HEALTH_MESMER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Necromancer", &(ColourPresets.COLOUR_PROF_HEALTH_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Ranger", &(ColourPresets.COLOUR_PROF_HEALTH_RANGER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Revenant", &(ColourPresets.COLOUR_PROF_HEALTH_REVENANT.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Thief", &(ColourPresets.COLOUR_PROF_HEALTH_THIEF.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Warrior", &(ColourPresets.COLOUR_PROF_HEALTH_WARRIOR.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Elementalist)", &(ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Engineer)", &(ColourPresets.COLOUR_PROF_HEALTH_ENGINEER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Guardian)", &(ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Mesmer)", &(ColourPresets.COLOUR_PROF_HEALTH_MESMER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Necromancer)", &(ColourPresets.COLOUR_PROF_HEALTH_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Ranger)", &(ColourPresets.COLOUR_PROF_HEALTH_RANGER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Revenant)", &(ColourPresets.COLOUR_PROF_HEALTH_REVENANT.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Thief)", &(ColourPresets.COLOUR_PROF_HEALTH_THIEF.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Warrior)", &(ColourPresets.COLOUR_PROF_HEALTH_WARRIOR.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Downed)", &(ColourPresets.COLOUR_PROF_HEALTH_DOWNED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Defeated)", &(ColourPresets.COLOUR_PROF_HEALTH_DEFEATED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Necromancer)", &(ColourPresets.COLOUR_PROF_SHROUD_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Specter)", &(ColourPresets.COLOUR_PROF_SHROUD_SPECTER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_PROF_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_PROF_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
             }

@@ -33,7 +33,7 @@ struct GeneralConfig_t
 
 struct ColourPresets_t
 {
-    /* Simple Colours */
+    /* Default Colours */
     ImColor COLOUR_BACKGROUND = ImColor(0, 0, 0);
     ImColor COLOUR_HEALTH = ImColor(74, 133, 62);
     ImColor COLOUR_HEALTH_DOWNED = ImColor(157, 31, 31);
@@ -66,6 +66,10 @@ struct ColourPresets_t
     ImColor COLOUR_PROF_HEALTH_REVENANT = ImColor(166, 87, 71);
     ImColor COLOUR_PROF_HEALTH_THIEF = ImColor(154, 114, 119);
     ImColor COLOUR_PROF_HEALTH_WARRIOR = ImColor(204, 167, 82);
+    ImColor COLOUR_PROF_HEALTH_DOWNED = ImColor(157, 31, 31);
+    ImColor COLOUR_PROF_HEALTH_DEFEATED = ImColor(78, 15, 15);
+    ImColor COLOUR_PROF_SHROUD_NECROMANCER = ImColor(38, 70, 45);
+    ImColor COLOUR_PROF_SHROUD_SPECTER = ImColor(108, 21, 95);
     ImColor COLOUR_PROF_BARRIER = ImColor(255, 255, 255, 128);
     ImColor COLOUR_PROF_HOVERED = ImColor(255, 255, 255, 32);
 

@@ -12,7 +12,7 @@ namespace UI {
 
     ImColor GetBackgroundColour(const ColourPresets_t& config, const std::string& palette)
     {
-        if (palette == "Generic")
+        if (palette == "Default")
         {
             return config.COLOUR_BACKGROUND;
         }
@@ -26,7 +26,7 @@ namespace UI {
     {
         ImColor colour{};
 
-        if (palette == "Generic")
+        if (palette == "Default")
         {
             switch (healthType)
             {
@@ -85,24 +85,16 @@ namespace UI {
             switch (healthType)
             {
                 case VitalSignsDataLink::E_HEALTH_DOWNED:
-                    colour = config.COLOUR_HEALTH_DOWNED;
+                    colour = config.COLOUR_PROF_HEALTH_DOWNED;
                     break;
                 case VitalSignsDataLink::E_HEALTH_DEFEATED:
-                    colour = config.COLOUR_HEALTH_DEFEATED;
+                    colour = config.COLOUR_PROF_HEALTH_DEFEATED;
                     break;
                 case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
-                    ImGui::ColorConvertRGBtoHSV(colour.Value.x, colour.Value.y, colour.Value.z, h, s, v);
-                    v *= 0.5f;
-                    v = max(v, 0.0f);
-                    v = min(v, 255.0f);
-                    ImGui::ColorConvertHSVtoRGB(h, s, v, colour.Value.x, colour.Value.y, colour.Value.z);
+                    colour = config.COLOUR_PROF_SHROUD_NECROMANCER;
                     break;
                 case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
-                    ImGui::ColorConvertRGBtoHSV(colour.Value.x, colour.Value.y, colour.Value.z, h, s, v);
-                    v *= 0.5f;
-                    v = max(v, 0.0f);
-                    v = min(v, 255.0f);
-                    ImGui::ColorConvertHSVtoRGB(h, s, v, colour.Value.x, colour.Value.y, colour.Value.z);
+                    colour = config.COLOUR_PROF_SHROUD_SPECTER;
                     break;
             }
         }
@@ -112,7 +104,7 @@ namespace UI {
 
     ImColor GetBarrierColour(const ColourPresets_t& config, const std::string& palette)
     {
-        if (palette == "Generic")
+        if (palette == "Default")
         {
             return config.COLOUR_BARRIER;
         }
