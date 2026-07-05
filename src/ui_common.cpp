@@ -20,9 +20,14 @@ namespace UI {
         {
             return config.COLOUR_PROF_BACKGROUND;
         }
+        else if (palette == "Heat Map")
+        {
+            return config.COLOUR_HEATMAP_BACKGROUND;
+        }
+        return ImColor();
     }
 
-    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType, VitalSignsDataLink::EProfession profession)
+    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType, float health, VitalSignsDataLink::EProfession profession)
     {
         ImColor colour{};
 
@@ -98,6 +103,61 @@ namespace UI {
                     break;
             }
         }
+        else if (palette == "Heat Map")
+        {
+            switch (healthType)
+            {
+                case VitalSignsDataLink::E_HEALTH_DOWNED:
+                    colour = config.COLOUR_HEATMAP_HEALTH_DOWNED;
+                    break;
+                case VitalSignsDataLink::E_HEALTH_DEFEATED:
+                    colour = config.COLOUR_HEATMAP_HEALTH_DEFEATED;
+                    break;
+                case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
+                    colour = config.COLOUR_HEATMAP_SHROUD_NECROMANCER;
+                    break;
+                case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
+                    colour = config.COLOUR_HEATMAP_SHROUD_SPECTER;
+                    break;
+                case VitalSignsDataLink::E_HEALTH_ALIVE:
+                default:
+                {
+                    ImVec4 c1, c2;
+                    float t = 0.0f;
+                    float pct = health;
+                    if (pct >= 0.75f) {
+                        c1 = config.COLOUR_HEATMAP_HEALTH_75.Value;
+                        c2 = config.COLOUR_HEATMAP_HEALTH_100.Value;
+                        t = (pct - 0.75f) / 0.25f;
+                    } else if (pct >= 0.5f) {
+                        c1 = config.COLOUR_HEATMAP_HEALTH_50.Value;
+                        c2 = config.COLOUR_HEATMAP_HEALTH_75.Value;
+                        t = (pct - 0.5f) / 0.25f;
+                    } else if (pct >= 0.25f) {
+                        c1 = config.COLOUR_HEATMAP_HEALTH_25.Value;
+                        c2 = config.COLOUR_HEATMAP_HEALTH_50.Value;
+                        t = (pct - 0.25f) / 0.25f;
+                    } else {
+                        c1 = config.COLOUR_HEATMAP_HEALTH_0.Value;
+                        c2 = config.COLOUR_HEATMAP_HEALTH_25.Value;
+                        t = pct / 0.25f;
+                    }
+                    
+                    float h1, s1, v1;
+                    ImGui::ColorConvertRGBtoHSV(c1.x, c1.y, c1.z, h1, s1, v1);
+                    float h2, s2, v2;
+                    ImGui::ColorConvertRGBtoHSV(c2.x, c2.y, c2.z, h2, s2, v2);
+                    
+                    float h = h1 + (h2 - h1) * t;
+                    float s = s1 + (s2 - s1) * t;
+                    float v = v1 + (v2 - v1) * t;
+                    
+                    ImGui::ColorConvertHSVtoRGB(h, s, v, colour.Value.x, colour.Value.y, colour.Value.z);
+                    colour.Value.w = c1.w + (c2.w - c1.w) * t;
+                    break;
+                }
+            }
+        }
 
         return colour;
     }
@@ -112,6 +172,11 @@ namespace UI {
         {
             return config.COLOUR_PROF_BARRIER;
         }
+        else if (palette == "Heat Map")
+        {
+            return config.COLOUR_HEATMAP_BARRIER;
+        }
+        return ImColor();
     }
 
     Texture* GetOrCreateTexture(const std::string& textureSource, const std::string& texturePath)

@@ -72,6 +72,20 @@ struct ColourPresets_t
     ImColor COLOUR_PROF_SHROUD_SPECTER = ImColor(108, 21, 95);
     ImColor COLOUR_PROF_BARRIER = ImColor(255, 255, 255, 128);
     ImColor COLOUR_PROF_HOVERED = ImColor(255, 255, 255, 32);
+    
+    /* Heat Map Colours */
+    ImColor COLOUR_HEATMAP_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_HEATMAP_HEALTH_100 = ImColor(74, 133, 62);
+    ImColor COLOUR_HEATMAP_HEALTH_75 = ImColor(138, 219, 113);
+    ImColor COLOUR_HEATMAP_HEALTH_50 = ImColor(219, 172, 113);
+    ImColor COLOUR_HEATMAP_HEALTH_25 = ImColor(219, 113, 113);
+    ImColor COLOUR_HEATMAP_HEALTH_0 = ImColor(157, 31, 31);
+    ImColor COLOUR_HEATMAP_HEALTH_DOWNED = ImColor(157, 31, 31);
+    ImColor COLOUR_HEATMAP_HEALTH_DEFEATED = ImColor(78, 15, 15);
+    ImColor COLOUR_HEATMAP_SHROUD_NECROMANCER = ImColor(38, 70, 45);
+    ImColor COLOUR_HEATMAP_SHROUD_SPECTER = ImColor(108, 21, 95);
+    ImColor COLOUR_HEATMAP_BARRIER = ImColor(255, 255, 255, 128);
+    ImColor COLOUR_HEATMAP_HOVERED = ImColor(255, 255, 255, 32);
 
     /** TODO: Party Colours */
     // ImColor COLOUR_PARTY_BACKGROUND = ImColor(0, 0, 0);

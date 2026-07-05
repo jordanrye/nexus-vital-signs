@@ -476,7 +476,8 @@ namespace Addon {
     {
         static const char* colorsOptions[] {
             "Default Color Palette",
-            "Profession Color Palette"
+            "Profession Color Palette",
+            "Heat Map Color Palette"
         };
         static const char* layoutOptions[] {
             "Radial",
@@ -525,14 +526,16 @@ namespace Addon {
         {
             static int colorsSelection = 0; // Default to "Centre"
             if (colors == "Default") colorsSelection = 0;
-            else if (colors == "Role") colorsSelection = 1;
             else if (colors == "Profession") colorsSelection = 1;
-            else if (colors == "Party") colorsSelection = 3;
+            else if (colors == "Heat Map") colorsSelection = 2;
+            // else if (colors == "Role") colorsSelection = -1;
+            // else if (colors == "Party") colorsSelection = -1;
 
             if (ImGui::Combo("Color Palette", &colorsSelection, colorsOptions, IM_ARRAYSIZE(colorsOptions)))
             {
                 if (colorsSelection == 0) colors = "Default";
                 else if (colorsSelection == 1) colors = "Profession";
+                else if (colorsSelection == 2) colors = "Heat Map";
             }
         }
 
@@ -1165,6 +1168,27 @@ namespace Addon {
                 ImGui::ColorEdit4("Shroud (Specter)", &(ColourPresets.COLOUR_PROF_SHROUD_SPECTER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_PROF_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_PROF_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+            }
+            ImGui::PopID();
+        });
+
+        AddPresetItem(coloursBranchId, "Colors", "Heat Map", []() {
+            ImGui::PushID("Colors/HeatMap");
+            {
+                ImGui::TextDisabled("Color Properties");
+                ImGui::Separator();
+                ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_HEATMAP_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 100%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_100.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 75%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_75.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 50%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_50.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 25%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_25.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 0%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_0.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Downed)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_DOWNED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Defeated)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_DEFEATED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Necromancer)", &(ColourPresets.COLOUR_HEATMAP_SHROUD_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Specter)", &(ColourPresets.COLOUR_HEATMAP_SHROUD_SPECTER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_HEATMAP_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_HEATMAP_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
             }
             ImGui::PopID();
         });

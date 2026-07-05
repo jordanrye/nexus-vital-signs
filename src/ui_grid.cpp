@@ -1022,7 +1022,7 @@ namespace UI::Grid {
 
                 const bool isHovered = IsItemHovered(parentProperties);
                 const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig.colors);
-                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig.colors, userData.HealthType, userData.Profession);
+                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig.colors, userData.HealthType, userData.GetHealthRatio(), userData.Profession);
                 const ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig.colors);
                 const Indicator_t* borderStyle = nullptr;
     

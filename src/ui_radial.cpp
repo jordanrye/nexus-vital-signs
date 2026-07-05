@@ -264,7 +264,7 @@ namespace UI::Radial {
                 float healthRadiusMin = annulusRadiusMin;
                 float healthRadiusMax = annulusRadiusMin + (annulusWidth * context.health[i]);
                 SectorDrawProperties_t healthProperties = CalcSectorProperties(centralAngle, arcSegments, healthRadiusMin, healthRadiusMax, itemSpacing, i);
-                DrawSector(drawList, healthProperties, context.menuPosition, GetHealthColour(context.colourPresets, context.palette, context.healthType[i], context.profession[i]));
+                DrawSector(drawList, healthProperties, context.menuPosition, GetHealthColour(context.colourPresets, context.palette, context.healthType[i], context.health[i], context.profession[i]));
 
                 if (isHovered)
                 {
