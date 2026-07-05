@@ -6,6 +6,7 @@ void form_Trigger(Trigger_t& trigger)
         "<Inherit From Parent>", 
         "Boons",
         "Conditions",
+        "Health",
         "Professions",
     };
     static const char* triggerBoonsEffectOptions[] {
@@ -37,6 +38,13 @@ void form_Trigger(Trigger_t& trigger)
         "Torment",
         "Vulnerability",
         "Weakness",
+    };
+    static const char* triggerHealthEffectOptions[] {
+        "Alive",
+        "Downed",
+        "Defeated",
+        "Shroud (Necromancer)",
+        "Shroud (Specter)",
     };
     static const char* triggerProfessionOptions[] {
         "Elementalist",
@@ -101,7 +109,8 @@ void form_Trigger(Trigger_t& trigger)
         if (trigger.category == "<Inherit From Parent>") triggerCategory = 0;
         else if (trigger.category == "Boons") triggerCategory = 1;
         else if (trigger.category == "Conditions") triggerCategory = 2;
-        else if (trigger.category == "Professions") triggerCategory = 3;
+        else if (trigger.category == "Health") triggerCategory = 3;
+        else if (trigger.category == "Professions") triggerCategory = 4;
         ImGui::Combo("Category", &triggerCategory, triggerCategoryOptions, IM_ARRAYSIZE(triggerCategoryOptions));
         trigger.category = triggerCategoryOptions[triggerCategory];
     
@@ -150,6 +159,18 @@ void form_Trigger(Trigger_t& trigger)
             ImGui::Combo("Effect", &triggerEffect, triggerConditionsEffectOptions, IM_ARRAYSIZE(triggerConditionsEffectOptions));
             trigger.effect = triggerConditionsEffectOptions[triggerEffect];
         }
+        else if ("Health" == trigger.category)
+        {
+            int triggerEffect = 0; // Default to "Alive"
+            if (trigger.effect == "Alive") triggerEffect = 0;
+            else if (trigger.effect == "Downed") triggerEffect = 1;
+            else if (trigger.effect == "Defeated") triggerEffect = 2;
+            else if (trigger.effect == "Shroud (Necromancer)") triggerEffect = 3;
+            else if (trigger.effect == "Shroud (Specter)") triggerEffect = 4;
+    
+            ImGui::Combo("State", &triggerEffect, triggerHealthEffectOptions, IM_ARRAYSIZE(triggerHealthEffectOptions));
+            trigger.effect = triggerHealthEffectOptions[triggerEffect];
+        }
         else if ("Professions" == trigger.category)
         {
             int triggerEffect = 0;             
@@ -165,7 +186,39 @@ void form_Trigger(Trigger_t& trigger)
             trigger.effect = triggerProfessionOptions[triggerEffect];
         }
 
-        if (("<Inherit From Parent>" != trigger.category) && ("Professions" != trigger.category))
+        if ("Health" == trigger.category)
+        {
+            static const char* triggerHealthConditionOptions[] {
+                "Status: Active",
+                "Status: Inactive",
+                "Threshold: Less Than",
+                "Threshold: More Than",
+                "Threshold: Between",
+            };
+            int triggerCondition = 0; // Default to "Status: Active"
+            if (trigger.condition == "Status: Active") triggerCondition = 0;
+            else if (trigger.condition == "Status: Inactive") triggerCondition = 1;
+            else if (trigger.condition == "Threshold: Less Than") triggerCondition = 2;
+            else if (trigger.condition == "Threshold: More Than") triggerCondition = 3;
+            else if (trigger.condition == "Threshold: Between") triggerCondition = 4;
+    
+            ImGui::Combo("Condition", &triggerCondition, triggerHealthConditionOptions, IM_ARRAYSIZE(triggerHealthConditionOptions));
+            trigger.condition = triggerHealthConditionOptions[triggerCondition];
+
+            if (trigger.condition != "Status: Active" && trigger.condition != "Status: Inactive")
+            {
+                if (trigger.condition == "Threshold: Between")
+                {
+                    ImGui::InputFloat("Threshold (Min)", &trigger.threshold, 1.f, 1.f, "%.1f");
+                    ImGui::InputFloat("Threshold (Max)", &trigger.thresholdMax, 1.f, 1.f, "%.1f");
+                }
+                else
+                {
+                    ImGui::InputFloat("Threshold", &trigger.threshold, 1.f, 1.f, "%.1f");
+                }
+            }
+        }
+        else if (("<Inherit From Parent>" != trigger.category) && ("Professions" != trigger.category))
         {
             int triggerCondition = 0; // Default to "Status: Active"
             if (trigger.condition == "Status: Active") triggerCondition = 0;

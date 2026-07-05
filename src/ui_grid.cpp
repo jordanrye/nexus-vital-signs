@@ -452,6 +452,28 @@ namespace UI::Grid {
             return true;
         }
 
+        if (trigger.category == "Health")
+        {
+            bool statusMatch = false;
+            if (trigger.effect == "Alive" && userData.HealthType == VitalSignsDataLink::E_HEALTH_ALIVE) statusMatch = true;
+            else if (trigger.effect == "Downed" && userData.HealthType == VitalSignsDataLink::E_HEALTH_DOWNED) statusMatch = true;
+            else if (trigger.effect == "Defeated" && userData.HealthType == VitalSignsDataLink::E_HEALTH_DEFEATED) statusMatch = true;
+            else if (trigger.effect == "Shroud (Necromancer)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER) statusMatch = true;
+            else if (trigger.effect == "Shroud (Specter)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER) statusMatch = true;
+
+            float healthRatio = userData.GetHealthRatio() * 100.0f; // Scale to match UI values (0-100)
+
+            if ((trigger.condition == "Status: Active" && statusMatch) ||
+                (trigger.condition == "Status: Inactive" && !statusMatch) ||
+                (trigger.condition == "Threshold: Less Than" && statusMatch && healthRatio < trigger.threshold) ||
+                (trigger.condition == "Threshold: More Than" && statusMatch && healthRatio > trigger.threshold) ||
+                (trigger.condition == "Threshold: Between" && statusMatch && healthRatio >= trigger.threshold && healthRatio <= trigger.thresholdMax))
+            {
+                return true;
+            }
+            return false;
+        }
+
         auto currStacks = userData.Effects[trigger.effect].stacks;
         auto currDuration = userData.Effects[trigger.effect].duration / 1000.0f;
 
