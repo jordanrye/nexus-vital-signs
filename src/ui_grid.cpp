@@ -914,8 +914,7 @@ namespace UI::Grid {
                     const auto clientRole = VitalsData->getUserData(clientId).SquadRole;
                     const auto clientMap = VitalsData->getUserData(clientId).MapName;
 
-                    ImGui::TextDisabled(userData.AccountName.c_str());
-                    ImGui::TextDisabled(userData.Nickname.c_str());
+                    ImGui::TextDisabled(userData.GetAccountName().c_str());
                     ImGui::Text(userData.GetDisplayName().c_str());
 
                     if (clientId != userData.UserId)
