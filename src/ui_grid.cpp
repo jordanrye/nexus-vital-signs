@@ -28,10 +28,11 @@ namespace UI::Grid {
         ImVec2 menuPosition;
         int index;
         int indexHovered;
-
+        
         // Item state
         bool isValid[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::UserData_t userData[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::UserId_t userIdHovered;
     } context;
 
     struct GridDrawProperties_t 
@@ -1179,6 +1180,7 @@ namespace UI::Grid {
                 if (isHovered)
                 {
                     context.indexHovered = i;
+                    context.userIdHovered = userData.UserId;
     
                     context.isItemPending = true;
                 }
@@ -1229,7 +1231,13 @@ namespace UI::Grid {
             context.isValid[context.index] = true;
             context.userData[context.index] = userData;
     
-            if ((context.index == context.indexHovered) && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+            /**
+             * @note Check if the item is clicked. Compare `UserId` against `userIdHovered` 
+             * instead of checking `context.index == context.indexHovered` to prevent a bug
+             * where sorting the grid inside `EndGridMenu` decouples the user's insertion slot
+             * (`context.index`) from their rendered display slot (`context.indexHovered`).
+             */
+            if ((context.indexHovered != -1) && (userData.UserId == context.userIdHovered) && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
             {
                 isSelected = true;
                 context.isClose = true;
