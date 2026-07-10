@@ -77,6 +77,9 @@ void AddonLoad(AddonAPI* aApi)
 
 		APIDefs->InputBinds.RegisterWithString("KB_HEALING_RADIAL", Addon::KeybindHandler, "(null)");
 		APIDefs->Localization.Set("KB_HEALING_RADIAL", "en", "Activate Radial Menu");
+
+		APIDefs->InputBinds.RegisterWithString("KB_VS_TOGGLE_SQUAD_MANAGER", Addon::KeybindHandler, "(null)");
+		APIDefs->Localization.Set("KB_VS_TOGGLE_SQUAD_MANAGER", "en", "Toggle Squad Manager");
 	}
 
     NexusLink = (NexusLinkData*)APIDefs->DataLink.Get("DL_NEXUS_LINK");
@@ -176,6 +179,7 @@ void AddonUnload()
     if (VitalsData->isInitialised())
     {
         APIDefs->InputBinds.Deregister("KB_HEALING_RADIAL");
+        APIDefs->InputBinds.Deregister("KB_VS_TOGGLE_SQUAD_MANAGER");
 
         APIDefs->Renderer.Deregister(Addon::Options);
         APIDefs->Renderer.Deregister(Addon::Render);

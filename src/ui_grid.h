@@ -9,7 +9,7 @@
 
 namespace UI::Grid {
 
-    bool BeginGridMenu(const char* name, const LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive);
+    bool BeginGridMenu(const char* name, LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive);
     void EndGridMenu();
     bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData);
 

@@ -51,6 +51,7 @@ namespace Addon {
     /* Global state */
     static bool isRadialMenuActive = false;
     static bool isPreviewModeActive = false;
+    bool isSquadManagerActive = false;
 
     /* Option tabs */
     void OptionsGeneral();
@@ -79,6 +80,24 @@ namespace Addon {
             else
             {
                 isRadialMenuActive = false;
+            }
+        }
+        else if (strcmp(aIdentifier, "KB_VS_TOGGLE_SQUAD_MANAGER") == 0)
+        {
+            if (isValidGameState())
+            {
+                if (!aIsRelease)
+                {
+                    isSquadManagerActive = true;
+                }
+                else
+                {
+                    isSquadManagerActive = false;
+                }
+            }
+            else
+            {
+                isSquadManagerActive = false;
             }
         }
     }

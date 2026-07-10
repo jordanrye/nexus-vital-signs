@@ -1,11 +1,14 @@
 #include "ui_grid.h"
 
+#include <algorithm>
+#include <vector>
+
 #include "imgui_extensions.h"
+
+#include "addon.h"
 #include "shared.h"
 #include "ui_common.h"
 #include "utilities.h"
-#include <algorithm>
-#include <vector>
 
 inline ImVec4 _ImVec4(float p)
 {
@@ -17,7 +20,7 @@ namespace UI::Grid {
     static struct GridContext_t
     {
         // Configuration
-        LayoutConfig_t layoutConfig;
+        LayoutConfig_t* layoutConfig;
         ColourPresets_t colourPresets;
         BorderPresets_t borderPresets;
 
@@ -301,9 +304,9 @@ namespace UI::Grid {
     DrawProperties_t CalcDrawProperties(float width, float height, const CellDrawProperties_t& cellDraw, ImDrawCornerFlags cellRoundingCorners, const GridDrawProperties_t& gridDraw, int index)
     {
         // Layout configuration
-        const int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
-        const std::string& direction = context.layoutConfig.layout.grid.cellDirection;
-        const std::string& squadDirection = context.layoutConfig.layout.grid.squadDirection;
+        const int cellDirectionMax = context.layoutConfig->layout.grid.cellDirectionMax;
+        const std::string& direction = context.layoutConfig->layout.grid.cellDirection;
+        const std::string& squadDirection = context.layoutConfig->layout.grid.squadDirection;
 
         // Target indices
         const int subgroup_index = index / cellDirectionMax;
@@ -350,13 +353,13 @@ namespace UI::Grid {
         return properties;
     }
 
-    bool BeginGridMenu(const char* name, const LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive)
+    bool BeginGridMenu(const char* name, LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive)
     {
         bool isOpen = false;
 
         if (isActive || context.isItemPending)
         {
-            context.layoutConfig = layout;
+            context.layoutConfig = &layout;
             context.colourPresets = colours;
             context.borderPresets = borders;
 
@@ -364,16 +367,16 @@ namespace UI::Grid {
             context.isClose = false;
 
             // Cache layout settings locally to keep calculations readable
-            const auto& gridLayout = context.layoutConfig.layout.grid;
-            const auto& posConfig = context.layoutConfig.position;
+            const auto& gridLayout = context.layoutConfig->layout.grid;
+            const auto& posConfig = context.layoutConfig->position;
 
             // Calculate maximum rendered bounds (in columns/rows)
             int rows, columns;
             CalcGridDimensions(context.index, gridLayout, rows, columns);
 
             // Convert abstract rows/cols to absolute pixel dimensions
-            float menuWidth = (float)(columns * gridLayout.cellWidth + (columns - 1) * context.layoutConfig.layout.itemSpacing);
-            float menuHeight = (float)(rows * gridLayout.cellHeight + (rows - 1) * context.layoutConfig.layout.itemSpacing);
+            float menuWidth = (float)(columns * gridLayout.cellWidth + (columns - 1) * context.layoutConfig->layout.itemSpacing);
+            float menuHeight = (float)(rows * gridLayout.cellHeight + (rows - 1) * context.layoutConfig->layout.itemSpacing);
             
             DrawProperties_t displayProps{};
             displayProps.position = ImVec2(0.f, 0.f);
@@ -430,7 +433,7 @@ namespace UI::Grid {
 
     static bool IsPreviewActive()
     {
-        return (context.layoutConfig.previewNodeId != TreeNodeUID::NONE);
+        return (context.layoutConfig->previewNodeId != TreeNodeUID::NONE);
     }
 
     static bool IsTriggerMet(const Trigger_t& trigger, VitalSignsDataLink::UserData_t& userData, bool isPreview = false)
@@ -520,9 +523,9 @@ namespace UI::Grid {
         
         for (const auto& indicator : indicators)
         {
-            bool isCurrentPreviewed = (indicator.id == context.layoutConfig.previewNodeId);
+            bool isCurrentPreviewed = (indicator.id == context.layoutConfig->previewNodeId);
             bool isPreviewed = isCurrentPreviewed || (indicator.enabled && isParentPreviewed);
-            bool isTraversalForced = !isPreviewed && IsPreviewActive() && HasDescendant(indicator, context.layoutConfig.previewNodeId);
+            bool isTraversalForced = !isPreviewed && IsPreviewActive() && HasDescendant(indicator, context.layoutConfig->previewNodeId);
 
             if (indicator.enabled || isPreviewed || isTraversalForced)
             {
@@ -574,7 +577,7 @@ namespace UI::Grid {
                 {
                     for (const auto& icon : indicator.iconList.list)
                     {
-                        bool isIconForced = isPreviewed || (icon.id == context.layoutConfig.previewNodeId);
+                        bool isIconForced = isPreviewed || (icon.id == context.layoutConfig->previewNodeId);
 
                         if (IsTriggerMet(icon.trigger, userData, isIconForced))
                         {
@@ -872,7 +875,7 @@ namespace UI::Grid {
         GridDrawProperties_t gridDrawProperties;
         gridDrawProperties.position = context.menuPosition;
 
-        const auto& gridLayout = context.layoutConfig.layout.grid;
+        const auto& gridLayout = context.layoutConfig->layout.grid;
         const int cellDirectionMax = gridLayout.cellDirectionMax;
 
         CalcGridDimensions(context.index, gridLayout, gridDrawProperties.rows, gridDrawProperties.columns);
@@ -880,20 +883,20 @@ namespace UI::Grid {
         /* Frame properties */
         CellDrawProperties_t frameDrawProperties;
         frameDrawProperties.size = ImVec2(
-            max(1.0f, static_cast<float>(context.layoutConfig.layout.grid.cellWidth - (2 * context.layoutConfig.layout.itemBorder))), 
-            max(1.0f, static_cast<float>(context.layoutConfig.layout.grid.cellHeight - (2 * context.layoutConfig.layout.itemBorder))));
-        frameDrawProperties.padding = _ImVec4(static_cast<float>(context.layoutConfig.layout.itemBorder));
-        frameDrawProperties.spacing = static_cast<float>(context.layoutConfig.layout.itemSpacing + context.layoutConfig.layout.itemBorder);
-        frameDrawProperties.rounding = ImMax(context.layoutConfig.layout.grid.cellRounding, context.layoutConfig.layout.grid.cellRounding - context.layoutConfig.layout.itemBorder);
+            max(1.0f, static_cast<float>(context.layoutConfig->layout.grid.cellWidth - (2 * context.layoutConfig->layout.itemBorder))), 
+            max(1.0f, static_cast<float>(context.layoutConfig->layout.grid.cellHeight - (2 * context.layoutConfig->layout.itemBorder))));
+        frameDrawProperties.padding = _ImVec4(static_cast<float>(context.layoutConfig->layout.itemBorder));
+        frameDrawProperties.spacing = static_cast<float>(context.layoutConfig->layout.itemSpacing + context.layoutConfig->layout.itemBorder);
+        frameDrawProperties.rounding = ImMax(context.layoutConfig->layout.grid.cellRounding, context.layoutConfig->layout.grid.cellRounding - context.layoutConfig->layout.itemBorder);
 
         /* Frame border properties */
         CellDrawProperties_t borderDrawProperties;
         borderDrawProperties.size = ImVec2(
-            static_cast<float>(context.layoutConfig.layout.grid.cellWidth), 
-            static_cast<float>(context.layoutConfig.layout.grid.cellHeight));
+            static_cast<float>(context.layoutConfig->layout.grid.cellWidth), 
+            static_cast<float>(context.layoutConfig->layout.grid.cellHeight));
         borderDrawProperties.padding = _ImVec4(0.f);
-        borderDrawProperties.spacing = static_cast<float>(context.layoutConfig.layout.itemSpacing);
-        borderDrawProperties.rounding = context.layoutConfig.layout.grid.cellRounding;
+        borderDrawProperties.spacing = static_cast<float>(context.layoutConfig->layout.itemSpacing);
+        borderDrawProperties.rounding = context.layoutConfig->layout.grid.cellRounding;
 
         /**
          * @note The state for `indexHovered` is reset in `EndGridMenu` because
@@ -909,7 +912,7 @@ namespace UI::Grid {
 
         /* Map the new drop target column */
         int newGroupIndex = lastPopulatedGroupIndex + 1;
-        if (newGroupIndex < context.layoutConfig.layout.grid.rowColMax + 1 && (newGroupIndex * cellDirectionMax) < SQUAD_MEMBER_LIMIT) {
+        if (newGroupIndex < context.layoutConfig->layout.grid.rowColMax + 1 && (newGroupIndex * cellDirectionMax) < SQUAD_MEMBER_LIMIT) {
             lastPopulatedGroupIndex = newGroupIndex;
         }
         
@@ -937,19 +940,117 @@ namespace UI::Grid {
             ImVec2 p_max(ImMax(firstCellProps.position.x + firstCellProps.width, lastCellProps.position.x + lastCellProps.width), ImMax(firstCellProps.position.y + firstCellProps.height, lastCellProps.position.y + lastCellProps.height));
             
             /// TODO: Make this more elegant 
-            p_min.x -= (context.layoutConfig.layout.itemSpacing / 2.f);
-            p_min.y -= (context.layoutConfig.layout.itemSpacing / 2.f);
-            p_max.x += (context.layoutConfig.layout.itemSpacing / 2.f);
-            p_max.y += (context.layoutConfig.layout.itemSpacing / 2.f);
+            p_min.x -= (context.layoutConfig->layout.itemSpacing / 2.f);
+            p_min.y -= (context.layoutConfig->layout.itemSpacing / 2.f);
+            p_max.x += (context.layoutConfig->layout.itemSpacing / 2.f);
+            p_max.y += (context.layoutConfig->layout.itemSpacing / 2.f);
 
             ImGui::SetCursorScreenPos(p_min);
             ImGui::PushID(groupIndex);
             ImGui::InvisibleButton("SubgroupTarget", ImVec2(p_max.x - p_min.x, p_max.y - p_min.y));
             ImGui::SetItemAllowOverlap();
 
-            if (ImGui::BeginDragDropTarget())
+            // Squad Manager: Subgroup header
+            if (Addon::isSquadManagerActive)
             {
-                drawList->AddRectFilled(p_min, p_max, ImColor(255, 255, 255, 64), context.layoutConfig.layout.grid.cellRounding);
+                std::string headerText = (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1)) ? "New Subgroup" : "Subgroup " + std::to_string(droppedSubgroupId + 1);
+                
+                ImFont* font = nullptr;
+                if (ConfigText.fontSource != "Nexus font" && ConfigText.fontSource != "Default font")
+                {
+                    font = utils::font::GetFont(ConfigText.font, ConfigText.fontSize);
+                }
+
+                if (font) ImGui::PushFont(font);
+                ImVec2 text_size = ImGui::CalcTextSize(headerText.c_str());
+
+                float frameWidth = (float)context.layoutConfig->layout.grid.cellWidth;
+                float frameHeight = (float)context.layoutConfig->layout.grid.cellHeight;
+                float spacing = (float)context.layoutConfig->layout.itemSpacing;
+                std::string cellDir = context.layoutConfig->layout.grid.cellDirection;
+
+                float headerWidth, headerHeight;
+                ImVec2 header_p_min;
+
+                if (cellDir == "Top-to-bottom")
+                {
+                    headerWidth = frameWidth;
+                    headerHeight = text_size.y * 3.0f;
+                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y - headerHeight - spacing);
+                }
+                else if (cellDir == "Bottom-to-top")
+                {
+                    headerWidth = frameWidth;
+                    headerHeight = text_size.y * 3.0f;
+                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y + frameHeight + spacing);
+                }
+                else if (cellDir == "Left-to-right")
+                {
+                    headerHeight = frameHeight;
+                    headerWidth = text_size.x + 20.0f;
+                    header_p_min = ImVec2(firstCellProps.position.x - headerWidth - spacing, firstCellProps.position.y);
+                }
+                else if (cellDir == "Right-to-left")
+                {
+                    headerHeight = frameHeight;
+                    headerWidth = text_size.x + 20.0f;
+                    header_p_min = ImVec2(firstCellProps.position.x + frameWidth + spacing, firstCellProps.position.y);
+                }
+                else
+                {
+                    headerWidth = frameWidth;
+                    headerHeight = text_size.y * 3.0f;
+                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y - headerHeight - spacing);
+                }
+
+                ImVec2 header_p_max = ImVec2(header_p_min.x + headerWidth, header_p_min.y + headerHeight);
+
+                ImU32 col_solid = ImColor(0, 0, 0, 255);
+                ImU32 col_trans = ImColor(0, 0, 0, 0);
+
+                if (cellDir == "Top-to-bottom")
+                {
+                    ImGui::AddRectFilledGradientV(drawList, header_p_min, header_p_max, col_trans, col_solid, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
+                }
+                else if (cellDir == "Bottom-to-top")
+                {
+                    ImGui::AddRectFilledGradientV(drawList, header_p_min, header_p_max, col_solid, col_trans, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
+                }
+                else if (cellDir == "Left-to-right")
+                {
+                    ImGui::AddRectFilledGradientH(drawList, header_p_min, header_p_max, col_trans, col_solid, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
+                }
+                else if (cellDir == "Right-to-left")
+                {
+                    ImGui::AddRectFilledGradientH(drawList, header_p_min, header_p_max, col_solid, col_trans, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
+                }
+                else
+                {
+                    ImGui::AddRectFilledGradientV(drawList, header_p_min, header_p_max, col_trans, col_solid, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
+                }
+
+                ImVec2 text_pos = ImVec2(header_p_min.x + (headerWidth - text_size.x) * 0.5f, header_p_min.y + (headerHeight - text_size.y) * 0.5f);
+
+                if (ConfigText.shadow)
+                {
+                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x + 1, text_pos.y + 1), ConfigText.shadowColor, headerText.c_str());
+                }
+                if (ConfigText.outline)
+                {
+                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x - 1, text_pos.y), ConfigText.outlineColor, headerText.c_str());
+                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x + 1, text_pos.y), ConfigText.outlineColor, headerText.c_str());
+                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x, text_pos.y - 1), ConfigText.outlineColor, headerText.c_str());
+                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x, text_pos.y + 1), ConfigText.outlineColor, headerText.c_str());
+                }
+
+                drawList->AddText(font, ConfigText.fontSize, text_pos, ConfigText.color, headerText.c_str());
+                if (font) ImGui::PopFont();
+            }
+
+            // Squad Manager: Drag-and-drop (drop)
+            if (Addon::isSquadManagerActive && ImGui::BeginDragDropTarget())
+            {
+                drawList->AddRectFilled(p_min, p_max, ImColor(255, 255, 255, 64), context.layoutConfig->layout.grid.cellRounding);
 
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("VS_USER_ID", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
                 {
@@ -1078,17 +1179,17 @@ namespace UI::Grid {
                 }
 
                 const bool isHovered = IsItemHovered(parentProperties);
-                const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig.colors);
-                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig.colors, userData.HealthType, userData.GetHealthRatio(), userData.Profession);
-                const ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig.colors);
+                const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig->colors);
+                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType, userData.GetHealthRatio(), userData.Profession);
+                const ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig->colors);
                 const Indicator_t* borderStyle = nullptr;
     
                 /* Process indicators (returns a list of drawable items) */
-                ProcessIndicatorsDFS(context.layoutConfig.indicators, userData, false, false, &healthColour, &borderStyle, drawables);
-                if ((context.layoutConfig.previewNodeId != TreeNodeUID::NONE) && (context.layoutConfig.previewNodeId == context.layoutConfig.id))
+                ProcessIndicatorsDFS(context.layoutConfig->indicators, userData, false, false, &healthColour, &borderStyle, drawables);
+                if ((context.layoutConfig->previewNodeId != TreeNodeUID::NONE) && (context.layoutConfig->previewNodeId == context.layoutConfig->id))
                 {
                     /* Preview mode */
-                    ProcessIndicatorsDFS(context.layoutConfig.indicators, userData, false, true, &healthColour, &borderStyle, drawables);
+                    ProcessIndicatorsDFS(context.layoutConfig->indicators, userData, false, true, &healthColour, &borderStyle, drawables);
                 }
     
                 /* Border */
@@ -1102,9 +1203,9 @@ namespace UI::Grid {
                         DrawBorder(drawList, borderProps, borderStyle->border.color, borderThickness);
                     }
                 }
-                else if (context.layoutConfig.layout.itemBorder >= 1)
+                else if (context.layoutConfig->layout.itemBorder >= 1)
                 {
-                    borderThickness = (float)context.layoutConfig.layout.itemBorder;
+                    borderThickness = (float)context.layoutConfig->layout.itemBorder;
                     DrawBorder(drawList, borderProps, context.borderPresets.COLOUR_BORDER, borderThickness);
                 }
     
@@ -1169,8 +1270,8 @@ namespace UI::Grid {
                     DrawIndicator(drawList, parentProperties, contentProps, pair.first, userData, pair.second);
                 }
 
-                /* Drag-and-drop */
-                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                /* Squad Manager: Drag-and-drop (drag) */
+                if (Addon::isSquadManagerActive && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
                     ImGui::SetDragDropPayload("VS_USER_ID", &userData.UserId, sizeof(userData.UserId));
                     ImGui::Text("%s", userData.GetDisplayName().c_str());
@@ -1189,6 +1290,149 @@ namespace UI::Grid {
         }
 
         drawList->PopClipRect();
+
+        // Squad Manager: Move and re-size
+        if (Addon::isSquadManagerActive)
+        {
+            // Compute first cell for move grip
+            DrawProperties_t firstCell = CalcDrawProperties(frameDrawProperties.size.x, frameDrawProperties.size.y, frameDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, 0);
+
+            // Compute last possible cell for resize grip based on current rowColMax and cellDirectionMax
+            int max_index = (context.layoutConfig->layout.grid.rowColMax * context.layoutConfig->layout.grid.cellDirectionMax) - 1;
+            DrawProperties_t lastCell = CalcDrawProperties(frameDrawProperties.size.x, frameDrawProperties.size.y, frameDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, max_index);
+
+            ImDrawList* fgDrawList = ImGui::GetForegroundDrawList();
+
+            auto drawDashedLine = [&](ImVec2 p1, ImVec2 p2, ImU32 col, float thickness, float dash_length, float gap_length) {
+                float dx = p2.x - p1.x;
+                float dy = p2.y - p1.y;
+                float length = std::sqrt(dx*dx + dy*dy);
+                if (length == 0.0f) return;
+                float nx = dx / length;
+                float ny = dy / length;
+                for (float t = 0.0f; t < length; t += dash_length + gap_length) {
+                    float t_end = ImMin(t + dash_length, length);
+                    fgDrawList->AddLine(ImVec2(p1.x + nx * t, p1.y + ny * t), ImVec2(p1.x + nx * t_end, p1.y + ny * t_end), col, thickness);
+                }
+            };
+
+            ImVec2 border_min = ImVec2(firstCell.position.x - 2.0f, firstCell.position.y - 2.0f);
+            ImVec2 border_max = ImVec2(lastCell.position.x + lastCell.width + 2.0f, lastCell.position.y + lastCell.height + 2.0f);
+            ImU32 dash_col = ImColor(200, 200, 200, 150);
+            drawDashedLine(border_min, ImVec2(border_max.x, border_min.y), dash_col, 1.0f, 4.0f, 4.0f);
+            drawDashedLine(ImVec2(border_max.x, border_min.y), border_max, dash_col, 1.0f, 4.0f, 4.0f);
+            drawDashedLine(border_max, ImVec2(border_min.x, border_max.y), dash_col, 1.0f, 4.0f, 4.0f);
+            drawDashedLine(ImVec2(border_min.x, border_max.y), border_min, dash_col, 1.0f, 4.0f, 4.0f);
+
+            // Move Grip
+            float moveGripWidth = 22.0f;
+            float moveGripHeight = 24.0f;
+            ImVec2 moveGripMin;
+            std::string cellDir = context.layoutConfig->layout.grid.cellDirection;
+            if (cellDir == "Top-to-bottom") {
+                // Header is above, place grip to the left of the dotted line's top-left corner
+                moveGripMin = ImVec2(border_min.x - moveGripWidth - 6.0f, border_min.y);
+            } else if (cellDir == "Left-to-right") {
+                // Header is to the left, place grip above the dotted line's top-left corner
+                moveGripMin = ImVec2(border_min.x, border_min.y - moveGripHeight - 6.0f);
+            } else {
+                // Top-left is free, place diagonally
+                moveGripMin = ImVec2(border_min.x - moveGripWidth - 6.0f, border_min.y - moveGripHeight - 6.0f);
+            }
+            
+            ImGui::SetNextWindowPos(moveGripMin);
+            ImGui::SetNextWindowSize(ImVec2(moveGripWidth, moveGripHeight));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+            ImGui::Begin("##MoveGripWindow", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+            ImGui::InvisibleButton("##MoveGripBtn", ImVec2(moveGripWidth, moveGripHeight));
+            if (ImGui::IsItemActive())
+            {
+                context.layoutConfig->position.offset.x += ImGui::GetIO().MouseDelta.x;
+                context.layoutConfig->position.offset.y += ImGui::GetIO().MouseDelta.y;
+            }
+            // Draw move grip
+            fgDrawList->AddRectFilled(moveGripMin, ImVec2(moveGripMin.x + moveGripWidth, moveGripMin.y + moveGripHeight), ImColor(100, 100, 100, 200), 2.0f);
+            for (int r = 0; r < 2; ++r) {
+                for (int c = 0; c < 3; ++c) {
+                    fgDrawList->AddCircleFilled(ImVec2(moveGripMin.x + 7.0f + r * 8.0f, moveGripMin.y + 6.0f + c * 6.0f), 2.0f, ImColor(200, 200, 200, 255));
+                }
+            }
+            ImGui::End();
+            ImGui::PopStyleVar();
+
+            // Resize Grip
+            static ImVec2 resize_drag_accum(0.0f, 0.0f);
+            
+            float resizeGripSize = 24.0f;
+            ImVec2 resizeGripMax(lastCell.position.x + lastCell.width + 8.0f, lastCell.position.y + lastCell.height + 8.0f);
+            ImVec2 resizeGripMin(resizeGripMax.x - resizeGripSize, resizeGripMax.y - resizeGripSize);
+            
+            ImGui::SetNextWindowPos(resizeGripMin);
+            ImGui::SetNextWindowSize(ImVec2(resizeGripSize, resizeGripSize));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+            ImGui::Begin("##ResizeGripWindow", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+            ImGui::InvisibleButton("##ResizeGripBtn", ImVec2(resizeGripSize, resizeGripSize));
+            if (ImGui::IsItemActive())
+            {
+                resize_drag_accum.x += ImGui::GetIO().MouseDelta.x;
+                resize_drag_accum.y += ImGui::GetIO().MouseDelta.y;
+
+                float cellTotalWidth = frameDrawProperties.size.x + frameDrawProperties.spacing + frameDrawProperties.padding.w;
+                float cellTotalHeight = frameDrawProperties.size.y + frameDrawProperties.spacing + frameDrawProperties.padding.x;
+
+                if (std::abs(resize_drag_accum.x) > cellTotalWidth)
+                {
+                    int drag_units = resize_drag_accum.x / cellTotalWidth;
+                    if (context.layoutConfig->layout.grid.cellDirection == "Left-to-right" || context.layoutConfig->layout.grid.cellDirection == "Right-to-left") {
+                        context.layoutConfig->layout.grid.cellDirectionMax = ImMax(1, context.layoutConfig->layout.grid.cellDirectionMax + drag_units);
+                    } else {
+                        context.layoutConfig->layout.grid.rowColMax = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.rowColMax + drag_units));
+                    }
+                    resize_drag_accum.x -= drag_units * cellTotalWidth;
+                }
+                
+                if (std::abs(resize_drag_accum.y) > cellTotalHeight)
+                {
+                    int drag_units = resize_drag_accum.y / cellTotalHeight;
+                    if (context.layoutConfig->layout.grid.cellDirection == "Top-to-bottom" || context.layoutConfig->layout.grid.cellDirection == "Bottom-to-top") {
+                        context.layoutConfig->layout.grid.cellDirectionMax = ImMax(1, context.layoutConfig->layout.grid.cellDirectionMax + drag_units);
+                    } else {
+                        context.layoutConfig->layout.grid.rowColMax = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.rowColMax + drag_units));
+                    }
+                    resize_drag_accum.y -= drag_units * cellTotalHeight;
+                }
+            }
+            else
+            {
+                resize_drag_accum = ImVec2(0.0f, 0.0f); // reset when not dragging
+            }
+            
+            // Draw resize grip
+            ImU32 resizeCol = ImGui::IsItemHovered() ? ImColor(130, 130, 130, 255) : ImColor(100, 100, 100, 200);
+            auto drawRoundedTriangle = [&](ImVec2 min, ImVec2 max, float r, ImU32 col) {
+                float d = r * 2.41421356f;
+                if (max.x - min.x < 2.0f * d || max.y - min.y < 2.0f * d) {
+                    fgDrawList->AddTriangleFilled(ImVec2(min.x, max.y), max, ImVec2(max.x, min.y), col);
+                    return;
+                }
+                fgDrawList->PathClear();
+                fgDrawList->PathArcTo(ImVec2(max.x - r, max.y - r), r, 0.0f, IM_PI / 2.0f, 5);
+                fgDrawList->PathArcTo(ImVec2(min.x + d, max.y - r), r, IM_PI / 2.0f, IM_PI * 1.25f, 5);
+                fgDrawList->PathArcTo(ImVec2(max.x - r, min.y + d), r, IM_PI * 1.25f, IM_PI * 2.0f, 5);
+                fgDrawList->PathFillConvex(col);
+            };
+            drawRoundedTriangle(resizeGripMin, resizeGripMax, 2.0f, resizeCol);
+            
+            ImU32 lineCol = ImGui::IsItemHovered() ? ImColor(255, 255, 255, 255) : ImColor(200, 200, 200, 255);
+            for (int i = 1; i <= 3; ++i) {
+                float offset = i * 4.0f + 3.0f;
+                ImVec2 p1(resizeGripMax.x - 4.0f, resizeGripMax.y - offset);
+                ImVec2 p2(resizeGripMax.x - offset, resizeGripMax.y - 4.0f);
+                fgDrawList->AddLine(p1, p2, lineCol, 1.5f);
+            }
+            ImGui::End();
+            ImGui::PopStyleVar();
+        }
 
         if (ImGui::IsWindowHovered() && (context.indexHovered == -1))
         {
@@ -1214,7 +1458,7 @@ namespace UI::Grid {
     {
         bool isSelected = false;
 
-        int cellDirectionMax = context.layoutConfig.layout.grid.cellDirectionMax;
+        int cellDirectionMax = context.layoutConfig->layout.grid.cellDirectionMax;
         
         if ((context.index > 0) && (context.userData[context.index - 1].SubgroupId != userData.SubgroupId))
         {
@@ -1226,7 +1470,7 @@ namespace UI::Grid {
 
         int current_s = context.index / cellDirectionMax;
 
-        if ((context.index < SQUAD_MEMBER_LIMIT) && (current_s < context.layoutConfig.layout.grid.rowColMax))
+        if ((context.index < SQUAD_MEMBER_LIMIT) && (current_s < context.layoutConfig->layout.grid.rowColMax))
         {
             context.isValid[context.index] = true;
             context.userData[context.index] = userData;
