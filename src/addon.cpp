@@ -125,6 +125,7 @@ namespace Addon {
         LayoutConfig_t* activeLayout = nullptr;
         bool hideSelf = false;
         bool hideSubgroups = false;
+        std::vector<int>* activeHiddenSubgroups = nullptr;
 
         switch (groupType)
         {
@@ -136,6 +137,7 @@ namespace Addon {
                 }
                 activeLayoutName = ConfigGeneral.partyLayout;
                 hideSelf = ConfigGeneral.isHiddenSelfParty;
+                activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsParty;
                 break;
             case VitalSignsDataLink::E_GROUP_SQUAD_10:
                 VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeRaid);
@@ -146,6 +148,7 @@ namespace Addon {
                 activeLayoutName = ConfigGeneral.raidLayout;
                 hideSelf = ConfigGeneral.isHiddenSelfRaid;
                 hideSubgroups = ConfigGeneral.isHiddenSubgroupsRaid;
+                activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsRaid;
                 break;
             case VitalSignsDataLink::E_GROUP_SQUAD_50:
                 VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeSquad);
@@ -156,10 +159,12 @@ namespace Addon {
                 activeLayoutName = ConfigGeneral.squadLayout;
                 hideSelf = ConfigGeneral.isHiddenSelfSquad;
                 hideSubgroups = ConfigGeneral.isHiddenSubgroupsSquad;
+                activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsSquad;
                 break;
             case VitalSignsDataLink::E_GROUP_NONE:
             default:
                 activeLayoutName = ConfigGeneral.soloLayout;
+                activeHiddenSubgroups = nullptr;
                 break;
         }
 
@@ -179,7 +184,7 @@ namespace Addon {
 
         if ("Grid" == activeLayout->layout.type)
         {
-            if (UI::Grid::BeginGridMenu("VitalSigns##Grid", *activeLayout, ColourPresets, BorderPresets, true /** TODO: isInCombat() */))
+            if (UI::Grid::BeginGridMenu("VitalSigns##Grid", *activeLayout, ColourPresets, BorderPresets, activeHiddenSubgroups, true /** TODO: isInCombat() */))
             {
                 auto clientId = VitalsData->getClientId();
                 auto clientSubgroupId = VitalsData->getUserData(clientId).SubgroupId;
@@ -368,7 +373,7 @@ namespace Addon {
             {
                 layout->previewNodeId = g_LayoutEditor.GetActiveNode();
                 
-                if (UI::Grid::BeginGridMenu("Preview##Grid", *layout, ColourPresets, BorderPresets, true))
+                if (UI::Grid::BeginGridMenu("Preview##Grid", *layout, ColourPresets, BorderPresets, nullptr, true))
                 {
                     VitalSignsDataLink::Effects_t dummyEffects{};
                     VitalSignsDataLink::UserId_t dummyUserId{};

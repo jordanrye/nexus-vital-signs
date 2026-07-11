@@ -2,6 +2,7 @@
 #define SHARED_TYPES_H
 
 #include <string>
+#include <vector>
 
 #include "imgui/imgui.h"
 
@@ -12,6 +13,7 @@ struct GeneralConfig_t
     std::string partyVisibility = "Always show";
     bool isHiddenNativeParty = false;
     bool isHiddenSelfParty = false;
+    std::vector<int> hiddenSubgroupsParty;
     
     /* Raid (10 Players) */
     std::string raidLayout;
@@ -19,6 +21,7 @@ struct GeneralConfig_t
     bool isHiddenSubgroupsRaid = false;
     bool isHiddenSelfRaid = false;
     bool isHiddenNativeRaid = false;
+    std::vector<int> hiddenSubgroupsRaid;
 
     /* Squad (50 Players) */
     std::string squadLayout;
@@ -26,6 +29,7 @@ struct GeneralConfig_t
     bool isHiddenSubgroupsSquad = false;
     bool isHiddenSelfSquad = false;
     bool isHiddenNativeSquad = false;
+    std::vector<int> hiddenSubgroupsSquad;
 
     /* Solo (No Group) */
     std::string soloLayout;

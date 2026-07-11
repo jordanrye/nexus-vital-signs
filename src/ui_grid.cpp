@@ -21,6 +21,7 @@ namespace UI::Grid {
     {
         // Configuration
         LayoutConfig_t* layoutConfig;
+        std::vector<int>* hiddenSubgroups; /** TODO: Global sorting and filtering */
         ColourPresets_t colourPresets;
         BorderPresets_t borderPresets;
 
@@ -36,6 +37,13 @@ namespace UI::Grid {
         bool isValid[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::UserData_t userData[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::UserId_t userIdHovered;
+
+        // Checkbox state
+        struct CheckboxData_t {
+            ImVec2 position;
+            int subgroupId;
+        };
+        std::vector<CheckboxData_t> headerCheckboxes;
     } context;
 
     struct GridDrawProperties_t 
@@ -353,15 +361,17 @@ namespace UI::Grid {
         return properties;
     }
 
-    bool BeginGridMenu(const char* name, LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive)
+    bool BeginGridMenu(const char* name, LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, std::vector<int>* hiddenSubgroups, bool isActive)
     {
         bool isOpen = false;
 
         if (isActive || context.isItemPending)
         {
             context.layoutConfig = &layout;
+            context.hiddenSubgroups = hiddenSubgroups;
             context.colourPresets = colours;
             context.borderPresets = borders;
+            context.headerCheckboxes.clear();
 
             context.isActive = isActive;
             context.isClose = false;
@@ -955,6 +965,18 @@ namespace UI::Grid {
             {
                 std::string headerText = (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1)) ? "New Subgroup" : "Subgroup " + std::to_string(droppedSubgroupId + 1);
                 
+                bool isHidden = false;
+                if (context.hiddenSubgroups)
+                {
+                    isHidden = std::find(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), droppedSubgroupId) != context.hiddenSubgroups->end();
+                }
+
+                if (isHidden)
+                {
+                    /// FIXME: Opacity not working for hidden subgroups
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
+                }
+
                 ImFont* font = nullptr;
                 if (ConfigText.fontSource != "Nexus font" && ConfigText.fontSource != "Default font")
                 {
@@ -1045,6 +1067,18 @@ namespace UI::Grid {
 
                 drawList->AddText(font, ConfigText.fontSize, text_pos, ConfigText.color, headerText.c_str());
                 if (font) ImGui::PopFont();
+
+                if (context.hiddenSubgroups)
+                {
+                    float checkboxSize = ImGui::GetFrameHeight();
+                    ImVec2 checkbox_pos = ImVec2(text_pos.x + text_size.x + 8.0f, text_pos.y + (text_size.y - checkboxSize) * 0.5f);
+                    context.headerCheckboxes.push_back({checkbox_pos, droppedSubgroupId});
+                }
+
+                if (isHidden)
+                {
+                    ImGui::PopStyleVar();
+                }
             }
 
             // Squad Manager: Drag-and-drop (drop)
@@ -1077,6 +1111,18 @@ namespace UI::Grid {
             }
 
             VitalSignsDataLink::UserData_t& userData = context.userData[i];
+
+            bool isHidden = false;
+            if (context.hiddenSubgroups)
+            {
+                isHidden = std::find(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), userData.SubgroupId) != context.hiddenSubgroups->end();
+            }
+
+            if (isHidden)
+            {
+                /// FIXME: Opacity not working for hidden subgroups
+                ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
+            }
 
             ImGui::PushID(i);
             {
@@ -1287,6 +1333,11 @@ namespace UI::Grid {
                 }
             }
             ImGui::PopID();
+            
+            if (isHidden)
+            {
+                ImGui::PopStyleVar();
+            }
         }
 
         drawList->PopClipRect();
@@ -1452,10 +1503,55 @@ namespace UI::Grid {
 
         ImGui::PopID(); // Pushed in `BeginGridMenu`
         ImGui::End(); // Begin in `BeginGridMenu`
+        
+        // Squad Manager: Visibility Checkboxes
+        if (Addon::isSquadManagerActive && context.hiddenSubgroups)
+        {
+            for (const auto& cb : context.headerCheckboxes)
+            {
+                ImGui::SetNextWindowPos(cb.position);
+                float checkboxSize = ImGui::GetFrameHeight();
+                ImGui::SetNextWindowSize(ImVec2(checkboxSize * 2.0f, checkboxSize));
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+                
+                std::string windowName = "##VisibilityGripWindow" + std::to_string(cb.subgroupId);
+                ImGui::Begin(windowName.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+                
+                bool isVisible = std::find(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), cb.subgroupId) == context.hiddenSubgroups->end();
+                
+                ImGui::PushID(cb.subgroupId);
+                if (ImGui::Checkbox("##Visibility", &isVisible))
+                {
+                    if (isVisible)
+                    {
+                        context.hiddenSubgroups->erase(std::remove(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), cb.subgroupId), context.hiddenSubgroups->end());
+                    }
+                    else
+                    {
+                        context.hiddenSubgroups->push_back(cb.subgroupId);
+                    }
+                }
+                ImGui::PopID();
+                
+                ImGui::End();
+                ImGui::PopStyleVar();
+            }
+        }
     }
 
     bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData)
     {
+        bool isHidden = false;
+        if (context.hiddenSubgroups)
+        {
+            isHidden = std::find(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), userData.SubgroupId) != context.hiddenSubgroups->end();
+        }
+
+        if (isHidden && !Addon::isSquadManagerActive)
+        {
+            return false; // Skip entirely, don't even allocate space
+        }
+
         bool isSelected = false;
 
         int cellDirectionMax = context.layoutConfig->layout.grid.cellDirectionMax;

@@ -77,18 +77,21 @@ void dser_GeneralConfig_t(json& object, GeneralConfig_t& config)
         dser_BasicType(object["party-visibility"], config.partyVisibility);
         dser_BasicType(object["party-hide-native"], config.isHiddenNativeParty);
         dser_BasicType(object["party-hide-self"], config.isHiddenSelfParty);
+        dser_BasicType(object["party-hide-subgroups-list"], config.hiddenSubgroupsParty);
         
         dser_BasicType(object["raid-layout"], config.raidLayout);
         dser_BasicType(object["raid-visibility"], config.raidVisibility);
         dser_BasicType(object["raid-hide-subgroups"], config.isHiddenSubgroupsRaid);
         dser_BasicType(object["raid-hide-self"], config.isHiddenSelfRaid);
         dser_BasicType(object["raid-hide-native"], config.isHiddenNativeRaid);
+        dser_BasicType(object["raid-hide-subgroups-list"], config.hiddenSubgroupsRaid);
         
         dser_BasicType(object["squad-layout"], config.squadLayout);
         dser_BasicType(object["squad-visibility"], config.squadVisibility);
         dser_BasicType(object["squad-hide-subgroups"], config.isHiddenSubgroupsSquad);
         dser_BasicType(object["squad-hide-self"], config.isHiddenSelfSquad);
         dser_BasicType(object["squad-hide-native"], config.isHiddenNativeSquad);
+        dser_BasicType(object["squad-hide-subgroups-list"], config.hiddenSubgroupsSquad);
 
         dser_BasicType(object["solo-layout"], config.soloLayout);
     }
@@ -378,16 +381,19 @@ json ser_GeneralConfig_t(const GeneralConfig_t& config)
     object["party-visibility"] = config.partyVisibility;
     object["party-hide-native"] = config.isHiddenNativeParty;
     object["party-hide-self"] = config.isHiddenSelfParty;
+    object["party-hide-subgroups-list"] = config.hiddenSubgroupsParty;
     object["raid-layout"] = config.raidLayout;
     object["raid-visibility"] = config.raidVisibility;
     object["raid-hide-subgroups"] = config.isHiddenSubgroupsRaid;
     object["raid-hide-self"] = config.isHiddenSelfRaid;
     object["raid-hide-native"] = config.isHiddenNativeRaid;
+    object["raid-hide-subgroups-list"] = config.hiddenSubgroupsRaid;
     object["squad-layout"] = config.squadLayout;
     object["squad-visibility"] = config.squadVisibility;
     object["squad-hide-subgroups"] = config.isHiddenSubgroupsSquad;
     object["squad-hide-self"] = config.isHiddenSelfSquad;
     object["squad-hide-native"] = config.isHiddenNativeSquad;
+    object["squad-hide-subgroups-list"] = config.hiddenSubgroupsSquad;
     object["solo-layout"] = config.soloLayout;
     return object;
 }
