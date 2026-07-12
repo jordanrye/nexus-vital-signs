@@ -36,10 +36,10 @@ void dser_GridProperties_t(json& object, GridProperties_t& properties)
 {
     if (!object.is_null())
     {
-        dser_BasicType(object["cell-direction"], properties.cellDirection);
+        dser_BasicType(object["frame-direction"], properties.frameDirection);
         dser_BasicType(object["squad-direction"], properties.squadDirection);
-        dser_BasicType(object["cell-direction-max"], properties.cellDirectionMax);
-        dser_BasicType(object["row-col-max"], properties.rowColMax);
+        dser_BasicType(object["max-rows"], properties.maxRows);
+        dser_BasicType(object["max-columns"], properties.maxColumns);
         dser_BasicType(object["cell-width"], properties.cellWidth);
         dser_BasicType(object["cell-height"], properties.cellHeight);
         dser_BasicType(object["cell-rounding"], properties.cellRounding);
@@ -343,10 +343,10 @@ json ser_Position_t(const Position_t& position)
 json ser_GridProperties_t(const GridProperties_t& properties)
 {
     json object = json::object();
-    object["cell-direction"] = properties.cellDirection;
+    object["frame-direction"] = properties.frameDirection;
     object["squad-direction"] = properties.squadDirection;
-    object["cell-direction-max"] = properties.cellDirectionMax;
-    object["row-col-max"] = properties.rowColMax;
+    object["max-rows"] = properties.maxRows;
+    object["max-columns"] = properties.maxColumns;
     object["cell-width"] = properties.cellWidth;
     object["cell-height"] = properties.cellHeight;
     object["cell-rounding"] = properties.cellRounding;

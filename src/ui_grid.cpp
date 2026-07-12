@@ -288,11 +288,13 @@ namespace UI::Grid {
 
     static void CalcGridDimensions(int itemCount, const GridProperties_t& gridLayout, int& outRows, int& outColumns)
     {
-        int requiredSubgroups = ImMax(1, (itemCount + gridLayout.cellDirectionMax - 1) / gridLayout.cellDirectionMax);
+        int cellDirectionMax = (gridLayout.frameDirection == "Left-to-right" || gridLayout.frameDirection == "Right-to-left") ? gridLayout.maxColumns : gridLayout.maxRows;
+        int requiredSubgroups = ImMax(1, (itemCount + cellDirectionMax - 1) / cellDirectionMax);
 
         // Reserve an extra subgroup block if the user is currently holding a valid drag-and-drop player payload
+        int squadMax = (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left") ? gridLayout.maxColumns : gridLayout.maxRows;
         const ImGuiPayload* payload = ImGui::GetDragDropPayload();
-        if (payload && payload->IsDataType("VS_USER_ID") && (requiredSubgroups < gridLayout.rowColMax + 1))
+        if (payload && payload->IsDataType("VS_USER_ID") && (requiredSubgroups < squadMax + 1))
         {
             requiredSubgroups++;
         }
@@ -301,8 +303,8 @@ namespace UI::Grid {
         outColumns = 1;
 
         // Internal growth (cells)
-        if (gridLayout.cellDirection == "Left-to-right" || gridLayout.cellDirection == "Right-to-left") outColumns = gridLayout.cellDirectionMax;
-        else outRows = gridLayout.cellDirectionMax;
+        if (gridLayout.frameDirection == "Left-to-right" || gridLayout.frameDirection == "Right-to-left") outColumns = cellDirectionMax;
+        else outRows = cellDirectionMax;
 
         // External growth (subgroups)
         if (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left") outColumns *= requiredSubgroups;
@@ -312,8 +314,8 @@ namespace UI::Grid {
     DrawProperties_t CalcDrawProperties(float width, float height, const CellDrawProperties_t& cellDraw, ImDrawCornerFlags cellRoundingCorners, const GridDrawProperties_t& gridDraw, int index)
     {
         // Layout configuration
-        const int cellDirectionMax = context.layoutConfig->layout.grid.cellDirectionMax;
-        const std::string& direction = context.layoutConfig->layout.grid.cellDirection;
+        const std::string& direction = context.layoutConfig->layout.grid.frameDirection;
+        const int cellDirectionMax = (direction == "Left-to-right" || direction == "Right-to-left") ? context.layoutConfig->layout.grid.maxColumns : context.layoutConfig->layout.grid.maxRows;
         const std::string& squadDirection = context.layoutConfig->layout.grid.squadDirection;
 
         // Target indices
@@ -886,7 +888,7 @@ namespace UI::Grid {
         gridDrawProperties.position = context.menuPosition;
 
         const auto& gridLayout = context.layoutConfig->layout.grid;
-        const int cellDirectionMax = gridLayout.cellDirectionMax;
+        const int cellDirectionMax = (gridLayout.frameDirection == "Left-to-right" || gridLayout.frameDirection == "Right-to-left") ? gridLayout.maxColumns : gridLayout.maxRows;
 
         CalcGridDimensions(context.index, gridLayout, gridDrawProperties.rows, gridDrawProperties.columns);
 
@@ -919,11 +921,12 @@ namespace UI::Grid {
         drawList->PushClipRectFullScreen(); // Required to prevent clipping
 
         int lastPopulatedGroupIndex = (context.index == 0) ? -1 : ((context.index - 1) / cellDirectionMax);
-        lastPopulatedGroupIndex = ImMin(lastPopulatedGroupIndex, context.layoutConfig->layout.grid.rowColMax - 1);
-
-        /* Map the new drop target column */
+        int squadMax = (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left") ? gridLayout.maxColumns : gridLayout.maxRows;
+        lastPopulatedGroupIndex = ImMin(lastPopulatedGroupIndex, squadMax - 1);
+        
         int newGroupIndex = lastPopulatedGroupIndex + 1;
-        if ((newGroupIndex < context.layoutConfig->layout.grid.rowColMax) && 
+        
+        if ((newGroupIndex < squadMax) && 
             ((newGroupIndex * cellDirectionMax) < SQUAD_MEMBER_LIMIT))
         {
             lastPopulatedGroupIndex = newGroupIndex;
@@ -992,7 +995,7 @@ namespace UI::Grid {
                 float frameWidth = (float)context.layoutConfig->layout.grid.cellWidth;
                 float frameHeight = (float)context.layoutConfig->layout.grid.cellHeight;
                 float spacing = (float)context.layoutConfig->layout.itemSpacing;
-                std::string cellDir = context.layoutConfig->layout.grid.cellDirection;
+                std::string cellDir = context.layoutConfig->layout.grid.frameDirection;
 
                 float headerWidth, headerHeight;
                 ImVec2 header_p_min;
@@ -1114,8 +1117,10 @@ namespace UI::Grid {
             }
 
             // Skip rendering items outside the bounds
-            int current_s = i / context.layoutConfig->layout.grid.cellDirectionMax;
-            if (current_s >= context.layoutConfig->layout.grid.rowColMax)
+            int cellDirectionMax = (context.layoutConfig->layout.grid.frameDirection == "Left-to-right" || context.layoutConfig->layout.grid.frameDirection == "Right-to-left") ? context.layoutConfig->layout.grid.maxColumns : context.layoutConfig->layout.grid.maxRows;
+            int squadMax = (context.layoutConfig->layout.grid.squadDirection == "Left-to-right" || context.layoutConfig->layout.grid.squadDirection == "Right-to-left") ? context.layoutConfig->layout.grid.maxColumns : context.layoutConfig->layout.grid.maxRows;
+            int current_s = i / cellDirectionMax;
+            if (current_s >= squadMax)
             {
                 continue; 
             }
@@ -1358,8 +1363,10 @@ namespace UI::Grid {
             // Compute first cell for move grip
             DrawProperties_t firstCell = CalcDrawProperties(frameDrawProperties.size.x, frameDrawProperties.size.y, frameDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, 0);
 
-            // Compute last possible cell for resize grip based on current rowColMax and cellDirectionMax
-            int max_index = (context.layoutConfig->layout.grid.rowColMax * context.layoutConfig->layout.grid.cellDirectionMax) - 1;
+            // Compute last possible cell for resize grip based on current squadMax and cellDirectionMax
+            int cellDirectionMax = (context.layoutConfig->layout.grid.frameDirection == "Left-to-right" || context.layoutConfig->layout.grid.frameDirection == "Right-to-left") ? context.layoutConfig->layout.grid.maxColumns : context.layoutConfig->layout.grid.maxRows;
+            int squadMax = (context.layoutConfig->layout.grid.squadDirection == "Left-to-right" || context.layoutConfig->layout.grid.squadDirection == "Right-to-left") ? context.layoutConfig->layout.grid.maxColumns : context.layoutConfig->layout.grid.maxRows;
+            int max_index = (squadMax * cellDirectionMax) - 1;
             DrawProperties_t lastCell = CalcDrawProperties(frameDrawProperties.size.x, frameDrawProperties.size.y, frameDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, max_index);
 
             ImDrawList* fgDrawList = ImGui::GetForegroundDrawList();
@@ -1389,7 +1396,7 @@ namespace UI::Grid {
             float moveGripWidth = 22.0f;
             float moveGripHeight = 24.0f;
             ImVec2 moveGripMin;
-            std::string cellDir = context.layoutConfig->layout.grid.cellDirection;
+            std::string cellDir = context.layoutConfig->layout.grid.frameDirection;
             if (cellDir == "Top-to-bottom") {
                 // Header is above, place grip to the left of the dotted line's top-left corner
                 moveGripMin = ImVec2(border_min.x - moveGripWidth - 6.0f, border_min.y);
@@ -1440,26 +1447,17 @@ namespace UI::Grid {
 
                 float cellTotalWidth = frameDrawProperties.size.x + frameDrawProperties.spacing + frameDrawProperties.padding.w;
                 float cellTotalHeight = frameDrawProperties.size.y + frameDrawProperties.spacing + frameDrawProperties.padding.x;
-
                 if (std::abs(resize_drag_accum.x) > cellTotalWidth)
                 {
-                    int drag_units = resize_drag_accum.x / cellTotalWidth;
-                    if (context.layoutConfig->layout.grid.cellDirection == "Left-to-right" || context.layoutConfig->layout.grid.cellDirection == "Right-to-left") {
-                        context.layoutConfig->layout.grid.cellDirectionMax = ImMax(1, context.layoutConfig->layout.grid.cellDirectionMax + drag_units);
-                    } else {
-                        context.layoutConfig->layout.grid.rowColMax = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.rowColMax + drag_units));
-                    }
+                    int drag_units = (int)(resize_drag_accum.x / cellTotalWidth);
+                    context.layoutConfig->layout.grid.maxColumns = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.maxColumns + drag_units));
                     resize_drag_accum.x -= drag_units * cellTotalWidth;
                 }
                 
                 if (std::abs(resize_drag_accum.y) > cellTotalHeight)
                 {
-                    int drag_units = resize_drag_accum.y / cellTotalHeight;
-                    if (context.layoutConfig->layout.grid.cellDirection == "Top-to-bottom" || context.layoutConfig->layout.grid.cellDirection == "Bottom-to-top") {
-                        context.layoutConfig->layout.grid.cellDirectionMax = ImMax(1, context.layoutConfig->layout.grid.cellDirectionMax + drag_units);
-                    } else {
-                        context.layoutConfig->layout.grid.rowColMax = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.rowColMax + drag_units));
-                    }
+                    int drag_units = (int)(resize_drag_accum.y / cellTotalHeight);
+                    context.layoutConfig->layout.grid.maxRows = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.maxRows + drag_units));
                     resize_drag_accum.y -= drag_units * cellTotalHeight;
                 }
             }
@@ -1564,7 +1562,16 @@ namespace UI::Grid {
 
         bool isSelected = false;
 
-        int cellDirectionMax = context.layoutConfig->layout.grid.cellDirectionMax;
+        int cellDirectionMax = (context.layoutConfig->layout.grid.frameDirection == "Left-to-right" || context.layoutConfig->layout.grid.frameDirection == "Right-to-left") ? context.layoutConfig->layout.grid.maxColumns : context.layoutConfig->layout.grid.maxRows;
+
+        /* Skip trailing empty cells */
+        if (context.isItemPending && VitalsData->getUsers().find(context.userData[context.index].SubgroupId) == VitalsData->getUsers().end())
+        {
+            if (context.index % cellDirectionMax != 0)
+            {
+                context.index = ((context.index / cellDirectionMax) + 1) * cellDirectionMax;
+            }
+        }
         
         if ((context.index > 0) && (context.userData[context.index - 1].SubgroupId != userData.SubgroupId))
         {

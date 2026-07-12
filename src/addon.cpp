@@ -503,21 +503,6 @@ namespace Addon {
             "Profession Color Palette",
             "Heat Map Color Palette"
         };
-        static const char* layoutOptions[] {
-            "Radial",
-            "Grid"
-        };
-        static const char* visibilityOptions[] {
-            "Always visible",
-            "Visible while in combat",
-            "Visible while activated"
-        };
-        static const char* cellDirectionOptions[] {
-            "Left-to-right",
-            "Top-to-bottom",
-            "Right-to-left",
-            "Bottom-to-top"
-        };
 
         static char inputBuff[MAX_PATH];
 
@@ -606,53 +591,36 @@ namespace Addon {
             ImGui::TextDisabled("Grid Properties");
             ImGui::Separator();
             {
-                form_Direction(layout.grid.cellDirection, "Frame Direction");
+                form_Direction(layout.grid.frameDirection, "Frame Direction");
                 ImGui::SameLine();
                 ImGui::TextDisabled("(?)");
                 ImGui::TooltipGeneric(
                     "Determines whether players in the same\n" \
-                    "subgroup fill down in a column or across\n" \
-                    "in a row.");
+                    "subgroup are positioned in a columnar or\n" \
+                    "row arrangement.");
 
-                std::string label = ((layout.grid.cellDirection == "Top-to-bottom" || layout.grid.cellDirection == "Bottom-to-top") ? "Column" : "Row");
-                if (ImGui::SliderInt(std::string("Max Frames Per " + label + "##CELL_DIRECTION_MAX").c_str(), &layout.grid.cellDirectionMax, 1, UI::SQUAD_MEMBER_LIMIT))
-                {
-                    if (layout.grid.cellDirectionMax < 1)
-                    {
-                        layout.grid.cellDirectionMax = 1;
-                    }
-                }
-                ImGui::SameLine();
-                ImGui::TextDisabled("(?)");
-                ImGui::TooltipGeneric(std::string(
-                    "Determines how many players can fit in a\n" \
-                    "subgroup's " + label + " before a new " + label + " is\n" \
-                    "started for that subgroup.").c_str());
-
-                form_Direction(layout.grid.squadDirection, std::string(label + " Direction"));
+                form_Direction(layout.grid.squadDirection, "Squad Direction");
                 ImGui::SameLine();
                 ImGui::TextDisabled("(?)");
                 ImGui::TooltipGeneric(
-                    "Determines where Subgroup 2 spawns\n" \
+                    "Determines where Subgroup 2 is positioned\n" \
                     "relative to Subgroup 1.");
 
-                std::string maxLabel = ((layout.grid.squadDirection == "Top-to-bottom" || layout.grid.squadDirection == "Bottom-to-top") ? "Rows" : "Columns");
-                if (ImGui::SliderInt(std::string("Max " + maxLabel + "##ROW_COL_MAX").c_str(), &layout.grid.rowColMax, 1, 15))
+                if (ImGui::InputInt("Max Rows##MAX_ROWS", &layout.grid.maxRows, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
-                    if (layout.grid.rowColMax < 1)
+                    if (layout.grid.maxRows < 1)
                     {
-                        layout.grid.rowColMax = 1;
-                    }
-                    if (layout.grid.rowColMax > UI::SQUAD_MEMBER_LIMIT)
-                    {
-                        layout.grid.rowColMax = UI::SQUAD_MEMBER_LIMIT;
+                        layout.grid.maxRows = 1;
                     }
                 }
-                ImGui::SameLine();
-                ImGui::TextDisabled("(?)");
-                ImGui::TooltipGeneric(std::string(
-                    "Determines the maximum number of " + maxLabel + "\n" \
-                    "(not subgroups) that can be displayed.").c_str());
+                
+                if (ImGui::InputInt("Max Columns##MAX_COLUMNS", &layout.grid.maxColumns, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
+                {
+                    if (layout.grid.maxColumns < 1)
+                    {
+                        layout.grid.maxColumns = 1;
+                    }
+                }
             }
 
             ImGui::TextDisabled("Frame Properties");
