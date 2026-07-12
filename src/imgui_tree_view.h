@@ -94,6 +94,7 @@ private:
     TreeNodeUID m_selectedId = TreeNodeUID::NONE;
     TreeNodeUID m_nextId = TreeNodeUID::DYNAMIC_START;
     std::string m_title = "Select Node...";
+    float m_menuWidth = 200.0f;
 
     // Internal helpers
     TreeNode* FindNode(std::vector<TreeNode>& nodes, TreeNodeUID id);

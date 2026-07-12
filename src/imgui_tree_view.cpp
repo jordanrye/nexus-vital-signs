@@ -85,22 +85,53 @@ void TreeView::RegisterContentView(TreeNodeUID id, ContentRenderer&& renderer)
 
 void TreeView::RenderTreeView(DeleteNodeCallback deleteCb, AddIndicatorCallback addCb, ReorderNodeCallback reorderCb)
 {
-    static const float menuWidth = 200.0f;
-
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.f, 2.f));
-    ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.f);
-
-    if (ImGui::BeginChild("TreeViewView", ImVec2(menuWidth, 0), true))
+    /* Tree View */
     {
-        ImGui::TextDisabled(m_title.c_str());
-        ImGui::Separator();
-
-        RenderNodes(Nodes, TreeNodeUID::NONE, deleteCb, addCb, reorderCb);
-
-        ImGui::EndChild();
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.f, 2.f));
+        ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.f);
+    
+        if (ImGui::BeginChild("TreeViewView", ImVec2(m_menuWidth, 0), true))
+        {
+            ImGui::TextDisabled(m_title.c_str());
+            ImGui::Separator();
+    
+            RenderNodes(Nodes, TreeNodeUID::NONE, deleteCb, addCb, reorderCb);
+    
+            ImGui::EndChild();
+        }
+    
+        ImGui::PopStyleVar(2);
     }
 
-    ImGui::PopStyleVar(2);
+    ImGui::SameLine();
+
+    /* Adjustable separator */
+    {
+        ImU32 separatorColour = ImGui::GetColorU32(ImGuiCol_Separator);
+        ImGui::InvisibleButton("##AdjustableSeparator", ImVec2(8.0f, ImGui::GetContentRegionAvail().y));
+    
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+            separatorColour = ImGui::GetColorU32(ImGuiCol_SeparatorHovered);
+        }
+        else if (ImGui::IsItemActive())
+        {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+            separatorColour = ImGui::GetColorU32(ImGuiCol_SeparatorActive);
+    
+            // Get new column width and clamp to reasonable limits
+            m_menuWidth += ImGui::GetIO().MouseDelta.x;
+            if (m_menuWidth < 100.0f) m_menuWidth = 100.0f;
+        }
+    
+        // Draw adjustable sepatator 
+        ImVec2 p_min = ImGui::GetItemRectMin();
+        ImVec2 p_max = ImGui::GetItemRectMax();
+        float thickness = 2.0f;
+        float mid_x = p_min.x + (p_max.x - p_min.x - thickness) * 0.5f;
+        ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(mid_x, p_min.y), ImVec2(mid_x + thickness, p_max.y), separatorColour);
+    }
 
     /* Start the ContentView on the same line. */
     ImGui::SameLine();
