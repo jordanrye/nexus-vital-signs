@@ -7,6 +7,8 @@
 
 namespace Addon {
 
+extern bool isSquadManagerActive;
+
 void KeybindHandler(const char* aIdentifier, bool aIsRelease);
 void Render();
 void Options();

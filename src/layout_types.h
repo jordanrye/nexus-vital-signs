@@ -43,9 +43,10 @@ struct TextStyle_t
 
 struct GridProperties_t
 {
-    std::string cellDirection = "Left-to-right";
-    int cellDirectionMax = 5;
-    int cellMax = 10;
+    std::string frameDirection = "Left-to-right";
+    std::string squadDirection = "Top-to-bottom";
+    int maxRows = 5;
+    int maxColumns = 10;
     int cellWidth = 200;
     int cellHeight = 60;
     int cellRounding = 4;
@@ -213,7 +214,7 @@ struct Indicator_t
 struct LayoutConfig_t
 {
     std::string name;
-    std::string colors = "Generic";
+    std::string colors = "Default";
     Position_t position;
     Layout_t layout;
     std::vector<Indicator_t> indicators;

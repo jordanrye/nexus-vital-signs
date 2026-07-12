@@ -1,6 +1,8 @@
 #ifndef VS_UI_GRID_H
 #define VS_UI_GRID_H
 
+#include <vector>
+
 #include "data_link/data_link.h"
 #include "imgui/imgui.h"
 
@@ -9,7 +11,7 @@
 
 namespace UI::Grid {
 
-    bool BeginGridMenu(const char* name, const LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, bool isActive);
+    bool BeginGridMenu(const char* name, LayoutConfig_t& layout, const ColourPresets_t& colours, const BorderPresets_t& borders, std::vector<int>* hiddenSubgroups, bool isActive);
     void EndGridMenu();
     bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData);
 

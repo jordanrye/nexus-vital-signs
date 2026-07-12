@@ -51,6 +51,7 @@ namespace Addon {
     /* Global state */
     static bool isRadialMenuActive = false;
     static bool isPreviewModeActive = false;
+    bool isSquadManagerActive = false;
 
     /* Option tabs */
     void OptionsGeneral();
@@ -81,6 +82,24 @@ namespace Addon {
                 isRadialMenuActive = false;
             }
         }
+        else if (strcmp(aIdentifier, "KB_VS_TOGGLE_SQUAD_MANAGER") == 0)
+        {
+            if (isValidGameState())
+            {
+                if (!aIsRelease)
+                {
+                    isSquadManagerActive = true;
+                }
+                else
+                {
+                    isSquadManagerActive = false;
+                }
+            }
+            else
+            {
+                isSquadManagerActive = false;
+            }
+        }
     }
 
     bool IsFrameHidden(std::string visibility)
@@ -104,6 +123,9 @@ namespace Addon {
         const VitalSignsDataLink::E_GROUP_TYPE groupType = VitalsData->getGroupType();
         std::string activeLayoutName = ConfigGeneral.soloLayout;
         LayoutConfig_t* activeLayout = nullptr;
+        bool hideSelf = false;
+        bool hideSubgroups = false;
+        std::vector<int>* activeHiddenSubgroups = nullptr;
 
         switch (groupType)
         {
@@ -114,6 +136,8 @@ namespace Addon {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.partyLayout;
+                hideSelf = ConfigGeneral.isHiddenSelfParty;
+                activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsParty;
                 break;
             case VitalSignsDataLink::E_GROUP_SQUAD_10:
                 VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeRaid);
@@ -122,6 +146,9 @@ namespace Addon {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.raidLayout;
+                hideSelf = ConfigGeneral.isHiddenSelfRaid;
+                hideSubgroups = ConfigGeneral.isHiddenSubgroupsRaid;
+                activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsRaid;
                 break;
             case VitalSignsDataLink::E_GROUP_SQUAD_50:
                 VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeSquad);
@@ -130,10 +157,14 @@ namespace Addon {
                     return;
                 }
                 activeLayoutName = ConfigGeneral.squadLayout;
+                hideSelf = ConfigGeneral.isHiddenSelfSquad;
+                hideSubgroups = ConfigGeneral.isHiddenSubgroupsSquad;
+                activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsSquad;
                 break;
             case VitalSignsDataLink::E_GROUP_NONE:
             default:
                 activeLayoutName = ConfigGeneral.soloLayout;
+                activeHiddenSubgroups = nullptr;
                 break;
         }
 
@@ -153,15 +184,31 @@ namespace Addon {
 
         if ("Grid" == activeLayout->layout.type)
         {
-            if (UI::Grid::BeginGridMenu("VitalSigns##Grid", *activeLayout, ColourPresets, BorderPresets, true /** TODO: isInCombat() */))
+            if (UI::Grid::BeginGridMenu("VitalSigns##Grid", *activeLayout, ColourPresets, BorderPresets, activeHiddenSubgroups, true /** TODO: isInCombat() */))
             {
-                for (auto &user : VitalsData->getUsers())
+                auto clientId = VitalsData->getClientId();
+                auto clientSubgroupId = VitalsData->getUserData(clientId).SubgroupId;
+
+                for (const auto &subgroup : VitalsData->getUsers())
                 {
-                    auto userData = VitalsData->getUserData(user);
-    
-                    if (UI::Grid::GridMenuItem(userData))
+                    if (hideSubgroups && subgroup.first != clientSubgroupId)
                     {
-                        VitalsData->setLockedSelection(user);
+                        continue;
+                    }
+
+                    for (const auto &user : subgroup.second)
+                    {
+                        if (hideSelf && user == clientId)
+                        {
+                            continue;
+                        }
+
+                        auto userData = VitalsData->getUserData(user);
+            
+                        if (UI::Grid::GridMenuItem(userData))
+                        {
+                            VitalsData->setLockedSelection(user);
+                        }
                     }
                 }
     
@@ -172,13 +219,29 @@ namespace Addon {
         {
             if (UI::Radial::BeginRadialMenu("VitalSigns##Radial", activeLayout->position, activeLayout->layout, activeLayout->colors, ColourPresets, isRadialMenuActive))
             {
-                for (auto &user : VitalsData->getUsers())
-                {
-                    auto userData = VitalsData->getUserData(user);
+                auto clientId = VitalsData->getClientId();
+                auto clientSubgroupId = VitalsData->getUserData(clientId).SubgroupId;
 
-                    if (UI::Radial::RadialMenuItem(userData))
+                for (const auto &subgroup : VitalsData->getUsers())
+                {
+                    if (hideSubgroups && subgroup.first != clientSubgroupId)
                     {
-                        VitalsData->setLockedSelection(user);
+                        continue;
+                    }
+
+                    for (const auto &user : subgroup.second)
+                    {
+                        if (hideSelf && user == clientId)
+                        {
+                            continue;
+                        }
+
+                        auto userData = VitalsData->getUserData(user);
+
+                        if (UI::Radial::RadialMenuItem(userData))
+                        {
+                            VitalsData->setLockedSelection(user);
+                        }
                     }
                 }
 
@@ -253,6 +316,7 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.partyLayout);
             form_Visibility(ConfigGeneral.partyVisibility);
+            ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfParty);
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeParty);
         }
         ImGui::PopID();
@@ -263,6 +327,8 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.raidLayout);
             form_Visibility(ConfigGeneral.raidVisibility);
+            ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfRaid);
+            ImGui::Checkbox("Hide subgroups", &ConfigGeneral.isHiddenSubgroupsRaid);
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeRaid);
         }
         ImGui::PopID();
@@ -273,6 +339,8 @@ namespace Addon {
             ImGui::Separator();
             form_SelectLayout(layoutNames, ConfigGeneral.squadLayout);
             form_Visibility(ConfigGeneral.squadVisibility);
+            ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfSquad);
+            ImGui::Checkbox("Hide subgroups", &ConfigGeneral.isHiddenSubgroupsSquad);
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
         }
         ImGui::PopID();
@@ -305,11 +373,15 @@ namespace Addon {
             {
                 layout->previewNodeId = g_LayoutEditor.GetActiveNode();
                 
-                if (UI::Grid::BeginGridMenu("Preview##Grid", *layout, ColourPresets, BorderPresets, true))
+                if (UI::Grid::BeginGridMenu("Preview##Grid", *layout, ColourPresets, BorderPresets, nullptr, true))
                 {
                     VitalSignsDataLink::Effects_t dummyEffects{};
+                    VitalSignsDataLink::UserId_t dummyUserId{};
+                    VitalSignsDataLink::SubgroupId_t dummySubgroupId = 1;
+                    int previewCount = 0;
                     auto AddPreviewItem = [&](const char* name, VitalSignsDataLink::EProfession prof, VitalSignsDataLink::ESpecialisation spec, float hp, VitalSignsDataLink::E_HEALTH_TYPE hpType, float barrier) {
                         VitalSignsDataLink::UserData_t user;
+                        user.SubgroupId = (previewCount / 5) + 1;
                         user.CharacterName = name;
                         user.Profession = prof;
                         user.Specialisation = spec;
@@ -319,6 +391,7 @@ namespace Addon {
                         user.Shroud = VitalSignsDataLink::Resource_t(hp, 1.0f);
                         user.Effects = dummyEffects;
                         UI::Grid::GridMenuItem(user);
+                        previewCount++;
                     };
 
                     AddPreviewItem("Preview 1", VitalSignsDataLink::EProfession::Elementalist, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
@@ -426,23 +499,9 @@ namespace Addon {
     void ContentViewGeneral(std::string& name, std::string& colors, Position_t& position, Layout_t& layout)
     {
         static const char* colorsOptions[] {
-            "Generic Color Palette",
-            "Profession Color Palette"
-        };
-        static const char* layoutOptions[] {
-            "Radial",
-            "Grid"
-        };
-        static const char* visibilityOptions[] {
-            "Always visible",
-            "Visible while in combat",
-            "Visible while activated"
-        };
-        static const char* cellDirectionOptions[] {
-            "Left-to-right",
-            "Top-to-bottom",
-            "Right-to-left",
-            "Bottom-to-top"
+            "Default Color Palette",
+            "Profession Color Palette",
+            "Heat Map Color Palette"
         };
 
         static char inputBuff[MAX_PATH];
@@ -475,29 +534,31 @@ namespace Addon {
         ImGui::Separator();
         {
             static int colorsSelection = 0; // Default to "Centre"
-            if (colors == "Generic") colorsSelection = 0;
-            else if (colors == "Role") colorsSelection = 1;
+            if (colors == "Default") colorsSelection = 0;
             else if (colors == "Profession") colorsSelection = 1;
-            else if (colors == "Party") colorsSelection = 3;
+            else if (colors == "Heat Map") colorsSelection = 2;
+            // else if (colors == "Role") colorsSelection = -1;
+            // else if (colors == "Party") colorsSelection = -1;
 
             if (ImGui::Combo("Color Palette", &colorsSelection, colorsOptions, IM_ARRAYSIZE(colorsOptions)))
             {
-                if (colorsSelection == 0) colors = "Generic";
+                if (colorsSelection == 0) colors = "Default";
                 else if (colorsSelection == 1) colors = "Profession";
+                else if (colorsSelection == 2) colors = "Heat Map";
             }
         }
 
-        ImGui::TextDisabled("Layout");
-        ImGui::Separator();
+        /* Radial*/
+        if (0U == layoutSelection)
         {
-            /* Radial*/
-            if (0U == layoutSelection)
+            ImGui::TextDisabled("Layout");
+            ImGui::Separator();
             {
                 ImGui::InputFloat("Radius (Inner)##RADIUS_MIN", &layout.radial.sectorRadiusInner, 5.f, 10.f, "%.2f");
                 ImGui::InputFloat("Radius (Outer)##RADIUS_MAX", &layout.radial.sectorRadiusOuter, 5.f, 10.f, "%.2f");
                 ImGui::SliderInt("Items (Min)##ITEMS_MIN", &layout.radial.sectorCountMin, 2, 10);
                 ImGui::SliderInt("Items (Max)##ITEMS_MAX", &layout.radial.sectorCountMax, 4, UI::SQUAD_MEMBER_LIMIT);
-                if (ImGui::InputInt("Item Spacing##ITEM_INNER_SPACING", &layout.itemSpacing, 1, 2))
+                if (ImGui::InputInt("Item Spacing##ITEM_INNER_SPACING", &layout.itemSpacing, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     const float MAX_SPACING = (layout.radial.sectorRadiusOuter - layout.radial.sectorRadiusInner) / 2;
                     if (layout.itemSpacing > MAX_SPACING)
@@ -509,7 +570,7 @@ namespace Addon {
                         layout.itemSpacing = 0;
                     }
                 }
-                if (ImGui::InputInt("Item Border##ITEM_BORDER", &layout.itemBorder, 1, 2))
+                if (ImGui::InputInt("Item Border##ITEM_BORDER", &layout.itemBorder, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     const float MAX_BORDER = (layout.radial.sectorRadiusOuter - layout.radial.sectorRadiusInner) / 2;
                     if (layout.itemBorder > MAX_BORDER)
@@ -522,62 +583,78 @@ namespace Addon {
                     }
                 }
             }
-            
-            /* Grid */
-            if (1U == layoutSelection)
+        }
+
+        /* Grid */
+        if (1U == layoutSelection)
+        {
+            ImGui::TextDisabled("Grid Properties");
+            ImGui::Separator();
             {
-                form_Direction(layout.grid.cellDirection);
+                form_Direction(layout.grid.frameDirection, "Frame Direction");
+                ImGui::SameLine();
+                ImGui::TextDisabled("(?)");
+                ImGui::TooltipGeneric(
+                    "Determines whether players in the same\n" \
+                    "subgroup are positioned in a columnar or\n" \
+                    "row arrangement.");
 
-                std::string label = ((layout.grid.cellDirection == "Top-to-bottom" || layout.grid.cellDirection == "Bottom-to-top") ? "Row" : "Column");
-                if (ImGui::SliderInt(std::string("Max Cells Per " + label + "##CELL_DIRECTION_MAX").c_str(), &layout.grid.cellDirectionMax, 1, UI::SQUAD_MEMBER_LIMIT))
-                {
-                    if (layout.grid.cellDirectionMax < 1)
-                    {
-                        layout.grid.cellDirectionMax = 1;
-                    }
-                }
+                form_Direction(layout.grid.squadDirection, "Squad Direction");
+                ImGui::SameLine();
+                ImGui::TextDisabled("(?)");
+                ImGui::TooltipGeneric(
+                    "Determines where Subgroup 2 is positioned\n" \
+                    "relative to Subgroup 1.");
 
-                if (ImGui::SliderInt("Max Cells##CELL_MAX", &layout.grid.cellMax, 1, UI::SQUAD_MEMBER_LIMIT))
+                if (ImGui::InputInt("Max Rows##MAX_ROWS", &layout.grid.maxRows, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
-                    if (layout.grid.cellMax < 1)
+                    if (layout.grid.maxRows < 1)
                     {
-                        layout.grid.cellMax = 1;
-                    }
-                    if (layout.grid.cellMax > UI::SQUAD_MEMBER_LIMIT)
-                    {
-                        layout.grid.cellMax = UI::SQUAD_MEMBER_LIMIT;
+                        layout.grid.maxRows = 1;
                     }
                 }
                 
-                if (ImGui::InputInt("Cell Width##CELL_WIDTH", &layout.grid.cellWidth, 1))
+                if (ImGui::InputInt("Max Columns##MAX_COLUMNS", &layout.grid.maxColumns, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
+                {
+                    if (layout.grid.maxColumns < 1)
+                    {
+                        layout.grid.maxColumns = 1;
+                    }
+                }
+            }
+
+            ImGui::TextDisabled("Frame Properties");
+            ImGui::Separator();
+            {
+                if (ImGui::InputInt("Width##CELL_WIDTH", &layout.grid.cellWidth, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.grid.cellWidth < 0)
                     {
                         layout.grid.cellWidth = 0;
                     }
                 }
-                if (ImGui::InputInt("Cell Height##CELL_HEIGHT", &layout.grid.cellHeight, 1))
+                if (ImGui::InputInt("Height##CELL_HEIGHT", &layout.grid.cellHeight, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.grid.cellHeight < 0)
                     {
                         layout.grid.cellHeight = 0;
                     }
                 }
-                if (ImGui::InputInt("Cell Rounding##CELL_ROUNDING", &layout.grid.cellRounding, 1))
+                if (ImGui::InputInt("Rounding##CELL_ROUNDING", &layout.grid.cellRounding, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.grid.cellRounding < 0)
                     {
                         layout.grid.cellRounding = 0;
                     }
                 }
-                if (ImGui::InputInt("Cell Border##CELL_BORDER", &layout.itemBorder, 1))
+                if (ImGui::InputInt("Border##CELL_BORDER", &layout.itemBorder, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.itemBorder < 0)
                     {
                         layout.itemBorder = 0;
                     }
                 }
-                if (ImGui::InputInt("Cell Spacing##CELL_SPACING", &layout.itemSpacing, 1))
+                if (ImGui::InputInt("Spacing##CELL_SPACING", &layout.itemSpacing, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     if (layout.itemSpacing < -layout.itemBorder)
                     {
@@ -597,7 +674,10 @@ namespace Addon {
             memset(inputBuff_Name, 0, MAX_PATH);
             strcpy_s(inputBuff_Name, MAX_PATH, indicator.name.c_str());
 
-            ImGui::Checkbox("Enabled", &indicator.enabled);
+            if (ImGui::Checkbox("Enabled", &indicator.enabled))
+            {
+                g_LayoutEditor.UpdateNodeEnabled(g_LayoutEditor.GetActiveNode(), indicator.enabled);
+            }
             if (ImGui::InputText("Name", inputBuff_Name, IM_ARRAYSIZE(inputBuff_Name)))
             {
                 indicator.name = inputBuff_Name;
@@ -877,7 +957,7 @@ namespace Addon {
             ImGui::Separator();
             {
                 ImGui::ColorEdit4("Color##BORDER_COLOR", (float*)&indicator.border.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::InputInt("Thickness##BORDER_THICKNESS", &indicator.border.thickness);
+                ImGui::InputInt("Thickness##BORDER_THICKNESS", &indicator.border.thickness, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue);
             }
             
             ImGui::TextDisabled("Trigger");
@@ -994,7 +1074,8 @@ namespace Addon {
                 indicator.name, 
                 indicator.type,
                 std::move(children),
-                (indicator.type == "Group") ? TreeNodeType::BRANCH : TreeNodeType::LEAF
+                ((indicator.type == "Group") ? TreeNodeType::BRANCH : TreeNodeType::LEAF),
+                indicator.enabled
             });
         }
     }
@@ -1041,8 +1122,8 @@ namespace Addon {
         TreeNodeUID coloursBranchId = g_PresetConfig.GenerateUID();
         g_PresetConfig.AppendNode(TreeNodeUID::NONE, coloursBranchId, "Colors", "", TreeNodeType::BRANCH);
 
-        AddPresetItem(coloursBranchId, "Colors", "Simple", []() {
-            ImGui::PushID("Colors/Simple");
+        AddPresetItem(coloursBranchId, "Colors", "Default", []() {
+            ImGui::PushID("Colors/Default");
             {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
@@ -1064,17 +1145,42 @@ namespace Addon {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
                 ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_PROF_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Elementalist", &(ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Engineer", &(ColourPresets.COLOUR_PROF_HEALTH_ENGINEER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Guardian", &(ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Mesmer", &(ColourPresets.COLOUR_PROF_HEALTH_MESMER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Necromancer", &(ColourPresets.COLOUR_PROF_HEALTH_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Ranger", &(ColourPresets.COLOUR_PROF_HEALTH_RANGER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Revenant", &(ColourPresets.COLOUR_PROF_HEALTH_REVENANT.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Thief", &(ColourPresets.COLOUR_PROF_HEALTH_THIEF.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
-                ImGui::ColorEdit4("Warrior", &(ColourPresets.COLOUR_PROF_HEALTH_WARRIOR.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Elementalist)", &(ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Engineer)", &(ColourPresets.COLOUR_PROF_HEALTH_ENGINEER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Guardian)", &(ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Mesmer)", &(ColourPresets.COLOUR_PROF_HEALTH_MESMER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Necromancer)", &(ColourPresets.COLOUR_PROF_HEALTH_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Ranger)", &(ColourPresets.COLOUR_PROF_HEALTH_RANGER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Revenant)", &(ColourPresets.COLOUR_PROF_HEALTH_REVENANT.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Thief)", &(ColourPresets.COLOUR_PROF_HEALTH_THIEF.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Warrior)", &(ColourPresets.COLOUR_PROF_HEALTH_WARRIOR.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Downed)", &(ColourPresets.COLOUR_PROF_HEALTH_DOWNED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Defeated)", &(ColourPresets.COLOUR_PROF_HEALTH_DEFEATED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Necromancer)", &(ColourPresets.COLOUR_PROF_SHROUD_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Specter)", &(ColourPresets.COLOUR_PROF_SHROUD_SPECTER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_PROF_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_PROF_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+            }
+            ImGui::PopID();
+        });
+
+        AddPresetItem(coloursBranchId, "Colors", "Heat Map", []() {
+            ImGui::PushID("Colors/HeatMap");
+            {
+                ImGui::TextDisabled("Color Properties");
+                ImGui::Separator();
+                ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_HEATMAP_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 100%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_100.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 75%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_75.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 50%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_50.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 25%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_25.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Alive: 0%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_0.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Downed)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_DOWNED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Defeated)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_DEFEATED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Necromancer)", &(ColourPresets.COLOUR_HEATMAP_SHROUD_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Specter)", &(ColourPresets.COLOUR_HEATMAP_SHROUD_SPECTER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_HEATMAP_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_HEATMAP_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
             }
             ImGui::PopID();
         });

@@ -9,7 +9,7 @@
 
 #include "shared.h"
 
-void form_Direction(std::string& direction);
+void form_Direction(std::string& direction, const std::string label = "Direction");
 void form_Font(std::string& fontSource, std::string& fontFilePath);
 void form_FontPreset(std::string& fontSource, std::string& fontFilePath);
 void form_FontSize(std::string& fontSource, float& fontSize);

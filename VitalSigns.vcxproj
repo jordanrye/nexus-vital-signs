@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -96,21 +96,26 @@
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorOrder.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorSignal.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\ChCliOrder.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Chat\ChatContext.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Combat\CbBuffMgr.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Combat\CbCombatant.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Dialog\DialogManager.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Frame\Frame.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Frame\FrameApi.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Map\EMapFlags.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Map\EMapType.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Map\MapDef.h" />
     <ClInclude Include="src\data_link\gw2re\Game\MissionContext.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Player\EPlayerFlags.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannel.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelMember.h" />
     <ClInclude Include="src\data_link\data_link.h" />
     <ClInclude Include="src\basic_types.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlContact.h" />
     <ClInclude Include="src\forms\forms.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Agent\Agent.h" />
     <ClInclude Include="src\data_link\gw2re\Game\AgentSelection\AsContext.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\Character.h" />
-    <ClInclude Include="src\data_link\gw2re\Game\Char\ChBuffMgr.h" />
-    <ClInclude Include="src\data_link\gw2re\Game\Char\ChCombatant.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\ChCoreStats.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\ChProfession.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChBuffType.h" />
@@ -162,8 +167,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\addon.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Chat\ChatContext.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Combat\CbCombatant.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Dialog\DialogManager.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Frame\Frame.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Frame\FrameApi.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Portal\PlChannel.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Portal\PlContact.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Squad\SquadContext.cpp" />
     <ClCompile Include="src\forms\icon_text.cpp" />
     <ClCompile Include="src\forms\visibility.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.cpp" />
@@ -187,8 +198,6 @@
     <ClCompile Include="src\data_link\gw2re\Game\Agent\Agent.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\AgentSelection\AsContext.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\Character.cpp" />
-    <ClCompile Include="src\data_link\gw2re\Game\Char\ChBuffMgr.cpp" />
-    <ClCompile Include="src\data_link\gw2re\Game\Char\ChCombatant.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChCoreStats.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChProfession.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Game\EventApi.cpp" />

@@ -349,13 +349,18 @@ void LayoutManager::RegisterIndicatorsRecursive(TreeNodeUID parentId, const std:
 static LayoutConfig_t GetDefaultGridLayout()
 {
     LayoutConfig_t layout{};
-    layout.colors = "Generic";
+    layout.layout.type = "Grid";
+    // Position
     layout.position.anchor = "Centre";
     layout.position.offset = { 0, 0 };
-    layout.layout.type = "Grid";
-    // Grid specific properties
-    layout.layout.grid.cellDirection = "Top-to-bottom";
-    layout.layout.grid.cellDirectionMax = 5;
+    // Color Palette
+    layout.colors = "Default";
+    // Grid Properties
+    layout.layout.grid.frameDirection = "Left-to-right";
+    layout.layout.grid.squadDirection = "Top-to-bottom";
+    layout.layout.grid.maxRows = 5;
+    layout.layout.grid.maxColumns = 10;
+    // Frame Properties
     layout.layout.grid.cellWidth = 180;
     layout.layout.grid.cellHeight = 100;
     layout.layout.grid.cellRounding = 4;
@@ -543,7 +548,7 @@ static LayoutConfig_t GetDefaultGridLayout()
 static LayoutConfig_t GetDefaultRadialLayout()
 {
     LayoutConfig_t layout{};
-    layout.colors = "Generic";
+    layout.colors = "Default";
     layout.position.anchor = "Centre";
     layout.position.offset = { 0, 0 };
     layout.layout.type = "Radial";

@@ -2,6 +2,7 @@
 #define SHARED_TYPES_H
 
 #include <string>
+#include <vector>
 
 #include "imgui/imgui.h"
 
@@ -11,16 +12,24 @@ struct GeneralConfig_t
     std::string partyLayout;
     std::string partyVisibility = "Always show";
     bool isHiddenNativeParty = false;
+    bool isHiddenSelfParty = false;
+    std::vector<int> hiddenSubgroupsParty;
     
     /* Raid (10 Players) */
     std::string raidLayout;
     std::string raidVisibility = "Always show";
+    bool isHiddenSubgroupsRaid = false;
+    bool isHiddenSelfRaid = false;
     bool isHiddenNativeRaid = false;
+    std::vector<int> hiddenSubgroupsRaid;
 
     /* Squad (50 Players) */
     std::string squadLayout;
     std::string squadVisibility = "Always show";
+    bool isHiddenSubgroupsSquad = false;
+    bool isHiddenSelfSquad = false;
     bool isHiddenNativeSquad = false;
+    std::vector<int> hiddenSubgroupsSquad;
 
     /* Solo (No Group) */
     std::string soloLayout;
@@ -28,7 +37,7 @@ struct GeneralConfig_t
 
 struct ColourPresets_t
 {
-    /* Simple Colours */
+    /* Default Colours */
     ImColor COLOUR_BACKGROUND = ImColor(0, 0, 0);
     ImColor COLOUR_HEALTH = ImColor(74, 133, 62);
     ImColor COLOUR_HEALTH_DOWNED = ImColor(157, 31, 31);
@@ -61,8 +70,26 @@ struct ColourPresets_t
     ImColor COLOUR_PROF_HEALTH_REVENANT = ImColor(166, 87, 71);
     ImColor COLOUR_PROF_HEALTH_THIEF = ImColor(154, 114, 119);
     ImColor COLOUR_PROF_HEALTH_WARRIOR = ImColor(204, 167, 82);
+    ImColor COLOUR_PROF_HEALTH_DOWNED = ImColor(157, 31, 31);
+    ImColor COLOUR_PROF_HEALTH_DEFEATED = ImColor(78, 15, 15);
+    ImColor COLOUR_PROF_SHROUD_NECROMANCER = ImColor(38, 70, 45);
+    ImColor COLOUR_PROF_SHROUD_SPECTER = ImColor(108, 21, 95);
     ImColor COLOUR_PROF_BARRIER = ImColor(255, 255, 255, 128);
     ImColor COLOUR_PROF_HOVERED = ImColor(255, 255, 255, 32);
+    
+    /* Heat Map Colours */
+    ImColor COLOUR_HEATMAP_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_HEATMAP_HEALTH_100 = ImColor(74, 133, 62);
+    ImColor COLOUR_HEATMAP_HEALTH_75 = ImColor(138, 219, 113);
+    ImColor COLOUR_HEATMAP_HEALTH_50 = ImColor(219, 172, 113);
+    ImColor COLOUR_HEATMAP_HEALTH_25 = ImColor(219, 113, 113);
+    ImColor COLOUR_HEATMAP_HEALTH_0 = ImColor(157, 31, 31);
+    ImColor COLOUR_HEATMAP_HEALTH_DOWNED = ImColor(157, 31, 31);
+    ImColor COLOUR_HEATMAP_HEALTH_DEFEATED = ImColor(78, 15, 15);
+    ImColor COLOUR_HEATMAP_SHROUD_NECROMANCER = ImColor(38, 70, 45);
+    ImColor COLOUR_HEATMAP_SHROUD_SPECTER = ImColor(108, 21, 95);
+    ImColor COLOUR_HEATMAP_BARRIER = ImColor(255, 255, 255, 128);
+    ImColor COLOUR_HEATMAP_HOVERED = ImColor(255, 255, 255, 32);
 
     /** TODO: Party Colours */
     // ImColor COLOUR_PARTY_BACKGROUND = ImColor(0, 0, 0);
