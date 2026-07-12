@@ -919,10 +919,13 @@ namespace UI::Grid {
         drawList->PushClipRectFullScreen(); // Required to prevent clipping
 
         int lastPopulatedGroupIndex = (context.index == 0) ? -1 : ((context.index - 1) / cellDirectionMax);
+        lastPopulatedGroupIndex = ImMin(lastPopulatedGroupIndex, context.layoutConfig->layout.grid.rowColMax - 1);
 
         /* Map the new drop target column */
         int newGroupIndex = lastPopulatedGroupIndex + 1;
-        if (newGroupIndex < context.layoutConfig->layout.grid.rowColMax + 1 && (newGroupIndex * cellDirectionMax) < SQUAD_MEMBER_LIMIT) {
+        if ((newGroupIndex < context.layoutConfig->layout.grid.rowColMax) && 
+            ((newGroupIndex * cellDirectionMax) < SQUAD_MEMBER_LIMIT))
+        {
             lastPopulatedGroupIndex = newGroupIndex;
         }
         
@@ -1108,6 +1111,13 @@ namespace UI::Grid {
             if (!context.isValid[i])
             {
                 continue;
+            }
+
+            // Skip rendering items outside the bounds
+            int current_s = i / context.layoutConfig->layout.grid.cellDirectionMax;
+            if (current_s >= context.layoutConfig->layout.grid.rowColMax)
+            {
+                continue; 
             }
 
             VitalSignsDataLink::UserData_t& userData = context.userData[i];
@@ -1566,7 +1576,7 @@ namespace UI::Grid {
 
         int current_s = context.index / cellDirectionMax;
 
-        if ((context.index < SQUAD_MEMBER_LIMIT) && (current_s < context.layoutConfig->layout.grid.rowColMax))
+        if (context.index < SQUAD_MEMBER_LIMIT)
         {
             context.isValid[context.index] = true;
             context.userData[context.index] = userData;
