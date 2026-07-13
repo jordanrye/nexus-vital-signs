@@ -5,11 +5,11 @@
 
 namespace Settings {
     
-    void Load(const std::filesystem::path& aSettingsPath);
-    void Save(const std::filesystem::path& aSettingsPath);
-
-    void LoadLayout(const std::filesystem::path& layoutFilePath);
-    void SaveLayout(const std::filesystem::path& layoutFilePath);
+    void LoadAllLayouts();
+    void SaveAllLayouts();
+    
+    void LoadPresets();
+    void SavePresets();
 
 } // namespace Settings
 

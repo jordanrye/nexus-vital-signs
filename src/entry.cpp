@@ -125,53 +125,12 @@ void AddonLoad(AddonAPI* aApi)
         g_LayoutEditor.SwapNode(parentId, idx_1, idx_2);
     });
 
-    Settings::Load(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"));
-    for (const auto& file : std::filesystem::directory_iterator(PacksDir))
-    {
-        if (file.is_regular_file())
-        {
-            const std::filesystem::path filePath = file.path();
-            
-            if (filePath.extension() == ".json")
-            {
-                Settings::LoadLayout(filePath);
-            } 
-            else 
-            {
-                std::string warningMessage = filePath.filename().string() + " is not a valid layout file.";
-                APIDefs->Log(ELogLevel_WARNING, "VitalSigns", warningMessage.c_str());
-            }
-        }
-    }
+    Settings::LoadPresets();
+    Settings::LoadAllLayouts();
 }
 
 void AddonUnload()
 {
-    for (const auto& file : g_LayoutManager.GetAllLayouts())
-    {
-        Settings::SaveLayout(file.first);
-    }
-
-    // for (const auto& file : std::filesystem::directory_iterator(PacksDir))
-    // {
-    //     if (file.is_regular_file())
-    //     {
-    //         const std::filesystem::path filePath = file.path();
-            
-    //         if (filePath.extension() == ".json")
-    //         {
-    //             Settings::SaveLayout(filePath);
-    //         } 
-    //         else 
-    //         {
-    //             std::string warningMessage = filePath.filename().string() + " is not a valid layout file.";
-    //             APIDefs->Log(ELogLevel_WARNING, "VitalSigns", warningMessage.c_str());
-    //         }
-    //     }
-    // }
-
-    Settings::Save(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"));
-
     APIDefs->Events.Unsubscribe("EV_MUMBLE_IDENTITY_UPDATED", OnMumbleIdentityUpdated);
     MumbleLink = nullptr;
     NexusLink = nullptr;

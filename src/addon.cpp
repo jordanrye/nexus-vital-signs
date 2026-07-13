@@ -14,6 +14,7 @@
 
 #include "forms/forms.h"
 #include "imgui_tree_view.h"
+#include "settings.h"
 #include "shared.h"
 #include "ui_common.h"
 #include "ui_grid.h"
@@ -360,7 +361,9 @@ namespace Addon {
         g_LayoutEditor.RenderTreeView(
             [](TreeNodeUID id) { return g_LayoutManager.Delete(id) || g_LayoutManager.DeleteIndicator(id); },
             [](TreeNodeUID id, const std::string& name, const std::string& type) { g_LayoutManager.AddIndicator(id, name, type); },
-            [](TreeNodeUID id, size_t oldIdx, size_t newIdx) { g_LayoutManager.ReorderIndicators(id, oldIdx, newIdx); }
+            [](TreeNodeUID id, size_t oldIdx, size_t newIdx) { g_LayoutManager.ReorderIndicators(id, oldIdx, newIdx); },
+            Settings::SaveAllLayouts,
+            Settings::LoadAllLayouts
         );
         g_LayoutEditor.RenderContentView();
 
@@ -427,7 +430,7 @@ namespace Addon {
             isInitialised = true;
         }
 
-        g_PresetConfig.RenderTreeView(nullptr, nullptr, nullptr);
+        g_PresetConfig.RenderTreeView(nullptr, nullptr, nullptr, Settings::SavePresets, Settings::LoadPresets);
         g_PresetConfig.RenderContentView();
     }
 
