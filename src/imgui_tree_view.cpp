@@ -83,7 +83,7 @@ void TreeView::RegisterContentView(TreeNodeUID id, ContentRenderer&& renderer)
     Forms.insert_or_assign(id, std::move(renderer));
 }
 
-void TreeView::RenderTreeView(DeleteNodeCallback deleteCb, AddIndicatorCallback addCb, ReorderNodeCallback reorderCb, SaveCallback saveCb, ReloadCallback reloadCb)
+void TreeView::RenderTreeView(CreateCallback createCb, DeleteNodeCallback deleteCb, AddIndicatorCallback addCb, ReorderNodeCallback reorderCb, SaveCallback saveCb, ReloadCallback reloadCb)
 {
     /* Tree View */
     if (ImGui::BeginChild("TreeViewView", ImVec2(m_menuWidth, 0), true))
@@ -101,7 +101,11 @@ void TreeView::RenderTreeView(DeleteNodeCallback deleteCb, AddIndicatorCallback 
          * bottom of the Tree View. This needs to be done before pushing custom
          * style variables to prevent incorrect spacing.
          */
-        float reservedHeight = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y * 2.0f;
+        int buttonRows = 0;
+        if (createCb) buttonRows++;
+        if (saveCb || reloadCb) buttonRows++;
+        
+        float reservedHeight = (buttonRows > 0) ? (ImGui::GetFrameHeightWithSpacing() * buttonRows + ImGui::GetStyle().ItemSpacing.y * 2.0f) : 0.0f;
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.f, 2.f));
         ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.f);
@@ -115,17 +119,33 @@ void TreeView::RenderTreeView(DeleteNodeCallback deleteCb, AddIndicatorCallback 
         }
         ImGui::PopStyleVar(2);
         
-        /* "Save" and "Reload" buttons */
-        float buttonWidth = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
-        ImGui::Separator();
-        if (ImGui::Button(m_saveButtonText.c_str(), ImVec2(buttonWidth, 0)) && saveCb)
+        /* "Create," "Save" and "Reload" buttons */
+        if (buttonRows > 0)
         {
-            saveCb();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button(m_reloadButtonText.c_str(), ImVec2(buttonWidth, 0)) && reloadCb)
-        {
-            reloadCb();
+            ImGui::Separator();
+            
+            if (createCb)
+            {
+                if (ImGui::Button(m_createButtonText.c_str(), ImVec2(-1, 0)))
+                {
+                    createCb();
+                }
+            }
+
+            if (saveCb || reloadCb)
+            {
+                float buttonWidth = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+                
+                if (ImGui::Button(m_saveButtonText.c_str(), ImVec2(buttonWidth, 0)) && saveCb)
+                {
+                    saveCb();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(m_reloadButtonText.c_str(), ImVec2(buttonWidth, 0)) && reloadCb)
+                {
+                    reloadCb();
+                }
+            }
         }
 
         ImGui::EndChild();

@@ -64,6 +64,7 @@ public:
     using AddIndicatorCallback = std::function<void(TreeNodeUID, const std::string&, const std::string&)>;
     using DeleteNodeCallback = std::function<bool(TreeNodeUID)>;
     using ReorderNodeCallback = std::function<void(TreeNodeUID, size_t, size_t)>;
+    using CreateCallback = std::function<void()>;
     using SaveCallback = std::function<void()>;
     using ReloadCallback = std::function<void()>;
 
@@ -77,13 +78,14 @@ public:
     
     // View management
     void RegisterContentView(TreeNodeUID id, ContentRenderer&& renderer);
-    void RenderTreeView(DeleteNodeCallback deleteCb, AddIndicatorCallback addCb, ReorderNodeCallback reorderCb, SaveCallback saveCb, ReloadCallback reloadCb);
+    void RenderTreeView(CreateCallback createCb, DeleteNodeCallback deleteCb, AddIndicatorCallback addCb, ReorderNodeCallback reorderCb, SaveCallback saveCb, ReloadCallback reloadCb);
     void RenderContentView();
     void SetActiveNode(TreeNodeUID id) { m_selectedId = id; }
     TreeNodeUID GetActiveNode() const { return m_selectedId; }
     void UpdateNodeLabel(TreeNodeUID id, const std::string& new_label);
     void UpdateNodeEnabled(TreeNodeUID id, bool enabled);
     void UpdateTreeViewHeader(const std::string& title) { m_title = title; }
+    void UpdateTreeViewCreateText(const std::string& text) { m_createButtonText = text; }
     void UpdateTreeViewSaveText(const std::string& text) { m_saveButtonText = text; }
     void UpdateTreeViewReloadText(const std::string& text) { m_reloadButtonText = text; }
 
@@ -98,6 +100,7 @@ private:
     TreeNodeUID m_selectedId = TreeNodeUID::NONE;
     TreeNodeUID m_nextId = TreeNodeUID::DYNAMIC_START;
     std::string m_title = "Select Node...";
+    std::string m_createButtonText = "Create";
     std::string m_saveButtonText = "Save";
     std::string m_reloadButtonText = "Reload";
     float m_menuWidth = 200.0f;

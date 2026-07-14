@@ -350,6 +350,7 @@ namespace Addon {
     void OptionsLayoutEditor()
     {
         static bool isInitialised = false;
+        bool isOpenPopup = false;
 
         if (!isInitialised)
         {
@@ -357,10 +358,12 @@ namespace Addon {
             isInitialised = true;
         }
 
+        g_LayoutEditor.UpdateTreeViewCreateText("Create New Layout");
         g_LayoutEditor.UpdateTreeViewSaveText(Settings::IsDirtyLayouts() ? "Save Layouts*" : "Save Layouts");
 
         /* Render Layout Editor */
         g_LayoutEditor.RenderTreeView(
+            [&isOpenPopup]() { isOpenPopup = true; },
             [](TreeNodeUID id) { return g_LayoutManager.Delete(id) || g_LayoutManager.DeleteIndicator(id); },
             [](TreeNodeUID id, const std::string& name, const std::string& type) { g_LayoutManager.AddIndicator(id, name, type); },
             [](TreeNodeUID id, size_t oldIdx, size_t newIdx) { g_LayoutManager.ReorderIndicators(id, oldIdx, newIdx); },
@@ -368,6 +371,47 @@ namespace Addon {
             Settings::LoadAllLayouts
         );
         g_LayoutEditor.RenderContentView();
+
+        if (isOpenPopup)
+        {
+            ImGui::OpenPopup("Create a new layout");
+        }
+
+        if (ImGui::BeginPopupModal("Create a new layout", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            static char inputBuff_Name[MAX_PATH] = "";
+            static std::string inputStr_Type = "Grid";
+            static bool createFromTemplate = false;
+
+            ImGui::InputText("Name", inputBuff_Name, IM_ARRAYSIZE(inputBuff_Name));
+            form_SelectLayoutType(inputStr_Type);
+            ImGui::Checkbox("Create using default template", &createFromTemplate);
+
+            if (ImGui::Button("Cancel", ImVec2(100, 0)))
+            {
+                // Reset state and close
+                memset(inputBuff_Name, 0, sizeof(inputBuff_Name));
+                createFromTemplate = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::SameLine();
+
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImU32)ImColor(38, 128, 20));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImU32)ImColor(48, 160, 25));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImU32)ImColor(30, 100, 15));
+            
+            if (ImGui::Button("Create", ImVec2(100, 0)))
+            {
+                g_LayoutManager.Create(std::string(inputBuff_Name), inputStr_Type, createFromTemplate, PacksDir);
+                memset(inputBuff_Name, 0, sizeof(inputBuff_Name));
+                createFromTemplate = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopStyleColor(3);
+
+            ImGui::EndPopup();
+        }
 
         /* Render Layout Preview */
         if (g_LayoutEditor.GetActiveNode() != TreeNodeUID::NONE)
@@ -434,7 +478,7 @@ namespace Addon {
 
         g_PresetConfig.UpdateTreeViewSaveText(Settings::IsDirtyPresets() ? "Save Presets*" : "Save Presets");
 
-        g_PresetConfig.RenderTreeView(nullptr, nullptr, nullptr, Settings::SavePresets, Settings::LoadPresets);
+        g_PresetConfig.RenderTreeView(nullptr, nullptr, nullptr, nullptr, Settings::SavePresets, Settings::LoadPresets);
         g_PresetConfig.RenderContentView();
     }
 
@@ -455,52 +499,7 @@ namespace Addon {
     {
         ImGui::TextDisabled("No element selected.");
         ImGui::Separator();
-        ImGui::TextWrappedDisabled("Click an item in the navigation menu to configure it, or press the button below to create a new layout.");
-
-        ImGui::NewLine();
-
-        if (ImGui::Button("Create a new layout"))
-        {
-            ImGui::OpenPopup("Create a new layout");
-        }
-
-        static char inputBuff_Name[MAX_PATH] = "";
-        static std::string inputStr_Type = "Grid";
-        static bool createFromTemplate = false;
-
-        if (ImGui::BeginPopupModal("Create a new layout", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::InputText("Name", inputBuff_Name, IM_ARRAYSIZE(inputBuff_Name));
-            form_SelectLayoutType(inputStr_Type);
-            ImGui::Checkbox("Create using default template", &createFromTemplate);
-
-            if (ImGui::Button("Cancel", ImVec2(100, 0)))
-            {
-                // Reset state and close
-                memset(inputBuff_Name, 0, sizeof(inputBuff_Name));
-                createFromTemplate = false;
-                ImGui::CloseCurrentPopup();
-            }
-
-            ImGui::SameLine();
-
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImU32)ImColor(38, 128, 20));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImU32)ImColor(48, 160, 25));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImU32)ImColor(30, 100, 15));
-
-            if (ImGui::Button("Create", ImVec2(100, 0)))
-            {
-                g_LayoutManager.Create(std::string(inputBuff_Name), inputStr_Type, createFromTemplate, PacksDir);
-
-                memset(inputBuff_Name, 0, sizeof(inputBuff_Name));
-                createFromTemplate = false;
-                ImGui::CloseCurrentPopup();
-            }
-            
-            ImGui::PopStyleColor(3);
-
-            ImGui::EndPopup();
-        }
+        ImGui::TextWrappedDisabled("Click an item in the navigation menu to configure it, or press the \"Create New Layout\" button in the bottom-left.");
     }
 
     void ContentViewGeneral(std::string& name, std::string& colors, Position_t& position, Layout_t& layout)
