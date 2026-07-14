@@ -345,6 +345,11 @@ namespace Addon {
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
         }
         ImGui::PopID();
+        
+        if (Settings::IsDirtySettings())
+        {
+            Settings::SaveSettings();
+        }
     }
 
     void OptionsLayoutEditor()

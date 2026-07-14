@@ -5,6 +5,10 @@
 
 namespace Settings {
     
+    void LoadSettings();
+    void SaveSettings();
+    bool IsDirtySettings();
+
     void LoadAllLayouts();
     void SaveAllLayouts();
     bool IsDirtyLayouts();

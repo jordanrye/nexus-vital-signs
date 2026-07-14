@@ -124,7 +124,8 @@ void AddonLoad(AddonAPI* aApi)
     g_LayoutManager.SetOnIndicatorSwapCallback([&](TreeNodeUID parentId, size_t idx_1, size_t idx_2) {
         g_LayoutEditor.SwapNode(parentId, idx_1, idx_2);
     });
-
+    
+    Settings::LoadSettings();
     Settings::LoadPresets();
     Settings::LoadAllLayouts();
 }

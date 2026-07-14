@@ -14,29 +14,62 @@ using json = nlohmann::json;
 namespace Settings
 {
     std::mutex Mutex;
+    json s_LastSavedSettings = json::object();
     json s_LastSavedPresets = json::object();
     std::map<std::filesystem::path, json> s_LastSavedLayouts;
 
     static bool jsonParse(const std::filesystem::path& aFilePath, json& jObject);
+    static json jsonSerialiseSettings();
     static json jsonSerialisePresets();
     static json jsonSerialiseLayouts(const LayoutConfig_t& layoutConfig);
     static void LoadLayout(const std::filesystem::path& aFilePath);
     static void SaveLayout(const std::filesystem::path& aFilePath);
+
+    void LoadSettings()
+    {
+        json settings = json::object();
+
+        if (jsonParse(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"), settings))
+        {
+            if (!settings.is_null())
+            {
+                dser_GeneralConfig_t(settings, ConfigGeneral);
+            }
+        }
+
+        s_LastSavedSettings = jsonSerialiseSettings();
+    }
+
+    void SaveSettings()
+    {
+        json settings = jsonSerialiseSettings();
+        s_LastSavedSettings = settings;
+
+        /* write updated configuration to disk */
+        Mutex.lock();
+        {
+            std::ofstream file(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"));
+            file << settings.dump(1, '\t') << std::endl;
+            file.close();
+        }
+        Mutex.unlock();
+    }
+
+    bool IsDirtySettings()
+    {
+        json current = jsonSerialiseSettings();
+        return current != s_LastSavedSettings;
+    }
 
     void LoadPresets()
     {
         json settings = json::object();
 
         /* load settings */
-        if (jsonParse(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"), settings))
+        if (jsonParse(APIDefs->Paths.GetAddonDirectory("VitalSigns/presets.json"), settings))
         {
             if (!settings.is_null())
             {
-                if (!settings["general"].is_null())
-                {
-                    dser_GeneralConfig_t(settings["general"], ConfigGeneral);
-                }
-
                 /* colors settings */
                 if (!settings["colors"].is_null())
                 {
@@ -116,8 +149,7 @@ namespace Settings
         /* write updated configuration to disk */
         Mutex.lock();
         {
-            /* save to settings.json */
-            std::ofstream file(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"));
+            std::ofstream file(APIDefs->Paths.GetAddonDirectory("VitalSigns/presets.json"));
             file << settings.dump(1, '\t') << std::endl;
             file.close();
         }
@@ -198,11 +230,14 @@ namespace Settings
         return success;
     }
 
+    json jsonSerialiseSettings()
+    {
+        return ser_GeneralConfig_t(ConfigGeneral);
+    }
+
     json jsonSerialisePresets()
     {
         json settings = json::object();
-
-        settings["general"] = ser_GeneralConfig_t(ConfigGeneral);
 
         /* colors settings */
         settings["colors"] = json::object();
