@@ -14,8 +14,12 @@ using json = nlohmann::json;
 namespace Settings
 {
     std::mutex Mutex;
+    json s_LastSavedPresets = json::object();
+    std::map<std::filesystem::path, json> s_LastSavedLayouts;
 
     static bool jsonParse(const std::filesystem::path& aFilePath, json& jObject);
+    static json jsonSerialisePresets();
+    static json jsonSerialiseLayouts(const LayoutConfig_t& layoutConfig);
     static void LoadLayout(const std::filesystem::path& aFilePath);
     static void SaveLayout(const std::filesystem::path& aFilePath);
 
@@ -100,9 +104,101 @@ namespace Settings
                 }
             }
         }
+
+        s_LastSavedPresets = jsonSerialisePresets();
     }
 
     void SavePresets()
+    {
+        json settings = jsonSerialisePresets();
+        s_LastSavedPresets = settings;
+
+        /* write updated configuration to disk */
+        Mutex.lock();
+        {
+            /* save to settings.json */
+            std::ofstream file(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"));
+            file << settings.dump(1, '\t') << std::endl;
+            file.close();
+        }
+        Mutex.unlock();
+    }
+
+    bool IsDirtyPresets()
+    {
+        json current = jsonSerialisePresets();
+        return current != s_LastSavedPresets;
+    }
+
+    void LoadAllLayouts()
+    {
+        for (const auto& file : std::filesystem::directory_iterator(PacksDir))
+        {
+            if (file.is_regular_file())
+            {
+                const std::filesystem::path filePath = file.path();
+                
+                if (filePath.extension() == ".json")
+                {
+                    LoadLayout(filePath);
+                } 
+                else 
+                {
+                    std::string warningMessage = filePath.filename().string() + " is not a valid layout file.";
+                    APIDefs->Log(ELogLevel_WARNING, "VitalSigns", warningMessage.c_str());
+                }
+            }
+        }
+    }
+
+    void SaveAllLayouts()
+    {
+        for (const auto& file : g_LayoutManager.GetAllLayouts())
+        {
+            SaveLayout(file.first);
+        }
+    }
+
+    bool IsDirtyLayouts()
+    {
+        for (const auto& file : g_LayoutManager.GetAllLayouts())
+        {
+            auto it = s_LastSavedLayouts.find(file.first);
+            if (it == s_LastSavedLayouts.end()) return true;
+
+            json current = jsonSerialiseLayouts(file.second);
+            if (current != it->second) return true;
+        }
+        return false;
+    }
+
+    bool jsonParse(const std::filesystem::path& aFilePath, json& jObject)
+    {
+        bool success = false;
+
+        /* Attempt to parse JSON file. */
+        Mutex.lock();
+        {
+            try
+            {
+                std::ifstream file(aFilePath);
+                jObject = json::parse(file);
+                file.close();
+                success = true;
+            }
+            catch (json::parse_error& ex)
+            {
+                std::string warningMessage = aFilePath.filename().string() + " could not be parsed.";
+                APIDefs->Log(ELogLevel_WARNING, "VitalSigns", warningMessage.c_str());
+                APIDefs->Log(ELogLevel_WARNING, "VitalSigns", ex.what());
+            }
+        }
+        Mutex.unlock();
+
+        return success;
+    }
+
+    json jsonSerialisePresets()
     {
         json settings = json::object();
 
@@ -163,70 +259,27 @@ namespace Settings
         settings["icon-duration"] = ser_IconText_t(ConfigIconDuration);
         settings["icon-stacks"] = ser_IconText_t(ConfigIconStacks);
 
-        /* write updated configuration to disk */
-        Mutex.lock();
-        {
-            /* save to settings.json */
-            std::ofstream file(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"));
-            file << settings.dump(1, '\t') << std::endl;
-            file.close();
-        }
-        Mutex.unlock();
+        return settings;
     }
 
-    void LoadAllLayouts()
+    json jsonSerialiseLayouts(const LayoutConfig_t& layoutConfig)
     {
-        for (const auto& file : std::filesystem::directory_iterator(PacksDir))
+        json layout = json::object();
+
+        /* General */
+        layout["name"] = layoutConfig.name;
+        layout["colors"] = layoutConfig.colors;
+        layout["position"] = ser_Position_t(layoutConfig.position);
+        layout["layout"] = ser_Layout_t(layoutConfig.layout);
+
+        /* Indicators */
+        layout["indicators"] = json::array();
+        for (auto& indicator : layoutConfig.indicators)
         {
-            if (file.is_regular_file())
-            {
-                const std::filesystem::path filePath = file.path();
-                
-                if (filePath.extension() == ".json")
-                {
-                    LoadLayout(filePath);
-                } 
-                else 
-                {
-                    std::string warningMessage = filePath.filename().string() + " is not a valid layout file.";
-                    APIDefs->Log(ELogLevel_WARNING, "VitalSigns", warningMessage.c_str());
-                }
-            }
+            layout["indicators"].push_back(ser_Indicator_t(indicator));
         }
-    }
 
-    void SaveAllLayouts()
-    {
-        for (const auto& file : g_LayoutManager.GetAllLayouts())
-        {
-            SaveLayout(file.first);
-        }
-    }
-
-    bool jsonParse(const std::filesystem::path& aFilePath, json& jObject)
-    {
-        bool success = false;
-
-        /* Attempt to parse JSON file. */
-        Mutex.lock();
-        {
-            try
-            {
-                std::ifstream file(aFilePath);
-                jObject = json::parse(file);
-                file.close();
-                success = true;
-            }
-            catch (json::parse_error& ex)
-            {
-                std::string warningMessage = aFilePath.filename().string() + " could not be parsed.";
-                APIDefs->Log(ELogLevel_WARNING, "VitalSigns", warningMessage.c_str());
-                APIDefs->Log(ELogLevel_WARNING, "VitalSigns", ex.what());
-            }
-        }
-        Mutex.unlock();
-
-        return success;
+        return layout;
     }
 
     void LoadLayout(const std::filesystem::path& aFilePath)
@@ -264,26 +317,15 @@ namespace Settings
             }
     
             g_LayoutManager.Insert(aFilePath, layoutConfig);
+            s_LastSavedLayouts[aFilePath] = jsonSerialiseLayouts(layoutConfig);
         }
     }
 
     void SaveLayout(const std::filesystem::path& aFilePath)
     {
-        json layout = json::object();
         auto& layoutConfig = g_LayoutManager.GetLayoutFromFilePath(aFilePath);
-
-        /* General */
-        layout["name"] = layoutConfig.name;
-        layout["colors"] = layoutConfig.colors;
-        layout["position"] = ser_Position_t(layoutConfig.position);
-        layout["layout"] = ser_Layout_t(layoutConfig.layout);
-
-        /* Indicators */
-        layout["indicators"] = json::array();
-        for (auto& indicator : layoutConfig.indicators)
-        {
-            layout["indicators"].push_back(ser_Indicator_t(indicator));
-        }
+        json layout = jsonSerialiseLayouts(layoutConfig);
+        s_LastSavedLayouts[aFilePath] = layout;
 
         /* write updated configuration to disk */
         Mutex.lock();

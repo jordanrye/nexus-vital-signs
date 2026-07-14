@@ -357,6 +357,8 @@ namespace Addon {
             isInitialised = true;
         }
 
+        g_LayoutEditor.UpdateTreeViewSaveText(Settings::IsDirtyLayouts() ? "Save Layouts*" : "Save Layouts");
+
         /* Render Layout Editor */
         g_LayoutEditor.RenderTreeView(
             [](TreeNodeUID id) { return g_LayoutManager.Delete(id) || g_LayoutManager.DeleteIndicator(id); },
@@ -429,6 +431,8 @@ namespace Addon {
             RegisterPresetConfigViews();
             isInitialised = true;
         }
+
+        g_PresetConfig.UpdateTreeViewSaveText(Settings::IsDirtyPresets() ? "Save Presets*" : "Save Presets");
 
         g_PresetConfig.RenderTreeView(nullptr, nullptr, nullptr, Settings::SavePresets, Settings::LoadPresets);
         g_PresetConfig.RenderContentView();

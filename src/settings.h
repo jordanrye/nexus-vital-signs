@@ -7,9 +7,11 @@ namespace Settings {
     
     void LoadAllLayouts();
     void SaveAllLayouts();
+    bool IsDirtyLayouts();
     
     void LoadPresets();
     void SavePresets();
+    bool IsDirtyPresets();
 
 } // namespace Settings
 
