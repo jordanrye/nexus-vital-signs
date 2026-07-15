@@ -17,6 +17,8 @@ inline ImVec4 _ImVec4(float p)
 
 namespace UI::Grid {
 
+    constexpr int MAX_GRID_CELLS = SQUAD_MEMBER_LIMIT * SQUAD_SUBGROUP_LIMIT;
+
     static struct GridContext_t
     {
         // Configuration
@@ -34,8 +36,8 @@ namespace UI::Grid {
         int indexHovered;
         
         // Item state
-        bool isValid[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::UserData_t userData[SQUAD_MEMBER_LIMIT];
+        bool isValid[MAX_GRID_CELLS];
+        VitalSignsDataLink::UserData_t userData[MAX_GRID_CELLS];
         VitalSignsDataLink::UserId_t userIdHovered;
 
         // Checkbox state
@@ -927,7 +929,7 @@ namespace UI::Grid {
         int newGroupIndex = lastPopulatedGroupIndex + 1;
         
         if ((newGroupIndex < squadMax) && 
-            ((newGroupIndex * cellDirectionMax) < SQUAD_MEMBER_LIMIT))
+            ((newGroupIndex * cellDirectionMax) < MAX_GRID_CELLS))
         {
             lastPopulatedGroupIndex = newGroupIndex;
         }
@@ -969,7 +971,7 @@ namespace UI::Grid {
             // Squad Manager: Subgroup header
             if (Addon::isSquadManagerActive)
             {
-                std::string headerText = (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1)) ? "New Subgroup" : "Subgroup " + std::to_string(droppedSubgroupId + 1);
+                std::string headerText = (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1)) ? "New" : std::to_string(droppedSubgroupId + 1);
                 
                 bool isHidden = false;
                 if (context.hiddenSubgroups)
@@ -1015,13 +1017,13 @@ namespace UI::Grid {
                 else if (cellDir == "Left-to-right")
                 {
                     headerHeight = frameHeight;
-                    headerWidth = text_size.x + 20.0f;
+                    headerWidth = frameWidth;
                     header_p_min = ImVec2(firstCellProps.position.x - headerWidth - spacing, firstCellProps.position.y);
                 }
                 else if (cellDir == "Right-to-left")
                 {
                     headerHeight = frameHeight;
-                    headerWidth = text_size.x + 20.0f;
+                    headerWidth = frameWidth;
                     header_p_min = ImVec2(firstCellProps.position.x + frameWidth + spacing, firstCellProps.position.y);
                 }
                 else
@@ -1057,7 +1059,32 @@ namespace UI::Grid {
                     ImGui::AddRectFilledGradientV(drawList, header_p_min, header_p_max, col_trans, col_solid, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
                 }
 
-                ImVec2 text_pos = ImVec2(header_p_min.x + (headerWidth - text_size.x) * 0.5f, header_p_min.y + (headerHeight - text_size.y) * 0.5f);
+                bool showCheckbox = context.hiddenSubgroups && (droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1));
+                float checkboxSize = showCheckbox ? ImGui::GetFrameHeight() : 0.0f;
+                float checkboxSpacing = showCheckbox ? 8.0f : 0.0f;
+
+                ImVec2 checkbox_pos;
+                ImVec2 text_pos;
+                if (cellDir == "Top-to-bottom" || cellDir == "Bottom-to-top" || (cellDir != "Left-to-right" && cellDir != "Right-to-left"))
+                {
+                    float contentWidth = text_size.x + checkboxSpacing + checkboxSize;
+                    float contentStartX = header_p_min.x + (headerWidth - contentWidth) * 0.5f;
+                    
+                    text_pos = ImVec2((float)(int)contentStartX, (float)(int)(header_p_min.y + (headerHeight - text_size.y) * 0.5f));
+                    checkbox_pos = ImVec2((float)(int)(contentStartX + text_size.x + checkboxSpacing), (float)(int)(header_p_min.y + (headerHeight - checkboxSize) * 0.5f));
+                }
+                else if (cellDir == "Right-to-left")
+                {
+                    float leftPadding = 8.0f;
+                    checkbox_pos = ImVec2((float)(int)(header_p_min.x + leftPadding), (float)(int)(header_p_min.y + (headerHeight - checkboxSize) * 0.5f));
+                    text_pos = ImVec2((float)(int)(checkbox_pos.x + checkboxSize + checkboxSpacing), (float)(int)(header_p_min.y + (headerHeight - text_size.y) * 0.5f));
+                }
+                else
+                {
+                    float rightPadding = 8.0f;
+                    checkbox_pos = ImVec2((float)(int)(header_p_max.x - rightPadding - checkboxSize), (float)(int)(header_p_min.y + (headerHeight - checkboxSize) * 0.5f));
+                    text_pos = ImVec2((float)(int)(checkbox_pos.x - checkboxSpacing - text_size.x), (float)(int)(header_p_min.y + (headerHeight - text_size.y) * 0.5f));
+                }
 
                 if (ConfigText.shadow)
                 {
@@ -1074,10 +1101,8 @@ namespace UI::Grid {
                 drawList->AddText(font, ConfigText.fontSize, text_pos, ConfigText.color, headerText.c_str());
                 if (font) ImGui::PopFont();
 
-                if (context.hiddenSubgroups)
+                if (showCheckbox)
                 {
-                    float checkboxSize = ImGui::GetFrameHeight();
-                    ImVec2 checkbox_pos = ImVec2(text_pos.x + text_size.x + 8.0f, text_pos.y + (text_size.y - checkboxSize) * 0.5f);
                     context.headerCheckboxes.push_back({checkbox_pos, droppedSubgroupId});
                 }
 
@@ -1384,8 +1409,8 @@ namespace UI::Grid {
                 }
             };
 
-            ImVec2 border_min = ImVec2(firstCell.position.x - 2.0f, firstCell.position.y - 2.0f);
-            ImVec2 border_max = ImVec2(lastCell.position.x + lastCell.width + 2.0f, lastCell.position.y + lastCell.height + 2.0f);
+            ImVec2 border_min = ImVec2(ImMin(firstCell.position.x, lastCell.position.x) - 2.0f, ImMin(firstCell.position.y, lastCell.position.y) - 2.0f);
+            ImVec2 border_max = ImVec2(ImMax(firstCell.position.x + firstCell.width, lastCell.position.x + lastCell.width) + 2.0f, ImMax(firstCell.position.y + firstCell.height, lastCell.position.y + lastCell.height) + 2.0f);
             ImU32 dash_col = ImColor(200, 200, 200, 150);
             drawDashedLine(border_min, ImVec2(border_max.x, border_min.y), dash_col, 1.0f, 4.0f, 4.0f);
             drawDashedLine(ImVec2(border_max.x, border_min.y), border_max, dash_col, 1.0f, 4.0f, 4.0f);
@@ -1432,7 +1457,7 @@ namespace UI::Grid {
             static ImVec2 resize_drag_accum(0.0f, 0.0f);
             
             float resizeGripSize = 24.0f;
-            ImVec2 resizeGripMax(lastCell.position.x + lastCell.width + 8.0f, lastCell.position.y + lastCell.height + 8.0f);
+            ImVec2 resizeGripMax(border_max.x + 6.0f, border_max.y + 6.0f);
             ImVec2 resizeGripMin(resizeGripMax.x - resizeGripSize, resizeGripMax.y - resizeGripSize);
             
             ImGui::SetNextWindowPos(resizeGripMin);
@@ -1515,12 +1540,21 @@ namespace UI::Grid {
         // Squad Manager: Visibility Checkboxes
         if (Addon::isSquadManagerActive && context.hiddenSubgroups)
         {
+            ImFont* font = nullptr;
+            if (ConfigText.fontSource != "Nexus font" && ConfigText.fontSource != "Default font")
+            {
+                font = utils::font::GetFont(ConfigText.font, ConfigText.fontSize);
+            }
+            
+            if (font) ImGui::PushFont(font);
+
             for (const auto& cb : context.headerCheckboxes)
             {
                 ImGui::SetNextWindowPos(cb.position);
                 float checkboxSize = ImGui::GetFrameHeight();
                 ImGui::SetNextWindowSize(ImVec2(checkboxSize * 2.0f, checkboxSize));
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
                 
                 std::string windowName = "##VisibilityGripWindow" + std::to_string(cb.subgroupId);
                 ImGui::Begin(windowName.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
@@ -1542,8 +1576,10 @@ namespace UI::Grid {
                 ImGui::PopID();
                 
                 ImGui::End();
-                ImGui::PopStyleVar();
+                ImGui::PopStyleVar(2);
             }
+            
+            if (font) ImGui::PopFont();
         }
     }
 
@@ -1583,7 +1619,7 @@ namespace UI::Grid {
 
         int current_s = context.index / cellDirectionMax;
 
-        if (context.index < SQUAD_MEMBER_LIMIT)
+        if (context.index < MAX_GRID_CELLS)
         {
             context.isValid[context.index] = true;
             context.userData[context.index] = userData;

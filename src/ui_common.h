@@ -8,6 +8,7 @@
 namespace UI {
 
     const int SQUAD_MEMBER_LIMIT = 50; // max number of player frames
+    const int SQUAD_SUBGROUP_LIMIT = 15; // max number of subgroups
     const int BOON_LIMIT = 12; // max number of boons
     const int CONDITION_LIMIT = 14; // max number of conditions
 
