@@ -1164,7 +1164,7 @@ namespace UI::Grid {
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
             }
 
-            ImGui::PushID(i);
+            ImGui::PushID(userData.AccountName.c_str());
             {
                 drawables.clear();
 
@@ -1174,6 +1174,7 @@ namespace UI::Grid {
                 ImGui::SetCursorScreenPos(parentProperties.position);
                 ImGui::InvisibleButton("", ImVec2(parentProperties.width, parentProperties.height));
 
+                /* Right-click context menu */
                 if (ImGui::BeginPopupContextItem())
                 {
                     // const auto clientId = VitalsData->getClientId();
