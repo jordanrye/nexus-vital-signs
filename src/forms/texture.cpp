@@ -2,15 +2,10 @@
 
 void form_Texture(std::string& textureSource, std::string& texturePath)
 {
-    static char inputBuff_TexturePath[MAX_PATH];
     static const char* textureSourceOptions[] {
         "File",
         "URL"
     };
-
-    memset(inputBuff_TexturePath, 0, MAX_PATH);
-    strcpy_s(inputBuff_TexturePath, MAX_PATH, texturePath.c_str());
-
     int option = 0; // Default to "File"
     if (textureSource == "File") option = 0;
     else if (textureSource == "URL") option = 1;
@@ -36,10 +31,7 @@ void form_Texture(std::string& textureSource, std::string& texturePath)
             break;
         case 1:
             // URL
-            if (ImGui::InputText("Filepath##TexFile", inputBuff_TexturePath, IM_ARRAYSIZE(inputBuff_TexturePath)))
-            {
-                texturePath = inputBuff_TexturePath;
-            }
+            ImGui::InputText("Filepath##TexFile", &texturePath);
             break;
     }
     

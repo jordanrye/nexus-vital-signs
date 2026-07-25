@@ -22,12 +22,6 @@ void form_TextContent(std::string& textType, std::string& textCustom)
 
     if (textType == "Custom text")
     {
-        static char inputBuff_TextCustom[MAX_PATH] = "";
-        memset(inputBuff_TextCustom, 0, sizeof(inputBuff_TextCustom));
-        strcpy_s(inputBuff_TextCustom, sizeof(inputBuff_TextCustom), textCustom.c_str());
-
-        if (ImGui::InputText("Custom Text##TEXT_CUSTOM", inputBuff_TextCustom, IM_ARRAYSIZE(inputBuff_TextCustom))) {
-            textCustom = inputBuff_TextCustom;
-        }
+        ImGui::InputText("Custom Text##TEXT_CUSTOM", &textCustom);
     }
 }

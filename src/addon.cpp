@@ -515,8 +515,6 @@ namespace Addon {
             "Heat Map Color Palette"
         };
 
-        static char inputBuff[MAX_PATH];
-
         static int layoutSelection = 0; // Default to "Radial"
         if (layout.type == "Radial") layoutSelection = 0;
         else if (layout.type == "Grid") layoutSelection = 1;
@@ -524,12 +522,8 @@ namespace Addon {
         ImGui::TextDisabled("General");
         ImGui::Separator();
         {
-            memset(inputBuff, 0, MAX_PATH);
-            strcpy_s(inputBuff, MAX_PATH, name.c_str());
-
-            if (ImGui::InputText("Name", inputBuff, IM_ARRAYSIZE(inputBuff)))
+            if (ImGui::InputText("Name", &name))
             {
-                name = inputBuff;
                 g_LayoutEditor.UpdateNodeLabel(g_LayoutEditor.GetActiveNode(), name);
             }
             form_SelectLayoutType(layout.type, true);
@@ -681,17 +675,12 @@ namespace Addon {
         ImGui::TextDisabled("General");
         ImGui::Separator();
         {
-            static char inputBuff_Name[MAX_PATH];
-            memset(inputBuff_Name, 0, MAX_PATH);
-            strcpy_s(inputBuff_Name, MAX_PATH, indicator.name.c_str());
-
             if (ImGui::Checkbox("Enabled", &indicator.enabled))
             {
                 g_LayoutEditor.UpdateNodeEnabled(g_LayoutEditor.GetActiveNode(), indicator.enabled);
             }
-            if (ImGui::InputText("Name", inputBuff_Name, IM_ARRAYSIZE(inputBuff_Name)))
+            if (ImGui::InputText("Name", &indicator.name))
             {
-                indicator.name = inputBuff_Name;
                 g_LayoutEditor.UpdateNodeLabel(g_LayoutEditor.GetActiveNode(), indicator.name);
             }
             form_SelectIndicatorType(indicator.type, true);
