@@ -647,7 +647,7 @@ namespace UI::Grid {
                 p_max = ImVec2((p_min.x + contentProperties.width - 1), (p_min.y + height - 1));
                 roundingCorners = (sizeRatio >= 1.0f) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Top;
                 colour_start = indicator->highlight.color;
-                colour_end = ImColor(0, 0, 0, 0);
+                colour_end = (indicator->highlight.color & 0x00FFFFFF);
                 ImGui::AddRectFilledGradientV(drawList, p_min, p_max, colour_start, colour_end, static_cast<float>(contentProperties.rounding), roundingCorners);
             }
             else if (indicator->highlight.position == "Bottom")
@@ -656,7 +656,7 @@ namespace UI::Grid {
                 p_min = ImVec2((contentProperties.position.x + 1), (contentProperties.position.y + contentProperties.height - height + 1));
                 p_max = ImVec2((p_min.x + contentProperties.width - 1), (p_min.y + height - 1));
                 roundingCorners = (sizeRatio >= 1.0f) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Bot;
-                colour_start = ImColor(0, 0, 0, 0);
+                colour_start = (indicator->highlight.color & 0x00FFFFFF);
                 colour_end = indicator->highlight.color;
                 ImGui::AddRectFilledGradientV(drawList, p_min, p_max, colour_start, colour_end, static_cast<float>(contentProperties.rounding), roundingCorners);
             }
@@ -667,7 +667,7 @@ namespace UI::Grid {
                 p_max = ImVec2((p_min.x + width - 1), (p_min.y + contentProperties.height - 1));
                 roundingCorners = (sizeRatio >= 1.0f) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
                 colour_start = indicator->highlight.color;
-                colour_end = ImColor(0, 0, 0, 0);
+                colour_end = (indicator->highlight.color & 0x00FFFFFF);
                 ImGui::AddRectFilledGradientH(drawList, p_min, p_max, colour_start, colour_end, static_cast<float>(contentProperties.rounding), roundingCorners);
             }
             else if (indicator->highlight.position == "Right")
@@ -676,7 +676,7 @@ namespace UI::Grid {
                 p_min = ImVec2((contentProperties.position.x + contentProperties.width - width + 1), (contentProperties.position.y + 1));
                 p_max = ImVec2((contentProperties.position.x + contentProperties.width - 1), (p_min.y + contentProperties.height - 1));
                 roundingCorners = (sizeRatio >= 1.0f) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Right;
-                colour_start = ImColor(0, 0, 0, 0);
+                colour_start = (indicator->highlight.color & 0x00FFFFFF);
                 colour_end = indicator->highlight.color;
                 ImGui::AddRectFilledGradientH(drawList, p_min, p_max, colour_start, colour_end, static_cast<float>(contentProperties.rounding), roundingCorners);
             }
