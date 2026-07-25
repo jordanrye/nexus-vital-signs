@@ -20,6 +20,7 @@ public:
     using OnIndicatorSwapCallback = std::function<void(TreeNodeUID layoutId, size_t oldIndex, size_t newIndex)>;
 
     // Data management
+    void Clear();
     void Create(const std::string& name, const std::string& type, bool createFromTemplate, const std::filesystem::path& path);
     void Insert(const std::filesystem::path& path, const LayoutConfig_t& layout);
     bool Delete(TreeNodeUID id);

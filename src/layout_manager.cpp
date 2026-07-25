@@ -9,6 +9,13 @@ static LayoutConfig_t GetDefaultRadialLayout();
 
 static void InsertRecursive(const std::vector<Indicator_t>& indicators, TreeNodeUID layoutId, std::map<TreeNodeUID, TreeNodeUID>& map);
 
+void LayoutManager::Clear()
+{
+    m_layouts.clear();
+    m_idToPath.clear();
+    m_indicatorToLayout.clear();
+}
+
 void LayoutManager::Create(const std::string& name, const std::string& type, bool createFromTemplate, const std::filesystem::path& fileDir)
 {
     // Get a sanitised filename

@@ -372,8 +372,8 @@ namespace Addon {
             [](TreeNodeUID id) { return g_LayoutManager.Delete(id) || g_LayoutManager.DeleteIndicator(id); },
             [](TreeNodeUID id, const std::string& name, const std::string& type) { g_LayoutManager.AddIndicator(id, name, type); },
             [](TreeNodeUID id, size_t oldIdx, size_t newIdx) { g_LayoutManager.ReorderIndicators(id, oldIdx, newIdx); },
-            Settings::SaveAllLayouts,
-            Settings::LoadAllLayouts
+            []() { Settings::SaveAllLayouts(); },
+            []() { Settings::LoadAllLayouts(); RegisterLayoutEditorViews(); }
         );
         g_LayoutEditor.RenderContentView();
 

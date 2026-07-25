@@ -164,6 +164,8 @@ namespace Settings
 
     void LoadAllLayouts()
     {
+        g_LayoutManager.Clear();
+        s_LastSavedLayouts.clear();
         for (const auto& file : std::filesystem::directory_iterator(PacksDir))
         {
             if (file.is_regular_file())
