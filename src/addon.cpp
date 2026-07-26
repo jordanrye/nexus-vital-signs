@@ -917,6 +917,8 @@ namespace Addon {
 
                     if (isOpen)
                     {
+                        ImGui::PushID(idx);
+
                         ImGui::BeginGroupPanel("Icon Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Texture(icon.source, icon.path);
@@ -928,6 +930,8 @@ namespace Addon {
                             form_Trigger(icon.trigger);
                         }
                         ImGui::EndGroupPanel();
+
+                        ImGui::PopID();
                     }
 
                     idx++;
