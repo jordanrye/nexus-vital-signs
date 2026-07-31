@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "data_link/data_link.h"
+#include "imgui/imgui.h"
 #include "imgui_extensions.h"
 
 #include "addon.h"
@@ -480,6 +482,7 @@ namespace UI::Grid {
             else if (trigger.effect == "Defeated" && userData.HealthType == VitalSignsDataLink::E_HEALTH_DEFEATED) statusMatch = true;
             else if (trigger.effect == "Shroud (Necromancer)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER) statusMatch = true;
             else if (trigger.effect == "Shroud (Specter)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER) statusMatch = true;
+            else if (trigger.effect == "Unknown" && userData.HealthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) statusMatch = true;
 
             float healthRatio = userData.GetHealthRatio() * 100.0f; // Scale to match UI values (0-100)
 

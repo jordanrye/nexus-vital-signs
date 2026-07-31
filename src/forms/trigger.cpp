@@ -45,6 +45,7 @@ void form_Trigger(Trigger_t& trigger)
         "Defeated",
         "Shroud (Necromancer)",
         "Shroud (Specter)",
+        "Unknown",
     };
     static const char* triggerProfessionOptions[] {
         "Elementalist",
@@ -167,6 +168,7 @@ void form_Trigger(Trigger_t& trigger)
             else if (trigger.effect == "Defeated") triggerEffect = 2;
             else if (trigger.effect == "Shroud (Necromancer)") triggerEffect = 3;
             else if (trigger.effect == "Shroud (Specter)") triggerEffect = 4;
+            else if (trigger.effect == "Unknown") triggerEffect = 5;
     
             ImGui::Combo("State", &triggerEffect, triggerHealthEffectOptions, IM_ARRAYSIZE(triggerHealthEffectOptions));
             trigger.effect = triggerHealthEffectOptions[triggerEffect];
