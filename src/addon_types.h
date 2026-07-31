@@ -39,6 +39,7 @@ struct ColourPresets_t
 {
     /* Default Colours */
     ImColor COLOUR_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_BACKGROUND_UNKNOWN = ImColor(0, 0, 0, 0);
     ImColor COLOUR_HEALTH = ImColor(74, 133, 62);
     ImColor COLOUR_HEALTH_DOWNED = ImColor(157, 31, 31);
     ImColor COLOUR_HEALTH_DEFEATED = ImColor(78, 15, 15);
@@ -61,6 +62,7 @@ struct ColourPresets_t
 
     /* Profession Colours */
     ImColor COLOUR_PROF_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_PROF_BACKGROUND_UNKNOWN = ImColor(0, 0, 0, 0);
     ImColor COLOUR_PROF_HEALTH_ELEMENTALIST = ImColor(197, 110, 108);
     ImColor COLOUR_PROF_HEALTH_ENGINEER = ImColor(166, 125, 71);
     ImColor COLOUR_PROF_HEALTH_GUARDIAN = ImColor(91, 154, 174);
@@ -79,6 +81,7 @@ struct ColourPresets_t
     
     /* Heat Map Colours */
     ImColor COLOUR_HEATMAP_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_HEATMAP_BACKGROUND_UNKNOWN = ImColor(0, 0, 0, 0);
     ImColor COLOUR_HEATMAP_HEALTH_100 = ImColor(74, 133, 62);
     ImColor COLOUR_HEATMAP_HEALTH_75 = ImColor(138, 219, 113);
     ImColor COLOUR_HEATMAP_HEALTH_50 = ImColor(219, 172, 113);

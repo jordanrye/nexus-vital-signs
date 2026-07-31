@@ -1147,6 +1147,7 @@ namespace Addon {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
                 ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Background (Unknown)", &(ColourPresets.COLOUR_BACKGROUND_UNKNOWN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Alive)", &(ColourPresets.COLOUR_HEALTH.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Downed)", &(ColourPresets.COLOUR_HEALTH_DOWNED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Defeated)", &(ColourPresets.COLOUR_HEALTH_DEFEATED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
@@ -1164,6 +1165,7 @@ namespace Addon {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
                 ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_PROF_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Background (Unknown)", &(ColourPresets.COLOUR_PROF_BACKGROUND_UNKNOWN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Elementalist)", &(ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Engineer)", &(ColourPresets.COLOUR_PROF_HEALTH_ENGINEER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Guardian)", &(ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
@@ -1189,6 +1191,7 @@ namespace Addon {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
                 ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_HEATMAP_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Background (Unknown)", &(ColourPresets.COLOUR_HEATMAP_BACKGROUND_UNKNOWN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Alive: 100%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_100.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Alive: 75%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_75.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Alive: 50%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_50.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);

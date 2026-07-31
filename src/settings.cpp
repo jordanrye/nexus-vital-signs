@@ -77,6 +77,7 @@ namespace Settings
 
                     /* Default Colours */
                     dser_ImColor(colors["default-background"], ColourPresets.COLOUR_BACKGROUND);
+                    dser_ImColor(colors["default-background-unknown"], ColourPresets.COLOUR_BACKGROUND_UNKNOWN);
                     dser_ImColor(colors["default-health"], ColourPresets.COLOUR_HEALTH);
                     dser_ImColor(colors["default-health-downed"], ColourPresets.COLOUR_HEALTH_DOWNED);
                     dser_ImColor(colors["default-health-defeated"], ColourPresets.COLOUR_HEALTH_DEFEATED);
@@ -87,6 +88,7 @@ namespace Settings
 
                     /* Profession Colours */
                     dser_ImColor(colors["profession-background"], ColourPresets.COLOUR_PROF_BACKGROUND);
+                    dser_ImColor(colors["profession-background-unknown"], ColourPresets.COLOUR_PROF_BACKGROUND_UNKNOWN);
                     dser_ImColor(colors["profession-health-elementalist"], ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST);
                     dser_ImColor(colors["profession-health-engineer"], ColourPresets.COLOUR_PROF_HEALTH_ENGINEER);
                     dser_ImColor(colors["profession-health-guardian"], ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN);
@@ -105,6 +107,7 @@ namespace Settings
                     
                     /* Heat Map Colours */
                     dser_ImColor(colors["heat-map-background"], ColourPresets.COLOUR_HEATMAP_BACKGROUND);
+                    dser_ImColor(colors["heat-map-background-unknown"], ColourPresets.COLOUR_HEATMAP_BACKGROUND_UNKNOWN);
                     dser_ImColor(colors["heat-map-health-100"], ColourPresets.COLOUR_HEATMAP_HEALTH_100);
                     dser_ImColor(colors["heat-map-health-75"], ColourPresets.COLOUR_HEATMAP_HEALTH_75);
                     dser_ImColor(colors["heat-map-health-50"], ColourPresets.COLOUR_HEATMAP_HEALTH_50);
@@ -248,6 +251,7 @@ namespace Settings
 
             /* Default Colours  */
             colors["default-background"] = ser_ImColor(ColourPresets.COLOUR_BACKGROUND);
+            colors["default-background-unknown"] = ser_ImColor(ColourPresets.COLOUR_BACKGROUND_UNKNOWN);
             colors["default-health"] = ser_ImColor(ColourPresets.COLOUR_HEALTH);
             colors["default-health-downed"] = ser_ImColor(ColourPresets.COLOUR_HEALTH_DOWNED);
             colors["default-health-defeated"] = ser_ImColor(ColourPresets.COLOUR_HEALTH_DEFEATED);
@@ -258,6 +262,7 @@ namespace Settings
             
             /* Profession Colours */
             colors["profession-background"] = ser_ImColor(ColourPresets.COLOUR_PROF_BACKGROUND);
+            colors["profession-background-unknown"] = ser_ImColor(ColourPresets.COLOUR_PROF_BACKGROUND_UNKNOWN);
             colors["profession-health-elementalist"] = ser_ImColor(ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST);
             colors["profession-health-engineer"] = ser_ImColor(ColourPresets.COLOUR_PROF_HEALTH_ENGINEER);
             colors["profession-health-guardian"] = ser_ImColor(ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN);
@@ -276,6 +281,7 @@ namespace Settings
             
             /* Heat Map Colours */
             colors["heat-map-background"] = ser_ImColor(ColourPresets.COLOUR_HEATMAP_BACKGROUND);
+            colors["heat-map-background-unknown"] = ser_ImColor(ColourPresets.COLOUR_HEATMAP_BACKGROUND_UNKNOWN);
             colors["heat-map-health-100"] = ser_ImColor(ColourPresets.COLOUR_HEATMAP_HEALTH_100);
             colors["heat-map-health-75"] = ser_ImColor(ColourPresets.COLOUR_HEATMAP_HEALTH_75);
             colors["heat-map-health-50"] = ser_ImColor(ColourPresets.COLOUR_HEATMAP_HEALTH_50);
