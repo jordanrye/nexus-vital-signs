@@ -249,14 +249,20 @@ void dser_ColourIndicator_t(json& object, ColourIndicator_t& colour)
     }
 }
 
-void dser_HighlightIndicator_t(json& object, HighlightIndicator_t& highlight)
+void dser_GlowIndicator_t(json& object, GlowIndicator_t& glow)
 {
     if (!object.is_null())
     {
-        dser_ImColor(object["color"], highlight.color);
-        dser_BasicType(object["position"], highlight.position);
-        dser_BasicType(object["size"], highlight.size);
-        dser_Trigger_t(object["trigger"], highlight.trigger);
+        dser_ImColor(object["color"], glow.color);
+        dser_BasicType(object["position"], glow.position);
+        dser_BasicType(object["directionTop"], glow.directionTop);
+        dser_BasicType(object["directionBottom"], glow.directionBottom);
+        dser_BasicType(object["directionLeft"], glow.directionLeft);
+        dser_BasicType(object["directionRight"], glow.directionRight);
+        dser_BasicType(object["thicknessType"], glow.thicknessType);
+        dser_BasicType(object["thickness"], glow.thickness);
+        dser_BasicType(object["hardness"], glow.hardness);
+        dser_Trigger_t(object["trigger"], glow.trigger);
     }
 }
 
@@ -307,8 +313,8 @@ void dser_Indicator_t(json& object, Indicator_t& indicator)
         else if ("Colour" == indicator.type) {
             dser_ColourIndicator_t(object["colour"], indicator.colour);
         }
-        else if ("Highlight" == indicator.type) {
-            dser_HighlightIndicator_t(object["highlight"], indicator.highlight);
+        else if ("Glow" == indicator.type) {
+            dser_GlowIndicator_t(object["glow"], indicator.glow);
         }
         else if ("Text" == indicator.type) {
             dser_TextIndicator_t(object["text"], indicator.text);
@@ -522,13 +528,19 @@ json ser_ColourIndicator_t(const ColourIndicator_t& colour)
     return object;
 }
 
-json ser_HighlightIndicator_t(const HighlightIndicator_t& highlight)
+json ser_GlowIndicator_t(const GlowIndicator_t& glow)
 {
     json object = json::object();
-    object["color"] = ser_ImColor(highlight.color);
-    object["position"] = highlight.position;
-    object["size"] = highlight.size;
-    object["trigger"] = ser_Trigger_t(highlight.trigger);
+    object["color"] = ser_ImColor(glow.color);
+    object["position"] = glow.position;
+    object["directionTop"] = glow.directionTop;
+    object["directionBottom"] = glow.directionBottom;
+    object["directionLeft"] = glow.directionLeft;
+    object["directionRight"] = glow.directionRight;
+    object["thicknessType"] = glow.thicknessType;
+    object["thickness"] = glow.thickness;
+    object["hardness"] = glow.hardness;
+    object["trigger"] = ser_Trigger_t(glow.trigger);
     return object;
 }
 
@@ -577,8 +589,8 @@ json ser_Indicator_t(const Indicator_t& indicator)
     else if ("Colour" == indicator.type) {
         object["colour"] = ser_ColourIndicator_t(indicator.colour);
     }
-    else if ("Highlight" == indicator.type) {
-        object["highlight"] = ser_HighlightIndicator_t(indicator.highlight);
+    else if ("Glow" == indicator.type) {
+        object["glow"] = ser_GlowIndicator_t(indicator.glow);
     }
     else if ("Text" == indicator.type) {
         object["text"] = ser_TextIndicator_t(indicator.text);

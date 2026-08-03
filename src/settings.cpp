@@ -8,6 +8,7 @@
 #include "json_addon_serialisers.h"
 #include "json_imgui_serialisers.h"
 #include "json_serialisers.h"
+#include "migration/migration.h"
 
 using json = nlohmann::json;
 
@@ -68,6 +69,8 @@ namespace Settings
         /* load settings */
         if (jsonParse(APIDefs->Paths.GetAddonDirectory("VitalSigns/presets.json"), settings))
         {
+            Migration::MigratePresetConfig(settings);
+
             if (!settings.is_null())
             {
                 /* colors settings */
@@ -243,6 +246,7 @@ namespace Settings
     json jsonSerialisePresets()
     {
         json settings = json::object();
+        settings["schemaVersion"] = Migration::SCHEMA_VERSION;
 
         /* colors settings */
         settings["colors"] = json::object();
@@ -308,6 +312,7 @@ namespace Settings
     json jsonSerialiseLayouts(const LayoutConfig_t& layoutConfig)
     {
         json layout = json::object();
+        layout["schemaVersion"] = layoutConfig.schemaVersion;
 
         /* General */
         layout["name"] = layoutConfig.name;
@@ -331,11 +336,17 @@ namespace Settings
 
         if (jsonParse(aFilePath, layout))
         {
+            Migration::MigrateLayoutConfig(layout);
             LayoutConfig_t layoutConfig{};
 
             if (!layout.is_null())
             {
                 layoutConfig.id = g_LayoutEditor.GenerateUID();
+
+                if (layout.contains("schemaVersion"))
+                {
+                    layoutConfig.schemaVersion = layout["schemaVersion"].get<int>();
+                }
     
                 dser_BasicType(layout["name"], layoutConfig.name);
                 dser_BasicType(layout["colors"], layoutConfig.colors);

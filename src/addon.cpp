@@ -1001,38 +1001,58 @@ namespace Addon {
             }
         }
 
-        if ("Highlight" == indicator.type)
+        if ("Glow" == indicator.type)
         {
-            static const char* directionOptions[] {
-                "Top",
-                "Bottom",
-                "Left",
-                "Right"
+            static const char* positionOptions[] {
+                "Inner",
+                "Outer"
             };
 
-            ImGui::TextDisabled("Highlight Properties");
+            ImGui::TextDisabled("Glow Properties");
             ImGui::Separator();
             {
-                ImGui::ColorEdit4("Color##HIGHLIGHT_COLOR", (float*)&indicator.highlight.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Color##GLOW_COLOR", (float*)&indicator.glow.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 
-                int directionSelection = 1; // Default to "Bottom"
-                if (indicator.highlight.position == "Top") directionSelection = 0;
-                else if (indicator.highlight.position == "Bottom") directionSelection = 1;
-                else if (indicator.highlight.position == "Left") directionSelection = 2;
-                else if (indicator.highlight.position == "Right") directionSelection = 3;
+                int positionSelection = 0; // Default to "Inner"
+                if (indicator.glow.position == "Inner") positionSelection = 0;
+                else if (indicator.glow.position == "Outer") positionSelection = 1;
 
-                if (ImGui::Combo("Position##HIGHLIGHT_POSITION", &directionSelection, directionOptions, IM_ARRAYSIZE(directionOptions)))
+                if (ImGui::Combo("Position##GLOW_POSITION", &positionSelection, positionOptions, IM_ARRAYSIZE(positionOptions)))
                 {
-                    indicator.highlight.position = directionOptions[directionSelection];
+                    indicator.glow.position = positionOptions[positionSelection];
                 }
 
-                ImGui::SliderFloat("Size (%)##HIGHLIGHT_SIZE", &indicator.highlight.size, 0.0f, 100.0f, "%.0f");
+                static const char* thicknessOptions[] {
+                    "Pixels",
+                    "Percentage"
+                };
+
+                int thicknessSelection = 0; // Default to "Pixels"
+                if (indicator.glow.thicknessType == "Pixels") thicknessSelection = 0;
+                else if (indicator.glow.thicknessType == "Percentage") thicknessSelection = 1;
+
+                if (ImGui::Combo("Thickness Type##GLOW_THICKNESS_TYPE", &thicknessSelection, thicknessOptions, IM_ARRAYSIZE(thicknessOptions)))
+                {
+                    indicator.glow.thicknessType = thicknessOptions[thicknessSelection];
+                }
+
+                ImGui::SliderFloat("Thickness##GLOW_THICKNESS", &indicator.glow.thickness, 1.0f, 100.0f, "%.0f");
+                ImGui::SliderFloat("Hardness##GLOW_HARDNESS", &indicator.glow.hardness, 0.0f, 1.0f, "%.2f");
+
+                ImGui::Text("Directions");
+                ImGui::Checkbox("Top##GLOW_TOP", &indicator.glow.directionTop);
+                ImGui::SameLine();
+                ImGui::Checkbox("Bottom##GLOW_BOTTOM", &indicator.glow.directionBottom);
+                ImGui::SameLine();
+                ImGui::Checkbox("Left##GLOW_LEFT", &indicator.glow.directionLeft);
+                ImGui::SameLine();
+                ImGui::Checkbox("Right##GLOW_RIGHT", &indicator.glow.directionRight);
             }
             
             ImGui::TextDisabled("Trigger");
             ImGui::Separator();
             {
-                form_Trigger(indicator.highlight.trigger);
+                form_Trigger(indicator.glow.trigger);
             }
         }
 

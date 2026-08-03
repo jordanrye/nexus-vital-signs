@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\addon.h" />
+    <ClInclude Include="src\migration\migration.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\Behavior.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorFlags.h" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\addon.cpp" />
+    <ClCompile Include="src\migration\migration.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Chat\ChatContext.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Combat\CbCombatant.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Dialog\DialogManager.cpp" />

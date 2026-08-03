@@ -1,6 +1,7 @@
 #pragma once
 
 #include "imgui_tree_view.h"
+#include "migration/migration.h"
 
 struct Size_t
 {
@@ -148,11 +149,17 @@ struct ColourIndicator_t
     Trigger_t trigger;
 };
 
-struct HighlightIndicator_t
+struct GlowIndicator_t
 {
     ImColor color = ImColor(255, 255, 255, 255);
-    std::string position = "Bottom";
-    float size = 50.f;
+    std::string position = "Inner";
+    bool directionTop = true;
+    bool directionBottom = true;
+    bool directionLeft = true;
+    bool directionRight = true;
+    std::string thicknessType = "Pixels";
+    float thickness = 20.f;
+    float hardness = 0.0f;
     Trigger_t trigger;
 };
 
@@ -204,7 +211,7 @@ struct Indicator_t
     BorderIndicator_t border;
     Group_t group;
     ColourIndicator_t colour;
-    HighlightIndicator_t highlight;
+    GlowIndicator_t glow;
     TextIndicator_t text;
 
     /* Dynamic identifier. */
@@ -213,6 +220,7 @@ struct Indicator_t
 
 struct LayoutConfig_t
 {
+    int schemaVersion = Migration::SCHEMA_VERSION;
     std::string name;
     std::string colors = "Default";
     Position_t position;

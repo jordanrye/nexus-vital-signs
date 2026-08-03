@@ -574,9 +574,9 @@ namespace UI::Grid {
                         isApplied = true;
                     }
                 }
-                else if (indicator.type == "Highlight")
+                else if (indicator.type == "Glow")
                 {
-                    if (IsTriggerMet(indicator.highlight.trigger, userData, isPreviewed) || isTraversalForced)
+                    if (IsTriggerMet(indicator.glow.trigger, userData, isPreviewed) || isTraversalForced)
                     {
                         outDrawables.push_back({ &indicator, isPreviewed });
                         isApplied = true;
@@ -633,56 +633,81 @@ namespace UI::Grid {
 
         return isAnyApplied;
     }
+    
+    void DrawGlow(ImDrawList* const drawList, const DrawProperties_t& properties, const GlowIndicator_t& glow)
+    {
+        ImVec2 p_min = properties.position;
+        ImVec2 p_max = ImVec2(p_min.x + properties.width, p_min.y + properties.height);
+        
+        float actualThickness = glow.thickness;
+        if (glow.thicknessType == "Percentage")
+        {
+            actualThickness = properties.height * (glow.thickness / 100.0f);
+        }
+
+        int steps = (int)actualThickness;
+        if (steps <= 0) return;
+
+        ImColor baseCol = glow.color;
+        float r = baseCol.Value.x;
+        float g = baseCol.Value.y;
+        float b = baseCol.Value.z;
+        float a = baseCol.Value.w;
+
+        ImVec2 clip_min = p_min;
+        ImVec2 clip_max = p_max;
+        
+        if (glow.position == "Outer")
+        {
+            if (glow.directionLeft) clip_min.x -= (actualThickness + 2.0f);
+            if (glow.directionTop) clip_min.y -= (actualThickness + 2.0f);
+            if (glow.directionRight) clip_max.x += (actualThickness + 2.0f);
+            if (glow.directionBottom) clip_max.y += (actualThickness + 2.0f);
+        }
+
+        drawList->PushClipRect(clip_min, clip_max, true);
+
+        for (int i = 0; i < steps; i++)
+        {
+            float progress = (float)i / steps;
+            float stepAlpha = a * (1.0f - progress * (1.0f - glow.hardness));
+            
+            if (glow.position == "Outer")
+            {
+                float offset = (float)(i + 1);
+                ImVec2 step_min = p_min;
+                ImVec2 step_max = p_max;
+                
+                step_min.x -= offset;
+                step_max.x += offset;
+                step_min.y -= offset;
+                step_max.y += offset;
+                
+                drawList->AddRect(step_min, step_max, ImColor(r, g, b, stepAlpha), properties.rounding + offset, properties.roundingCorners, 1.0f);
+            }
+            else
+            {
+                float offset = (float)i;
+                ImVec2 step_min = p_min;
+                ImVec2 step_max = p_max;
+                
+                step_min.x = glow.directionLeft ? (step_min.x + offset) : (step_min.x - actualThickness - 2.0f);
+                step_max.x = glow.directionRight ? (step_max.x - offset) : (step_max.x + actualThickness + 2.0f);
+                step_min.y = glow.directionTop ? (step_min.y + offset) : (step_min.y - actualThickness - 2.0f);
+                step_max.y = glow.directionBottom ? (step_max.y - offset) : (step_max.y + actualThickness + 2.0f);
+                
+                drawList->AddRect(step_min, step_max, ImColor(r, g, b, stepAlpha), ImMax(0.0f, properties.rounding - offset), properties.roundingCorners, 1.0f);
+            }
+        }
+        
+        drawList->PopClipRect();
+    }
 
     static void DrawIndicator(ImDrawList* const drawList, const DrawProperties_t& parentProperties, const DrawProperties_t& contentProperties, const Indicator_t* indicator, VitalSignsDataLink::UserData_t& userData, bool isPreviewed)
     {
-        if (indicator->type == "Highlight")
+        if (indicator->type == "Glow")
         {
-            const float sizeRatio = indicator->highlight.size / 100.0f;
-            ImVec2 p_min, p_max;
-            ImDrawCornerFlags roundingCorners = ImDrawCornerFlags_None;
-            ImU32 colour_start, colour_end;
-            
-            if (indicator->highlight.position == "Top")
-            {
-                float height = contentProperties.height * sizeRatio;
-                p_min = ImVec2((contentProperties.position.x + 1), (contentProperties.position.y + 1));
-                p_max = ImVec2((p_min.x + contentProperties.width - 1), (p_min.y + height - 1));
-                roundingCorners = (sizeRatio >= 1.0f) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Top;
-                colour_start = indicator->highlight.color;
-                colour_end = (indicator->highlight.color & 0x00FFFFFF);
-                ImGui::AddRectFilledGradientV(drawList, p_min, p_max, colour_start, colour_end, static_cast<float>(contentProperties.rounding), roundingCorners);
-            }
-            else if (indicator->highlight.position == "Bottom")
-            {
-                float height = contentProperties.height * sizeRatio;
-                p_min = ImVec2((contentProperties.position.x + 1), (contentProperties.position.y + contentProperties.height - height + 1));
-                p_max = ImVec2((p_min.x + contentProperties.width - 1), (p_min.y + height - 1));
-                roundingCorners = (sizeRatio >= 1.0f) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Bot;
-                colour_start = (indicator->highlight.color & 0x00FFFFFF);
-                colour_end = indicator->highlight.color;
-                ImGui::AddRectFilledGradientV(drawList, p_min, p_max, colour_start, colour_end, static_cast<float>(contentProperties.rounding), roundingCorners);
-            }
-            else if (indicator->highlight.position == "Left")
-            {
-                float width = contentProperties.width * sizeRatio;
-                p_min = ImVec2((contentProperties.position.x + 1), (contentProperties.position.y + 1));
-                p_max = ImVec2((p_min.x + width - 1), (p_min.y + contentProperties.height - 1));
-                roundingCorners = (sizeRatio >= 1.0f) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
-                colour_start = indicator->highlight.color;
-                colour_end = (indicator->highlight.color & 0x00FFFFFF);
-                ImGui::AddRectFilledGradientH(drawList, p_min, p_max, colour_start, colour_end, static_cast<float>(contentProperties.rounding), roundingCorners);
-            }
-            else if (indicator->highlight.position == "Right")
-            {
-                float width = contentProperties.width * sizeRatio;
-                p_min = ImVec2((contentProperties.position.x + contentProperties.width - width + 1), (contentProperties.position.y + 1));
-                p_max = ImVec2((contentProperties.position.x + contentProperties.width - 1), (p_min.y + contentProperties.height - 1));
-                roundingCorners = (sizeRatio >= 1.0f) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Right;
-                colour_start = (indicator->highlight.color & 0x00FFFFFF);
-                colour_end = indicator->highlight.color;
-                ImGui::AddRectFilledGradientH(drawList, p_min, p_max, colour_start, colour_end, static_cast<float>(contentProperties.rounding), roundingCorners);
-            }
+            DrawGlow(drawList, contentProperties, indicator->glow);
         }
         else if (indicator->type == "Icon")
         {
