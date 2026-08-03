@@ -1681,13 +1681,18 @@ namespace UI::Grid {
         bool isSelected = false;
 
         int cellDirectionMax = (context.layoutConfig->layout.grid.frameDirection == "Left-to-right" || context.layoutConfig->layout.grid.frameDirection == "Right-to-left") ? context.layoutConfig->layout.grid.maxColumns : context.layoutConfig->layout.grid.maxRows;
+        bool isPreview = (context.layoutConfig->previewNodeId != TreeNodeUID::NONE) && (context.layoutConfig->previewNodeId == context.layoutConfig->id);
 
         /* Skip trailing empty cells */
-        if (context.isItemPending && VitalsData->getUsers().find(context.userData[context.index].SubgroupId) == VitalsData->getUsers().end())
+        if (context.isItemPending && !isPreview && Addon::isSquadManagerActive)
         {
-            if (context.index % cellDirectionMax != 0)
+            auto users = VitalsData->getUsers();
+            if (users.find(context.userData[context.index].SubgroupId) == users.end())
             {
-                context.index = ((context.index / cellDirectionMax) + 1) * cellDirectionMax;
+                if (context.index % cellDirectionMax != 0)
+                {
+                    context.index = ((context.index / cellDirectionMax) + 1) * cellDirectionMax;
+                }
             }
         }
         
