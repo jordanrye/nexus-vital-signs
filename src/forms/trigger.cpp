@@ -8,6 +8,7 @@ void form_Trigger(Trigger_t& trigger)
         "Conditions",
         "Health",
         "Professions",
+        "Roles",
     };
     static const char* triggerBoonsEffectOptions[] {
         "Aegis",
@@ -94,6 +95,12 @@ void form_Trigger(Trigger_t& trigger)
         "Warrior: Bladesworn",
         "Warrior: Paragon",
     };
+    static const char* triggerRoleOptions[] {
+        "Commander",
+        "Hovered",
+        "Selected",
+        "Self",
+    };
     static const char* triggerConditionOptions[] {
         "Status: Active",
         "Status: Inactive",
@@ -112,6 +119,7 @@ void form_Trigger(Trigger_t& trigger)
         else if (trigger.category == "Conditions") triggerCategory = 2;
         else if (trigger.category == "Health") triggerCategory = 3;
         else if (trigger.category == "Professions") triggerCategory = 4;
+        else if (trigger.category == "Roles") triggerCategory = 5;
         ImGui::Combo("Category", &triggerCategory, triggerCategoryOptions, IM_ARRAYSIZE(triggerCategoryOptions));
         trigger.category = triggerCategoryOptions[triggerCategory];
     
@@ -187,6 +195,20 @@ void form_Trigger(Trigger_t& trigger)
             ImGui::Combo("Effect", &triggerEffect, triggerProfessionOptions, IM_ARRAYSIZE(triggerProfessionOptions));
             trigger.effect = triggerProfessionOptions[triggerEffect];
         }
+        else if ("Roles" == trigger.category)
+        {
+            int triggerEffect = 0;             
+            for (int i = 0; i < IM_ARRAYSIZE(triggerRoleOptions); i++)
+            {
+                if (trigger.effect == triggerRoleOptions[i])
+                {
+                    triggerEffect = i;
+                    break;
+                }
+            }
+            ImGui::Combo("Effect", &triggerEffect, triggerRoleOptions, IM_ARRAYSIZE(triggerRoleOptions));
+            trigger.effect = triggerRoleOptions[triggerEffect];
+        }
 
         if ("Health" == trigger.category)
         {
@@ -220,7 +242,7 @@ void form_Trigger(Trigger_t& trigger)
                 }
             }
         }
-        else if (("<Inherit From Parent>" != trigger.category) && ("Professions" != trigger.category))
+        else if (("<Inherit From Parent>" != trigger.category) && ("Professions" != trigger.category) && ("Roles" != trigger.category))
         {
             int triggerCondition = 0; // Default to "Status: Active"
             if (trigger.condition == "Status: Active") triggerCondition = 0;

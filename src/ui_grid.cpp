@@ -474,6 +474,15 @@ namespace UI::Grid {
             return true;
         }
 
+        if (trigger.category == "Roles")
+        {
+            if (trigger.effect == "Commander" && userData.SquadRole == VitalSignsDataLink::ESquadRole::Commander) return true;
+            if (trigger.effect == "Self" && VitalsData && userData.UserId == VitalsData->getClientId()) return true;
+            if (trigger.effect == "Hovered" && userData.IsHovered) return true;
+            if (trigger.effect == "Selected" && userData.IsSelected) return true;
+            return false;
+        }
+
         if (trigger.category == "Health")
         {
             bool statusMatch = false;
