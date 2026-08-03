@@ -1227,6 +1227,83 @@ namespace Addon {
             ImGui::PopID();
         });
 
+        TreeNodeUID frameStatesBranchId = g_PresetConfig.GenerateUID();
+        g_PresetConfig.AppendNode(TreeNodeUID::NONE, frameStatesBranchId, "Frame States", "", TreeNodeType::BRANCH);
+
+        auto AddFrameStateItem = [&](const std::string& name, FrameStatePreset_t& preset) {
+            AddPresetItem(frameStatesBranchId, "Frame States", name, [name, &preset]() {
+                ImGui::PushID(("FrameStates/" + name).c_str());
+                {
+                    ImGui::TextDisabled("Border Override");
+                    ImGui::Separator();
+                    ImGui::Checkbox("Enable Border", &preset.borderOverride);
+                    if (preset.borderOverride)
+                    {
+                        ImGui::ColorEdit4("Color##BORDER_COLOR", (float*)&preset.border.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                        ImGui::InputInt("Thickness##BORDER_THICKNESS", &preset.border.thickness, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue);
+                    }
+
+                    ImGui::TextDisabled("Overlay");
+                    ImGui::Separator();
+                    ImGui::Checkbox("Enable Overlay", &preset.overlayEnabled);
+                    if (preset.overlayEnabled)
+                    {
+                        ImGui::ColorEdit4("Color##OVERLAY_COLOR", (float*)&preset.overlayColor, ImGuiColorEditFlags_AlphaPreviewHalf);
+                    }
+
+                    ImGui::TextDisabled("Glow Effect");
+                    ImGui::Separator();
+                    ImGui::Checkbox("Enable Glow", &preset.glowEnabled);
+                    if (preset.glowEnabled)
+                    {
+                        ImGui::ColorEdit4("Color##GLOW_COLOR", (float*)&preset.glow.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                        
+                        static const char* positionOptions[] {
+                            "Inner",
+                            "Outer"
+                        };
+                        
+                        int positionSelection = 0; // Default to "Inner"
+                        if (preset.glow.position == "Inner") positionSelection = 0;
+                        else if (preset.glow.position == "Outer") positionSelection = 1;
+
+                        if (ImGui::Combo("Position##GLOW_POSITION", &positionSelection, positionOptions, IM_ARRAYSIZE(positionOptions)))
+                        {
+                            preset.glow.position = positionOptions[positionSelection];
+                        }
+                        
+                        ImGui::Checkbox("Top", &preset.glow.directionTop); ImGui::SameLine();
+                        ImGui::Checkbox("Bottom", &preset.glow.directionBottom); ImGui::SameLine();
+                        ImGui::Checkbox("Left", &preset.glow.directionLeft); ImGui::SameLine();
+                        ImGui::Checkbox("Right", &preset.glow.directionRight);
+                        
+                        static const char* thicknessOptions[] {
+                            "Pixels",
+                            "Percentage"
+                        };
+
+                        int thicknessSelection = 0; // Default to "Pixels"
+                        if (preset.glow.thicknessType == "Pixels") thicknessSelection = 0;
+                        else if (preset.glow.thicknessType == "Percentage") thicknessSelection = 1;
+
+                        if (ImGui::Combo("Thickness Type##GLOW_THICKNESS_TYPE", &thicknessSelection, thicknessOptions, IM_ARRAYSIZE(thicknessOptions)))
+                        {
+                            preset.glow.thicknessType = thicknessOptions[thicknessSelection];
+                        }
+
+                        ImGui::SliderFloat("Thickness##GLOW_THICKNESS", &preset.glow.thickness, 0.0f, 100.0f, "%.0f");
+                        ImGui::SliderFloat("Hardness##GLOW_HARDNESS", &preset.glow.hardness, 0.0f, 1.0f, "%.2f");
+                    }
+                }
+                ImGui::PopID();
+            });
+        };
+
+        AddFrameStateItem("Hovered", FrameStatePresets.hovered);
+        AddFrameStateItem("Selected", FrameStatePresets.selected);
+        AddFrameStateItem("Self", FrameStatePresets.self);
+        AddFrameStateItem("Commander", FrameStatePresets.commander);
+
         TreeNodeUID borderBranchId = g_PresetConfig.GenerateUID();
         g_PresetConfig.AppendNode(TreeNodeUID::NONE, borderBranchId, "Borders", "", TreeNodeType::BRANCH);
 

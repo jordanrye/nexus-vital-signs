@@ -240,6 +240,19 @@ void dser_BorderIndicator_t(json& object, BorderIndicator_t& border)
     }
 }
 
+void dser_FrameStatePreset_t(json& object, FrameStatePreset_t& preset)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["border-override"], preset.borderOverride);
+        dser_BorderIndicator_t(object["border"], preset.border);
+        dser_BasicType(object["overlay-enabled"], preset.overlayEnabled);
+        dser_ImColor(object["overlay-color"], preset.overlayColor);
+        dser_BasicType(object["glow-enabled"], preset.glowEnabled);
+        dser_GlowIndicator_t(object["glow"], preset.glow);
+    }
+}
+
 void dser_ColourIndicator_t(json& object, ColourIndicator_t& colour)
 {
     if (!object.is_null())
@@ -517,6 +530,18 @@ json ser_BorderIndicator_t(const BorderIndicator_t& border)
     object["color"] = ser_ImColor(border.color);
     object["thickness"] = border.thickness;
     object["trigger"] = ser_Trigger_t(border.trigger);
+    return object;
+}
+
+json ser_FrameStatePreset_t(const FrameStatePreset_t& preset)
+{
+    json object = json::object();
+    object["border-override"] = preset.borderOverride;
+    object["border"] = ser_BorderIndicator_t(preset.border);
+    object["overlay-enabled"] = preset.overlayEnabled;
+    object["overlay-color"] = ser_ImColor(preset.overlayColor);
+    object["glow-enabled"] = preset.glowEnabled;
+    object["glow"] = ser_GlowIndicator_t(preset.glow);
     return object;
 }
 

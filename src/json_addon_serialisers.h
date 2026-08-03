@@ -15,6 +15,7 @@ void dser_Indicator_t(json& object, Indicator_t& indicator);
 void dser_IconTextTrigger_t(json& object, IconTextTrigger_t& trigger);
 void dser_TextStyle_t(json& object, TextStyle_t& textStyle);
 void dser_IconText_t(json& object, IconText_t& iconText);
+void dser_FrameStatePreset_t(json& object, FrameStatePreset_t& preset);
 void dser_GlowIndicator_t(json& object, GlowIndicator_t& glow);
 
 json ser_Position_t(const Position_t& position);
@@ -24,6 +25,7 @@ json ser_Indicator_t(const Indicator_t& indicator);
 json ser_IconTextTrigger_t(const IconTextTrigger_t& trigger);
 json ser_TextStyle_t(const TextStyle_t& textStyle);
 json ser_IconText_t(const IconText_t& iconText);
+json ser_FrameStatePreset_t(const FrameStatePreset_t& preset);
 json ser_GlowIndicator_t(const GlowIndicator_t& glow);
 
 #endif /* JSON_ADDON_SERIALISERS */

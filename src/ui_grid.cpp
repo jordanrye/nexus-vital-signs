@@ -1170,6 +1170,9 @@ namespace UI::Grid {
 
         std::vector<std::pair<const Indicator_t*, bool>> drawables;
 
+        ImDrawListSplitter splitter;
+        splitter.Split(drawList, 2);
+
         /* Draw items */
         for (int i = 0; i < context.index; i++)
         {
@@ -1315,16 +1318,43 @@ namespace UI::Grid {
                     /* Preview mode */
                     ProcessIndicatorsDFS(context.layoutConfig->indicators, userData, false, true, &healthColour, &borderStyle, drawables);
                 }
-    
+
+                // Evaluate Frame State Presets for current cell
+                std::vector<FrameStatePreset_t*> activePresets;
+                if (userData.SquadRole == VitalSignsDataLink::ESquadRole::Commander) activePresets.push_back(&FrameStatePresets.commander);
+                if (VitalsData && userData.UserId == VitalsData->getClientId()) activePresets.push_back(&FrameStatePresets.self);
+                if (isHovered) activePresets.push_back(&FrameStatePresets.hovered);
+                if (userData.IsSelected) activePresets.push_back(&FrameStatePresets.selected);
+
                 /* Border */
                 DrawProperties_t borderProps = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, i);
                 float borderThickness = 0.0f;
-                if (borderStyle)
+                
+                const BorderIndicator_t* activeBorder = borderStyle ? &borderStyle->border : nullptr;
+                for (auto preset : activePresets)
                 {
-                    if (borderStyle->border.thickness >= 1)
+                    if (preset->borderOverride) activeBorder = &preset->border;
+                }
+
+                // Channel 0: Outer Glows (rendered underneath the cell background)
+                splitter.SetCurrentChannel(drawList, 0);
+                for (auto preset : activePresets)
+                {
+                    if (preset->glowEnabled && preset->glow.position == "Outer")
                     {
-                        borderThickness = (float)borderStyle->border.thickness;
-                        DrawBorder(drawList, borderProps, borderStyle->border.color, borderThickness);
+                        DrawGlow(drawList, borderProps, preset->glow);
+                    }
+                }
+
+                // Channel 1: Cell Content
+                splitter.SetCurrentChannel(drawList, 1);
+
+                if (activeBorder)
+                {
+                    if (activeBorder->thickness >= 1)
+                    {
+                        borderThickness = (float)activeBorder->thickness;
+                        DrawBorder(drawList, borderProps, activeBorder->color, borderThickness);
                     }
                 }
                 else if (context.layoutConfig->layout.itemBorder >= 1)
@@ -1356,11 +1386,6 @@ namespace UI::Grid {
                     properties.roundingCorners = roundingCorners;
     
                     DrawCell(drawList, properties, healthColour);
-    
-                    if (isHovered)
-                    {
-                        DrawCell(drawList, properties, context.colourPresets.COLOUR_HOVERED);
-                    }
                 }
                 
                 /* Barrier */
@@ -1388,10 +1413,28 @@ namespace UI::Grid {
                     }
                 }
     
+                // Inner glows
+                for (auto preset : activePresets)
+                {
+                    if (preset->glowEnabled && preset->glow.position == "Inner")
+                    {
+                        DrawGlow(drawList, contentProps, preset->glow);
+                    }
+                }
+
                 /* Indicators */
                 for (const auto& pair : drawables)
                 {
                     DrawIndicator(drawList, parentProperties, contentProps, pair.first, userData, pair.second);
+                }
+
+                // Overlays
+                for (auto preset : activePresets)
+                {
+                    if (preset->overlayEnabled)
+                    {
+                        DrawCell(drawList, contentProps, preset->overlayColor);
+                    }
                 }
 
                 /* Squad Manager: Drag-and-drop (drag) */
@@ -1418,6 +1461,7 @@ namespace UI::Grid {
             }
         }
 
+        splitter.Merge(drawList);
         drawList->PopClipRect();
 
         // Squad Manager: Move and re-size

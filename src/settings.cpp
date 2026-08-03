@@ -127,6 +127,15 @@ namespace Settings
                     dser_ImColor(colors["border"], BorderPresets.COLOUR_BORDER);
                 }
 
+                if (!settings["frame-states"].is_null())
+                {
+                    auto& fs = settings["frame-states"];
+                    dser_FrameStatePreset_t(fs["hovered"], FrameStatePresets.hovered);
+                    dser_FrameStatePreset_t(fs["selected"], FrameStatePresets.selected);
+                    dser_FrameStatePreset_t(fs["self"], FrameStatePresets.self);
+                    dser_FrameStatePreset_t(fs["commander"], FrameStatePresets.commander);
+                }
+
                 if (!settings["text"].is_null())
                 {
                     dser_TextStyle_t(settings["text"], ConfigText);
@@ -305,6 +314,12 @@ namespace Settings
         settings["text"] = ser_TextStyle_t(ConfigText);
         settings["icon-duration"] = ser_IconText_t(ConfigIconDuration);
         settings["icon-stacks"] = ser_IconText_t(ConfigIconStacks);
+
+        settings["frame-states"] = json::object();
+        settings["frame-states"]["hovered"] = ser_FrameStatePreset_t(FrameStatePresets.hovered);
+        settings["frame-states"]["selected"] = ser_FrameStatePreset_t(FrameStatePresets.selected);
+        settings["frame-states"]["self"] = ser_FrameStatePreset_t(FrameStatePresets.self);
+        settings["frame-states"]["commander"] = ser_FrameStatePreset_t(FrameStatePresets.commander);
 
         return settings;
     }

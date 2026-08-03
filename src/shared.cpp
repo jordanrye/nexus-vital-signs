@@ -21,6 +21,7 @@ GeneralConfig_t ConfigGeneral{};
 LayoutManager g_LayoutManager{};
 ColourPresets_t ColourPresets{};
 BorderPresets_t BorderPresets{};
+FrameStatePresets_t FrameStatePresets{};
 
 TextStyle_t ConfigText = []{ TextStyle_t c; c.fontSource = "Nexus font"; c.fontSizeSource = "Nexus font size"; c.fontSize = 0.0f; return c; }();
 IconText_t ConfigIconDuration = []{ IconText_t c; c.position.anchor = "Bottom-right"; c.textStyle.fontSource = "Nexus font"; c.textStyle.fontSizeSource = "Nexus font size"; c.textStyle.fontSize = 0.0f; return c; }();
