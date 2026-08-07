@@ -244,7 +244,7 @@ namespace UI::Radial {
         /* Radial properties */
         const float centralAngle = (2 * IM_PI) / ImMax(context.layoutConfig.radial.sectorCountMin, context.index);
         const int arcSegments = (int)(64 * centralAngle / (2 * IM_PI)) + 1;
-        const int itemSpacing = context.layoutConfig.itemSpacing;
+        const int itemSpacing = context.layoutConfig.radial.itemSpacing;
         const float annulusRadiusMin = context.layoutConfig.radial.sectorRadiusInner + itemSpacing;
         const float annulusRadiusMax = context.layoutConfig.radial.sectorRadiusOuter - itemSpacing;
         const float annulusWidth = annulusRadiusMax - annulusRadiusMin;

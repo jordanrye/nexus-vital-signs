@@ -51,6 +51,8 @@ struct GridProperties_t
     int cellWidth = 200;
     int cellHeight = 60;
     int cellRounding = 4;
+    int spacingVertical = 4;
+    int spacingHorizontal = 4;
 };
 
 struct RadialProperties_t
@@ -59,6 +61,7 @@ struct RadialProperties_t
     float sectorRadiusOuter = 180;
     int sectorCountMin = 4;
     int sectorCountMax = 10;
+    int itemSpacing = 4;
 };
 
 struct Layout_t
@@ -67,7 +70,6 @@ struct Layout_t
     GridProperties_t grid;
     RadialProperties_t radial;
     int itemBorder = 1;
-    int itemSpacing = 4;
 };
 
 struct Trigger_t

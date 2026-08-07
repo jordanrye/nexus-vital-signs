@@ -74,6 +74,28 @@ namespace Migration
                 MigrateIndicatorsV1ToV2(config["indicators"]);
             }
 
+            if (config.contains("layout") && config["layout"].is_object())
+            {
+                auto& layout = config["layout"];
+                if (layout.contains("spacing"))
+                {
+                    int legacySpacing = layout["spacing"].get<int>();
+                    
+                    if (layout.contains("grid") && layout["grid"].is_object())
+                    {
+                        layout["grid"]["spacing-horizontal"] = legacySpacing;
+                        layout["grid"]["spacing-vertical"] = legacySpacing;
+                    }
+                    
+                    if (layout.contains("radial") && layout["radial"].is_object())
+                    {
+                        layout["radial"]["spacing"] = legacySpacing;
+                    }
+
+                    layout.erase("spacing");
+                }
+            }
+
             config["schemaVersion"] = 2;
         }
     }

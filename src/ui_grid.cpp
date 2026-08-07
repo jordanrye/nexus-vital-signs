@@ -61,7 +61,7 @@ namespace UI::Grid {
     {
         ImVec2 size;
         ImVec4 padding;
-        float spacing;
+        ImVec2 spacing;
         int rounding;
     };
 
@@ -351,8 +351,8 @@ namespace UI::Grid {
         else if (direction == "Bottom-to-top") indexRow += (cellRows - 1 - member_index);
 
         // Calculate the offset based on row/column index and padding/spacing setup
-        float offsetRow = indexRow * (cellDraw.size.y + cellDraw.spacing + cellDraw.padding.x);
-        float offsetColumn = indexColumn * (cellDraw.size.x + cellDraw.spacing + cellDraw.padding.w) + (indexColumn * cellDraw.padding.y) - (indexColumn * cellDraw.padding.w);
+        float offsetRow = indexRow * (cellDraw.size.y + cellDraw.spacing.y + cellDraw.padding.x);
+        float offsetColumn = indexColumn * (cellDraw.size.x + cellDraw.spacing.x + cellDraw.padding.w) + (indexColumn * cellDraw.padding.y) - (indexColumn * cellDraw.padding.w);
         ImVec2 cellOffset(offsetColumn, offsetRow);
 
         // Finalise draw properties using the grid's anchor position
@@ -391,8 +391,8 @@ namespace UI::Grid {
             CalcGridDimensions(context.index, gridLayout, rows, columns);
 
             // Convert abstract rows/cols to absolute pixel dimensions
-            float menuWidth = (float)(columns * gridLayout.cellWidth + (columns - 1) * context.layoutConfig->layout.itemSpacing);
-            float menuHeight = (float)(rows * gridLayout.cellHeight + (rows - 1) * context.layoutConfig->layout.itemSpacing);
+            float menuWidth = (float)(columns * gridLayout.cellWidth + (columns - 1) * context.layoutConfig->layout.grid.spacingHorizontal);
+            float menuHeight = (float)(rows * gridLayout.cellHeight + (rows - 1) * context.layoutConfig->layout.grid.spacingVertical);
             
             DrawProperties_t displayProps{};
             displayProps.position = ImVec2(0.f, 0.f);
@@ -937,7 +937,8 @@ namespace UI::Grid {
             max(1.0f, static_cast<float>(context.layoutConfig->layout.grid.cellWidth - (2 * context.layoutConfig->layout.itemBorder))), 
             max(1.0f, static_cast<float>(context.layoutConfig->layout.grid.cellHeight - (2 * context.layoutConfig->layout.itemBorder))));
         frameDrawProperties.padding = _ImVec4(static_cast<float>(context.layoutConfig->layout.itemBorder));
-        frameDrawProperties.spacing = static_cast<float>(context.layoutConfig->layout.itemSpacing + context.layoutConfig->layout.itemBorder);
+        frameDrawProperties.spacing = ImVec2(static_cast<float>(context.layoutConfig->layout.grid.spacingHorizontal + context.layoutConfig->layout.itemBorder),
+                                             static_cast<float>(context.layoutConfig->layout.grid.spacingVertical + context.layoutConfig->layout.itemBorder));
         frameDrawProperties.rounding = ImMax(context.layoutConfig->layout.grid.cellRounding, context.layoutConfig->layout.grid.cellRounding - context.layoutConfig->layout.itemBorder);
 
         /* Frame border properties */
@@ -946,7 +947,7 @@ namespace UI::Grid {
             static_cast<float>(context.layoutConfig->layout.grid.cellWidth), 
             static_cast<float>(context.layoutConfig->layout.grid.cellHeight));
         borderDrawProperties.padding = _ImVec4(0.f);
-        borderDrawProperties.spacing = static_cast<float>(context.layoutConfig->layout.itemSpacing);
+        borderDrawProperties.spacing = ImVec2(static_cast<float>(context.layoutConfig->layout.grid.spacingHorizontal), static_cast<float>(context.layoutConfig->layout.grid.spacingVertical));
         borderDrawProperties.rounding = context.layoutConfig->layout.grid.cellRounding;
 
         /**
@@ -995,10 +996,10 @@ namespace UI::Grid {
             ImVec2 p_max(ImMax(firstCellProps.position.x + firstCellProps.width, lastCellProps.position.x + lastCellProps.width), ImMax(firstCellProps.position.y + firstCellProps.height, lastCellProps.position.y + lastCellProps.height));
             
             /// TODO: Make this more elegant 
-            p_min.x -= (context.layoutConfig->layout.itemSpacing / 2.f);
-            p_min.y -= (context.layoutConfig->layout.itemSpacing / 2.f);
-            p_max.x += (context.layoutConfig->layout.itemSpacing / 2.f);
-            p_max.y += (context.layoutConfig->layout.itemSpacing / 2.f);
+            p_min.x -= (context.layoutConfig->layout.grid.spacingHorizontal / 2.f);
+            p_min.y -= (context.layoutConfig->layout.grid.spacingVertical / 2.f);
+            p_max.x += (context.layoutConfig->layout.grid.spacingHorizontal / 2.f);
+            p_max.y += (context.layoutConfig->layout.grid.spacingVertical / 2.f);
 
             ImGui::SetCursorScreenPos(p_min);
             ImGui::PushID(groupIndex);
@@ -1033,7 +1034,8 @@ namespace UI::Grid {
 
                 float frameWidth = (float)context.layoutConfig->layout.grid.cellWidth;
                 float frameHeight = (float)context.layoutConfig->layout.grid.cellHeight;
-                float spacing = (float)context.layoutConfig->layout.itemSpacing;
+                float spacingX = (float)context.layoutConfig->layout.grid.spacingHorizontal;
+                float spacingY = (float)context.layoutConfig->layout.grid.spacingVertical;
                 std::string cellDir = context.layoutConfig->layout.grid.frameDirection;
 
                 float headerWidth, headerHeight;
@@ -1043,31 +1045,31 @@ namespace UI::Grid {
                 {
                     headerWidth = frameWidth;
                     headerHeight = text_size.y * 3.0f;
-                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y - headerHeight - spacing);
+                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y - headerHeight - spacingY);
                 }
                 else if (cellDir == "Bottom-to-top")
                 {
                     headerWidth = frameWidth;
                     headerHeight = text_size.y * 3.0f;
-                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y + frameHeight + spacing);
+                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y + frameHeight + spacingY);
                 }
                 else if (cellDir == "Left-to-right")
                 {
                     headerHeight = frameHeight;
                     headerWidth = frameWidth;
-                    header_p_min = ImVec2(firstCellProps.position.x - headerWidth - spacing, firstCellProps.position.y);
+                    header_p_min = ImVec2(firstCellProps.position.x - headerWidth - spacingX, firstCellProps.position.y);
                 }
                 else if (cellDir == "Right-to-left")
                 {
                     headerHeight = frameHeight;
                     headerWidth = frameWidth;
-                    header_p_min = ImVec2(firstCellProps.position.x + frameWidth + spacing, firstCellProps.position.y);
+                    header_p_min = ImVec2(firstCellProps.position.x + frameWidth + spacingX, firstCellProps.position.y);
                 }
                 else
                 {
                     headerWidth = frameWidth;
                     headerHeight = text_size.y * 3.0f;
-                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y - headerHeight - spacing);
+                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y - headerHeight - spacingY);
                 }
 
                 ImVec2 header_p_max = ImVec2(header_p_min.x + headerWidth, header_p_min.y + headerHeight);
@@ -1590,8 +1592,8 @@ namespace UI::Grid {
                 resize_drag_accum.x += ImGui::GetIO().MouseDelta.x;
                 resize_drag_accum.y += ImGui::GetIO().MouseDelta.y;
 
-                float cellTotalWidth = frameDrawProperties.size.x + frameDrawProperties.spacing + frameDrawProperties.padding.w;
-                float cellTotalHeight = frameDrawProperties.size.y + frameDrawProperties.spacing + frameDrawProperties.padding.x;
+                float cellTotalWidth = frameDrawProperties.size.x + frameDrawProperties.spacing.x + frameDrawProperties.padding.w;
+                float cellTotalHeight = frameDrawProperties.size.y + frameDrawProperties.spacing.y + frameDrawProperties.padding.x;
                 if (std::abs(resize_drag_accum.x) > cellTotalWidth)
                 {
                     int drag_units = (int)(resize_drag_accum.x / cellTotalWidth);

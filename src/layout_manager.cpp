@@ -372,7 +372,8 @@ static LayoutConfig_t GetDefaultGridLayout()
     layout.layout.grid.cellHeight = 100;
     layout.layout.grid.cellRounding = 4;
     layout.layout.itemBorder = 1;
-    layout.layout.itemSpacing = 4;
+    layout.layout.grid.spacingHorizontal = 4;
+    layout.layout.grid.spacingVertical = 4;
 
     // Add a default indicator for character name.
     Indicator_t nameIndicator{};
@@ -564,7 +565,7 @@ static LayoutConfig_t GetDefaultRadialLayout()
     layout.layout.radial.sectorRadiusOuter = 180;
     layout.layout.radial.sectorCountMin = 4;
     layout.layout.radial.sectorCountMax = 10;
-    layout.layout.itemSpacing = 4;
+    layout.layout.radial.itemSpacing = 4;
 
     return layout;
 }

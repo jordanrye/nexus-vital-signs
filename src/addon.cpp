@@ -578,16 +578,16 @@ namespace Addon {
                 ImGui::InputFloat("Radius (Outer)##RADIUS_MAX", &layout.radial.sectorRadiusOuter, 5.f, 10.f, "%.2f");
                 ImGui::SliderInt("Items (Min)##ITEMS_MIN", &layout.radial.sectorCountMin, 2, 10);
                 ImGui::SliderInt("Items (Max)##ITEMS_MAX", &layout.radial.sectorCountMax, 4, UI::SQUAD_MEMBER_LIMIT);
-                if (ImGui::InputInt("Item Spacing##ITEM_INNER_SPACING", &layout.itemSpacing, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
+                if (ImGui::InputInt("Item Spacing##ITEM_INNER_SPACING", &layout.radial.itemSpacing, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     const float MAX_SPACING = (layout.radial.sectorRadiusOuter - layout.radial.sectorRadiusInner) / 2;
-                    if (layout.itemSpacing > MAX_SPACING)
+                    if (layout.radial.itemSpacing > MAX_SPACING)
                     {
-                        layout.itemSpacing = MAX_SPACING;
+                        layout.radial.itemSpacing = MAX_SPACING;
                     }
-                    else if (layout.itemSpacing < 0)
+                    else if (layout.radial.itemSpacing < 0)
                     {
-                        layout.itemSpacing = 0;
+                        layout.radial.itemSpacing = 0;
                     }
                 }
                 if (ImGui::InputInt("Item Border##ITEM_BORDER", &layout.itemBorder, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
@@ -641,6 +641,22 @@ namespace Addon {
                         layout.grid.maxColumns = 1;
                     }
                 }
+                
+                if (ImGui::InputInt("Spacing (Horizontal)##CELL_SPACING_HORIZONTAL", &layout.grid.spacingHorizontal, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
+                {
+                    if (layout.grid.spacingHorizontal < -layout.itemBorder)
+                    {
+                        layout.grid.spacingHorizontal = -layout.itemBorder;
+                    }
+                }
+                
+                if (ImGui::InputInt("Spacing (Vertical)##CELL_SPACING_VERTICAL", &layout.grid.spacingVertical, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
+                {
+                    if (layout.grid.spacingVertical < -layout.itemBorder)
+                    {
+                        layout.grid.spacingVertical = -layout.itemBorder;
+                    }
+                }
             }
 
             ImGui::TextDisabled("Frame Properties");
@@ -672,13 +688,6 @@ namespace Addon {
                     if (layout.itemBorder < 0)
                     {
                         layout.itemBorder = 0;
-                    }
-                }
-                if (ImGui::InputInt("Spacing##CELL_SPACING", &layout.itemSpacing, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
-                {
-                    if (layout.itemSpacing < -layout.itemBorder)
-                    {
-                        layout.itemSpacing = -layout.itemBorder;
                     }
                 }
             }

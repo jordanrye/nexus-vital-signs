@@ -43,6 +43,8 @@ void dser_GridProperties_t(json& object, GridProperties_t& properties)
         dser_BasicType(object["cell-width"], properties.cellWidth);
         dser_BasicType(object["cell-height"], properties.cellHeight);
         dser_BasicType(object["cell-rounding"], properties.cellRounding);
+        dser_BasicType(object["spacing-horizontal"], properties.spacingHorizontal);
+        dser_BasicType(object["spacing-vertical"], properties.spacingVertical);
     }
 }
 
@@ -54,6 +56,7 @@ void dser_RadialProperties_t(json& object, RadialProperties_t& properties)
         dser_BasicType(object["radius-outer"], properties.sectorRadiusOuter);
         dser_BasicType(object["sector-min"], properties.sectorCountMin);
         dser_BasicType(object["sector-max"], properties.sectorCountMax);
+        dser_BasicType(object["spacing"], properties.itemSpacing);
     }
 }
 
@@ -65,7 +68,6 @@ void dser_Layout_t(json& object, Layout_t& layout)
         dser_GridProperties_t(object["grid"], layout.grid);
         dser_RadialProperties_t(object["radial"], layout.radial);
         dser_BasicType(object["border"], layout.itemBorder);
-        dser_BasicType(object["spacing"], layout.itemSpacing);
     }
 }
 
@@ -369,6 +371,8 @@ json ser_GridProperties_t(const GridProperties_t& properties)
     object["cell-width"] = properties.cellWidth;
     object["cell-height"] = properties.cellHeight;
     object["cell-rounding"] = properties.cellRounding;
+    object["spacing-horizontal"] = properties.spacingHorizontal;
+    object["spacing-vertical"] = properties.spacingVertical;
     return object;
 }
 
@@ -379,6 +383,7 @@ json ser_RadialProperties_t(const RadialProperties_t& properties)
     object["radius-outer"] = properties.sectorRadiusOuter;
     object["sector-min"] = properties.sectorCountMin;
     object["sector-max"] = properties.sectorCountMax;
+    object["spacing"] = properties.itemSpacing;
     return object;
 }
 
@@ -389,7 +394,6 @@ json ser_Layout_t(const Layout_t& layout)
     object["grid"] = ser_GridProperties_t(layout.grid);
     object["radial"] = ser_RadialProperties_t(layout.radial);
     object["border"] = layout.itemBorder;
-    object["spacing"] = layout.itemSpacing;
     return object;
 }
 
