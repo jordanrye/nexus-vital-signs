@@ -1214,6 +1214,43 @@ namespace UI::Grid {
                 ImGui::SetCursorScreenPos(parentProperties.position);
                 ImGui::InvisibleButton("", ImVec2(parentProperties.width, parentProperties.height));
 
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::BeginTooltip();
+                    {
+                        ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+                        float radius = ImGui::GetTextLineHeight() * 0.35f;
+                        ImVec2 center = ImVec2(cursorPos.x + radius, cursorPos.y + ImGui::GetTextLineHeight() * 0.5f);
+                        
+                        ImColor statusColor;
+                        switch(userData.OnlineStatus)
+                        {
+                            case GW2RE::EOnlineStatus::Online: statusColor = ImColor(50, 205, 50, 255); break;
+                            case GW2RE::EOnlineStatus::Away: statusColor = ImColor(255, 165, 0, 255); break;
+                            case GW2RE::EOnlineStatus::LFG: statusColor = ImColor(34, 153, 238, 255); break;
+                            case GW2RE::EOnlineStatus::Offline:
+                            default: statusColor = ImColor(170, 170, 170, 255); break;
+                        }
+                        
+                        ImGui::GetWindowDrawList()->AddCircleFilled(center, radius, statusColor);
+                        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + radius * 2.0f + ImGui::GetStyle().ItemSpacing.x);
+                        ImGui::Text(userData.GetAccountName().c_str());
+                        ImGui::TextDisabled(userData.GetOnlineStatusName().c_str());
+    
+                        if (!userData.CharacterName.empty())
+                        {
+                            ImGui::Separator();
+                            ImGui::Text(userData.GetDisplayName().c_str());
+                            ImGui::Text("Level %u %s", userData.Level, VitalSignsDataLink::getProfessionShortString(userData.Profession, userData.Specialisation));
+                            if (!userData.MapName.empty())
+                            {
+                                ImGui::Text(userData.MapName.c_str());
+                            }
+                        }
+                    }
+                    ImGui::EndTooltip();
+                }
+
                 /* Right-click context menu */
                 if (ImGui::BeginPopupContextItem())
                 {
@@ -1221,12 +1258,8 @@ namespace UI::Grid {
                     const auto clientRole = VitalsData->getUserData(clientId).SquadRole;
                     const auto clientMap = VitalsData->getUserData(clientId).MapName;
 
-                    ImGui::TextDisabled(userData.GetAccountName().c_str());
-                    ImGui::Text(userData.GetDisplayName().c_str());
-
                     if (clientId != userData.UserId)
                     {
-                        ImGui::Separator();
                         if (ImGui::Button("Whisper")) { VitalsData->whisperUser(userData.UserId); }
                         if (ImGui::Button("Send Mail")) { VitalsData->sendMail(userData.AccountName); }
                         if (userData.IsInInstance)

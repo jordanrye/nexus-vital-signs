@@ -203,6 +203,8 @@
     <ClCompile Include="src\data_link\gw2re\Game\Char\Character.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChCoreStats.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChProfession.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Common.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Text\TextApi.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Game\EventApi.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Player\Player.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Player\Specialization\SpecDef.cpp" />
