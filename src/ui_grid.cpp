@@ -1363,10 +1363,15 @@ namespace UI::Grid {
                 DrawProperties_t borderProps = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, i);
                 float borderThickness = 0.0f;
                 
-                const BorderIndicator_t* activeBorder = borderStyle ? &borderStyle->border : nullptr;
+                const BorderIndicator_t* activeBorder = nullptr;
                 for (auto preset : activePresets)
                 {
                     if (preset->borderOverride) activeBorder = &preset->border;
+                }
+
+                if (borderStyle)
+                {
+                    activeBorder = &borderStyle->border;
                 }
 
                 // Channel 0: Outer Glows (rendered underneath the cell background)
