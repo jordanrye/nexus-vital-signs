@@ -42,36 +42,6 @@ struct TextStyle_t
     ImColor outlineColor = ImColor(0, 0, 0, 255);
 };
 
-struct GridProperties_t
-{
-    std::string frameDirection = "Left-to-right";
-    std::string squadDirection = "Top-to-bottom";
-    int maxRows = 5;
-    int maxColumns = 10;
-    int cellWidth = 200;
-    int cellHeight = 60;
-    int cellRounding = 4;
-    int spacingVertical = 4;
-    int spacingHorizontal = 4;
-};
-
-struct RadialProperties_t
-{
-    float sectorRadiusInner = 60;
-    float sectorRadiusOuter = 180;
-    int sectorCountMin = 4;
-    int sectorCountMax = 10;
-    int itemSpacing = 4;
-};
-
-struct Layout_t
-{
-    std::string type = "Grid";
-    GridProperties_t grid;
-    RadialProperties_t radial;
-    int itemBorder = 1;
-};
-
 struct Trigger_t
 {
     std::string category;
@@ -136,6 +106,23 @@ struct IconList_t
     
     bool showStacks = false;
     IconText_t stacksText;
+};
+
+struct Rectangle_t
+{
+    Size_t dimensions = { 28, 28 };
+    int rounding = 4;
+    ImColor color = ImColor(0, 0, 0, 32);
+    int borderThickness = 1;
+    ImColor borderColor = ImColor(0, 0, 0, 16);
+};
+
+struct Line_t
+{
+    std::string style = "Solid";
+    int length = 200;
+    int thickness = 1;
+    ImColor color = ImColor(0, 0, 0, 32);
 };
 
 struct BorderIndicator_t
@@ -218,6 +205,70 @@ struct Indicator_t
 
     /* Dynamic identifier. */
     TreeNodeUID id;
+};
+
+struct SubgroupHeaderBadge_t
+{
+    std::string shape = "Rectangle";
+    Rectangle_t rectangle;
+};
+
+struct SubgroupHeaderDivider_t
+{
+    int spacing = 0;
+    bool stretchToFitWidth = true;
+    bool stretchToFitHeight = true;
+    std::string alignment = "Centre";
+    Line_t line;
+    Rectangle_t rectangle;
+};
+
+struct SubgroupHeaderProperties_t
+{
+    std::string visibility = "Always Show";
+    std::string type = "Badge";
+
+    std::string anchor;
+    bool stretchToFitWidth = true;
+    bool stretchToFitHeight = true;
+    Coordinate_t offset;
+
+    TextStyle_t textStyle;
+    Position_t labelPosition;
+
+    SubgroupHeaderBadge_t badge;
+    SubgroupHeaderDivider_t divider;
+};
+
+struct GridProperties_t
+{
+    std::string frameDirection = "Left-to-right";
+    std::string squadDirection = "Top-to-bottom";
+    int maxRows = 5;
+    int maxColumns = 10;
+    int cellWidth = 200;
+    int cellHeight = 60;
+    int cellRounding = 4;
+    int spacingVertical = 4;
+    int spacingHorizontal = 4;
+    SubgroupHeaderProperties_t subgroupHeader;
+};
+
+struct RadialProperties_t
+{
+    float sectorRadiusInner = 60;
+    float sectorRadiusOuter = 180;
+    int sectorCountMin = 4;
+    int sectorCountMax = 10;
+    int itemSpacing = 4;
+};
+
+struct Layout_t
+{
+    std::string type = "Grid";
+    GridProperties_t grid;
+    RadialProperties_t radial;
+    int itemBorder = 1;
 };
 
 struct LayoutConfig_t

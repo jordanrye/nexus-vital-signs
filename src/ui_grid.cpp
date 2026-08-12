@@ -315,6 +315,75 @@ namespace UI::Grid {
         else outRows *= requiredSubgroups;
     }
 
+    float CalcDividerSizeForLayout(const LayoutConfig_t& config, const std::string& squadDirection, const std::string& frameDirection)
+    {
+        const auto& shProps = config.layout.grid.subgroupHeader;
+        if (shProps.type != "Divider") return 0.0f;
+        
+        bool isHorizontal = (squadDirection == "Top-to-bottom" || squadDirection == "Bottom-to-top");
+        bool isVerticalFrame = (frameDirection == "Top-to-bottom" || frameDirection == "Bottom-to-top");
+        bool isRectOrTex = (shProps.divider.line.style == "Rectangle" || shProps.divider.line.style == "Texture");
+
+        float textHeight = 0.0f;
+        float textWidth = 0.0f;
+        
+        if (shProps.visibility != "Hidden") {
+            const auto& textStyle = shProps.textStyle;
+            float fontSize = (textStyle.fontSizeSource == "Custom size") ? (float)textStyle.fontSize : (float)ConfigText.fontSize;
+            std::string fontSource = (textStyle.fontSource == "Default font") ? ConfigText.fontSource : textStyle.fontSource;
+            std::string fontName = (textStyle.fontSource == "Default font") ? ConfigText.font : textStyle.font;
+            ImFont* font = nullptr;
+            if (fontSource != "Nexus font" && fontSource != "Default font") font = utils::font::GetFont(fontName, fontSize);
+            
+            if (font) ImGui::PushFont(font);
+            
+            std::vector<VitalSignsDataLink::SubgroupId_t> activeSubgroups;
+            for (int i = 0; i < context.index; i++) {
+                if (context.isValid[i]) {
+                    auto subgroupId = context.userData[i].SubgroupId;
+                    if (std::find(activeSubgroups.begin(), activeSubgroups.end(), subgroupId) == activeSubgroups.end()) {
+                        activeSubgroups.push_back(subgroupId);
+                    }
+                }
+            }
+            
+            if (activeSubgroups.empty())
+            {
+                ImVec2 textSize = ImGui::CalcTextSize("10");
+                textHeight = textSize.y;
+                textWidth = textSize.x;
+            } 
+            else
+            {
+                for (auto subgroupId : activeSubgroups)
+                {
+                    ImVec2 textSize = ImGui::CalcTextSize(std::to_string(subgroupId).c_str());
+                    textHeight = ImMax(textHeight, textSize.y);
+                    textWidth = ImMax(textWidth, textSize.x);
+                }
+            }
+            
+            if (font) ImGui::PopFont();
+        }
+        
+        float padX = ImGui::GetStyle().FramePadding.x * 4.0f;
+        float padY = ImGui::GetStyle().FramePadding.y * 2.0f + 2.0f;
+        
+        if (isHorizontal) {
+            if (isRectOrTex) {
+                return shProps.divider.stretchToFitHeight ? (isVerticalFrame ? 0.0f : textHeight + padY) : (float)shProps.divider.rectangle.dimensions.height;
+            } else {
+                return ImMax((float)shProps.divider.line.thickness, textHeight);
+            }
+        } else {
+            if (isRectOrTex) {
+                return shProps.divider.stretchToFitWidth ? (isVerticalFrame ? textWidth + padX : 0.0f) : (float)shProps.divider.rectangle.dimensions.width;
+            } else {
+                return ImMax((float)shProps.divider.line.thickness, textWidth);
+            }
+        }
+    }
+
     DrawProperties_t CalcDrawProperties(float width, float height, const CellDrawProperties_t& cellDraw, ImDrawCornerFlags cellRoundingCorners, const GridDrawProperties_t& gridDraw, int index)
     {
         // Layout configuration
@@ -353,6 +422,26 @@ namespace UI::Grid {
         // Calculate the offset based on row/column index and padding/spacing setup
         float offsetRow = indexRow * (cellDraw.size.y + cellDraw.spacing.y + cellDraw.padding.x);
         float offsetColumn = indexColumn * (cellDraw.size.x + cellDraw.spacing.x + cellDraw.padding.w) + (indexColumn * cellDraw.padding.y) - (indexColumn * cellDraw.padding.w);
+
+        // Apply divider spacing
+        if (context.layoutConfig->layout.grid.subgroupHeader.type == "Divider")
+        {
+            if ((context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always Show") ||  
+                (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on Hover") ||
+                (Addon::isSquadManagerActive))
+            {
+                float dividerSpacing = (float)context.layoutConfig->layout.grid.subgroupHeader.divider.spacing;
+                float dividerSize = CalcDividerSizeForLayout(*context.layoutConfig, squadDirection, direction);
+                float gridSpacing = (squadDirection == "Top-to-bottom" || squadDirection == "Bottom-to-top") ? context.layoutConfig->layout.grid.spacingVertical : context.layoutConfig->layout.grid.spacingHorizontal;
+                float totalSpacing = dividerSpacing + dividerSize + gridSpacing;
+    
+                if (squadDirection == "Top-to-bottom") offsetRow += subgroup_index * totalSpacing;
+                else if (squadDirection == "Bottom-to-top") offsetRow += (squadRows - 1 - subgroup_index) * totalSpacing;
+                else if (squadDirection == "Left-to-right") offsetColumn += subgroup_index * totalSpacing;
+                else if (squadDirection == "Right-to-left") offsetColumn += (squadCols - 1 - subgroup_index) * totalSpacing;
+            }
+        }
+
         ImVec2 cellOffset(offsetColumn, offsetRow);
 
         // Finalise draw properties using the grid's anchor position
@@ -393,6 +482,27 @@ namespace UI::Grid {
             // Convert abstract rows/cols to absolute pixel dimensions
             float menuWidth = (float)(columns * gridLayout.cellWidth + (columns - 1) * context.layoutConfig->layout.grid.spacingHorizontal);
             float menuHeight = (float)(rows * gridLayout.cellHeight + (rows - 1) * context.layoutConfig->layout.grid.spacingVertical);
+            
+            if (context.layoutConfig->layout.grid.subgroupHeader.type == "Divider")
+            {
+                if ((context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always Show") ||
+                    (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on Hover") ||
+                    (Addon::isSquadManagerActive))
+                {
+                    float dividerSpacing = (float)context.layoutConfig->layout.grid.subgroupHeader.divider.spacing;
+                    float dividerSize = CalcDividerSizeForLayout(*context.layoutConfig, gridLayout.squadDirection, gridLayout.frameDirection);
+                    float gridSpacing = (gridLayout.squadDirection == "Top-to-bottom" || gridLayout.squadDirection == "Bottom-to-top") ? context.layoutConfig->layout.grid.spacingVertical : context.layoutConfig->layout.grid.spacingHorizontal;
+                    float totalSpacing = dividerSpacing + dividerSize + gridSpacing;
+    
+                    int cellDirectionMax = (gridLayout.frameDirection == "Left-to-right" || gridLayout.frameDirection == "Right-to-left") ? gridLayout.maxColumns : gridLayout.maxRows;
+                    int squadRowsCols = (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left") ? (columns / cellDirectionMax) : (rows / cellDirectionMax);
+                    if (squadRowsCols > 1)
+                    {
+                        if (gridLayout.squadDirection == "Top-to-bottom" || gridLayout.squadDirection == "Bottom-to-top") menuHeight += (squadRowsCols - 1) * totalSpacing;
+                        else menuWidth += (squadRowsCols - 1) * totalSpacing;
+                    }
+                }
+            }
             
             DrawProperties_t displayProps{};
             displayProps.position = ImVec2(0.f, 0.f);
@@ -866,6 +976,150 @@ namespace UI::Grid {
         }
     }
 
+    void DrawTextWithDecorators(ImDrawList* drawList, ImFont* font, float fontSize, ImVec2 pos, ImColor color, bool useShadow, ImColor shadowColor, bool useOutline, ImColor outlineColor, const std::string& text)
+    {
+        if (useShadow)
+        {
+            drawList->AddText(font, fontSize, ImVec2(pos.x + 1, pos.y + 1), shadowColor, text.c_str());
+        }
+        if (useOutline)
+        {
+            drawList->AddText(font, fontSize, ImVec2(pos.x - 1, pos.y), outlineColor, text.c_str());
+            drawList->AddText(font, fontSize, ImVec2(pos.x + 1, pos.y), outlineColor, text.c_str());
+            drawList->AddText(font, fontSize, ImVec2(pos.x, pos.y - 1), outlineColor, text.c_str());
+            drawList->AddText(font, fontSize, ImVec2(pos.x, pos.y + 1), outlineColor, text.c_str());
+        }
+        drawList->AddText(font, fontSize, pos, color, text.c_str());
+    }
+
+    void DrawCornerRibbon(ImDrawList* drawList, const ImVec2& p_min, const ImVec2& p_max, float width, float height, float borderThickness, ImU32 bgCol, ImU32 borderColor)
+    {
+        if (borderThickness > 0)
+        {
+            float t = borderThickness;
+            float w = width;
+            float h = height;
+            float hyp = sqrtf(w*w + h*h);
+            
+            ImVec2 P1 = p_min;
+            ImVec2 P2 = ImVec2(p_max.x, p_min.y);
+            ImVec2 P3 = ImVec2(p_min.x, p_max.y);
+            
+            ImVec2 p1 = ImVec2(p_min.x + t, p_min.y + t);
+            float dx = t * (w / h) + t * (hyp / h);
+            float dy = t * (h / w) + t * (hyp / w);
+            ImVec2 p2 = ImVec2(p_max.x - dx, p_min.y + t);
+            ImVec2 p3 = ImVec2(p_min.x + t, p_max.y - dy);
+            
+            if (p2.x > p1.x && p3.y > p1.y) {
+                // Draw inner triangle first
+                drawList->AddTriangleFilled(p1, p2, p3, bgCol);
+                // Draw border as 3 surrounding quads
+                drawList->AddQuadFilled(P1, P2, p2, p1, borderColor);
+                drawList->AddQuadFilled(P2, P3, p3, p2, borderColor);
+                drawList->AddQuadFilled(P3, P1, p1, p3, borderColor);
+            } else {
+                // Too small, just draw solid border
+                drawList->AddTriangleFilled(P1, P2, P3, borderColor);
+            }
+        }
+        else
+        {
+            drawList->AddTriangleFilled(p_min, ImVec2(p_max.x, p_min.y), ImVec2(p_min.x, p_max.y), bgCol);
+        }
+    }
+
+    void DrawDashedLine(ImDrawList* drawList, const ImVec2& p1, const ImVec2& p2, ImU32 color, float thickness, float dashLen, float gapLen)
+    {
+        bool isHorizontal = (p1.y == p2.y);
+        float totalLen = isHorizontal ? (p2.x - p1.x) : (p2.y - p1.y);
+        for (float t = 0.0f; t < totalLen; t += dashLen + gapLen)
+        {
+            float currentDashLen = ImMin(dashLen, totalLen - t);
+            if (isHorizontal) {
+                ImVec2 rMin = ImVec2(p1.x + t, p1.y - thickness * 0.5f);
+                ImVec2 rMax = ImVec2(p1.x + t + currentDashLen, p1.y + thickness * 0.5f);
+                drawList->AddRectFilled(rMin, rMax, color);
+            } else {
+                ImVec2 rMin = ImVec2(p1.x - thickness * 0.5f, p1.y + t);
+                ImVec2 rMax = ImVec2(p1.x + thickness * 0.5f, p1.y + t + currentDashLen);
+                drawList->AddRectFilled(rMin, rMax, color);
+            }
+        }
+    }
+
+    void CalcBadgeGeometry(const SubgroupHeaderProperties_t& shProps, const ImVec2& grid_p_min, const ImVec2& grid_p_max, const ImVec2& text_size, const std::string& frameDirection, float spacingVertical, float spacingHorizontal, ImVec2& out_p_min, ImVec2& out_p_max, float& out_width, float& out_height)
+    {
+        ImVec2 offset = ImVec2((float)shProps.offset.x, (float)shProps.offset.y);
+        float padX = ImGui::GetStyle().FramePadding.x * 4.0f;
+        float padY = ImGui::GetStyle().FramePadding.y * 2.0f + 2.0f;
+        bool isVerticalFrame = (frameDirection == "Top-to-bottom" || frameDirection == "Bottom-to-top");
+
+        if (shProps.stretchToFitWidth) {
+            out_width = isVerticalFrame ? (grid_p_max.x - grid_p_min.x) : (text_size.x + padX);
+        } else {
+            out_width = (float)shProps.badge.rectangle.dimensions.width;
+        }
+        
+        if (shProps.stretchToFitHeight) {
+            out_height = isVerticalFrame ? (text_size.y + padY) : (grid_p_max.y - grid_p_min.y);
+        } else {
+            out_height = (float)shProps.badge.rectangle.dimensions.height;
+        }
+        
+        if (shProps.anchor == "Top") {
+            out_p_min = ImVec2(grid_p_min.x, grid_p_min.y - spacingVertical - out_height - shProps.badge.rectangle.borderThickness) + offset;
+        } else if (shProps.anchor == "Bottom") {
+            out_p_min = ImVec2(grid_p_min.x, grid_p_max.y + spacingVertical + shProps.badge.rectangle.borderThickness) + offset;
+        } else if (shProps.anchor == "Right") {
+            out_p_min = ImVec2(grid_p_max.x + spacingHorizontal + shProps.badge.rectangle.borderThickness, grid_p_min.y) + offset;
+        } else { // Left
+            out_p_min = ImVec2(grid_p_min.x - spacingHorizontal - out_width - shProps.badge.rectangle.borderThickness, grid_p_min.y) + offset;
+        }
+        out_p_max = ImVec2(out_p_min.x + out_width, out_p_min.y + out_height);
+    }
+    
+    void CalcDividerGeometry(const SubgroupHeaderProperties_t& shProps, const ImVec2& grid_p_min, const ImVec2& grid_p_max, const ImVec2& text_size, const std::string& squadDirection, const std::string& frameDirection, float spacingVertical, float spacingHorizontal, ImVec2& out_p_min, ImVec2& out_p_max, float& out_width, float& out_height)
+    {
+        ImVec2 offset = ImVec2((float)shProps.offset.x, (float)shProps.offset.y);
+        std::string autoAnchor = "Top";
+        if (squadDirection == "Top-to-bottom") autoAnchor = "Top";
+        else if (squadDirection == "Bottom-to-top") autoAnchor = "Bottom";
+        else if (squadDirection == "Left-to-right") autoAnchor = "Left";
+        else if (squadDirection == "Right-to-left") autoAnchor = "Right";
+
+        bool isRectOrTex = (shProps.divider.line.style == "Rectangle" || shProps.divider.line.style == "Texture");
+        float padX = ImGui::GetStyle().FramePadding.x * 4.0f;
+        float padY = ImGui::GetStyle().FramePadding.y * 2.0f + 2.0f;
+        bool isVerticalFrame = (frameDirection == "Top-to-bottom" || frameDirection == "Bottom-to-top");
+
+        if (autoAnchor == "Top" || autoAnchor == "Bottom")
+        {
+            out_height = isRectOrTex ? (shProps.divider.stretchToFitHeight ? (isVerticalFrame ? (grid_p_max.y - grid_p_min.y) : (text_size.y + padY)) : (float)shProps.divider.rectangle.dimensions.height) : ImMax((float)shProps.divider.line.thickness, text_size.y);
+            out_width = shProps.divider.stretchToFitWidth ? (isVerticalFrame ? (text_size.x + padX) : (grid_p_max.x - grid_p_min.x)) : (isRectOrTex ? (float)shProps.divider.rectangle.dimensions.width : (float)shProps.divider.line.length);
+            
+            float alignX = 0.0f;
+            if (shProps.divider.alignment == "Centre") alignX = ((grid_p_max.x - grid_p_min.x) - out_width) * 0.5f;
+            else if (shProps.divider.alignment == "Right") alignX = (grid_p_max.x - grid_p_min.x) - out_width;
+            
+            float gapAlignY = ((float)shProps.divider.spacing + 2.0f * spacingVertical) * 0.5f;
+            out_p_min = (autoAnchor == "Top") ? ImVec2(grid_p_min.x + alignX, grid_p_min.y - out_height - gapAlignY) + offset : ImVec2(grid_p_min.x + alignX, grid_p_max.y + gapAlignY) + offset;
+        }
+        else // Left or Right
+        {
+            out_width = isRectOrTex ? (shProps.divider.stretchToFitWidth ? (isVerticalFrame ? (text_size.x + padX) : (grid_p_max.x - grid_p_min.x)) : (float)shProps.divider.rectangle.dimensions.width) : ImMax((float)shProps.divider.line.thickness, text_size.x);
+            out_height = shProps.divider.stretchToFitHeight ? (isVerticalFrame ? (grid_p_max.y - grid_p_min.y) : (text_size.y + padY)) : (isRectOrTex ? (float)shProps.divider.rectangle.dimensions.height : (float)shProps.divider.line.length);
+            
+            float alignY = 0.0f;
+            if (shProps.divider.alignment == "Centre") alignY = ((grid_p_max.y - grid_p_min.y) - out_height) * 0.5f;
+            else if (shProps.divider.alignment == "Bottom") alignY = (grid_p_max.y - grid_p_min.y) - out_height;
+            
+            float gapAlignX = ((float)shProps.divider.spacing + 2.0f * spacingHorizontal) * 0.5f;
+            out_p_min = (autoAnchor == "Left") ? ImVec2(grid_p_min.x - out_width - gapAlignX, grid_p_min.y + alignY) + offset : ImVec2(grid_p_max.x + gapAlignX, grid_p_min.y + alignY) + offset;
+        }
+        out_p_max = ImVec2(out_p_min.x + out_width, out_p_min.y + out_height);
+    }
+
     void EndGridMenu()
     {
         const auto clientId = VitalsData->getClientId();
@@ -992,10 +1246,11 @@ namespace UI::Grid {
             DrawProperties_t firstCellProps = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, startGroupIndex * cellDirectionMax);
             DrawProperties_t lastCellProps = CalcDrawProperties(borderDrawProperties.size.x, borderDrawProperties.size.y, borderDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, endGroupIndex * cellDirectionMax + cellDirectionMax - 1);
             
-            ImVec2 p_min(ImMin(firstCellProps.position.x, lastCellProps.position.x), ImMin(firstCellProps.position.y, lastCellProps.position.y));
-            ImVec2 p_max(ImMax(firstCellProps.position.x + firstCellProps.width, lastCellProps.position.x + lastCellProps.width), ImMax(firstCellProps.position.y + firstCellProps.height, lastCellProps.position.y + lastCellProps.height));
+            ImVec2 grid_p_min(ImMin(firstCellProps.position.x, lastCellProps.position.x), ImMin(firstCellProps.position.y, lastCellProps.position.y));
+            ImVec2 grid_p_max(ImMax(firstCellProps.position.x + firstCellProps.width, lastCellProps.position.x + lastCellProps.width), ImMax(firstCellProps.position.y + firstCellProps.height, lastCellProps.position.y + lastCellProps.height));
             
-            /// TODO: Make this more elegant 
+            ImVec2 p_min = grid_p_min;
+            ImVec2 p_max = grid_p_max;
             p_min.x -= (context.layoutConfig->layout.grid.spacingHorizontal / 2.f);
             p_min.y -= (context.layoutConfig->layout.grid.spacingVertical / 2.f);
             p_max.x += (context.layoutConfig->layout.grid.spacingHorizontal / 2.f);
@@ -1007,7 +1262,13 @@ namespace UI::Grid {
             ImGui::SetItemAllowOverlap();
 
             // Squad Manager: Subgroup header
-            if (Addon::isSquadManagerActive)
+            bool showHeader = Addon::isSquadManagerActive || context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always Show";
+            if (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on Hover" && !showHeader)
+            {
+                showHeader = ImGui::IsMouseHoveringRect(p_min, p_max, false);
+            }
+
+            if (showHeader)
             {
                 std::string headerText = (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1)) ? "New" : std::to_string(droppedSubgroupId + 1);
                 
@@ -1023,122 +1284,110 @@ namespace UI::Grid {
                     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
                 }
 
+                SubgroupHeaderProperties_t& shProps = context.layoutConfig->layout.grid.subgroupHeader;
+                
+                float effectiveFontSize = (shProps.textStyle.fontSizeSource == "Custom size") ? (float)shProps.textStyle.fontSize : (float)ConfigText.fontSize;
+                ImColor effectiveColor = (shProps.textStyle.colorSource == "Custom color") ? shProps.textStyle.color : ConfigText.color;
+                bool effectiveShadow = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.shadow : ConfigText.shadow;
+                ImColor effectiveShadowColor = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.shadowColor : ConfigText.shadowColor;
+                bool effectiveOutline = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.outline : ConfigText.outline;
+                ImColor effectiveOutlineColor = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.outlineColor : ConfigText.outlineColor;
+
+                std::string effectiveFontSource = (shProps.textStyle.fontSource == "Default font") ? ConfigText.fontSource : shProps.textStyle.fontSource;
+                std::string effectiveFontName = (shProps.textStyle.fontSource == "Default font") ? ConfigText.font : shProps.textStyle.font;
+
                 ImFont* font = nullptr;
-                if (ConfigText.fontSource != "Nexus font" && ConfigText.fontSource != "Default font")
+                if (effectiveFontSource != "Nexus font" && effectiveFontSource != "Default font")
                 {
-                    font = utils::font::GetFont(ConfigText.font, ConfigText.fontSize);
+                    font = utils::font::GetFont(effectiveFontName, effectiveFontSize);
                 }
 
                 if (font) ImGui::PushFont(font);
                 ImVec2 text_size = ImGui::CalcTextSize(headerText.c_str());
+                if (font) ImGui::PopFont();
 
-                float frameWidth = (float)context.layoutConfig->layout.grid.cellWidth;
-                float frameHeight = (float)context.layoutConfig->layout.grid.cellHeight;
-                float spacingX = (float)context.layoutConfig->layout.grid.spacingHorizontal;
-                float spacingY = (float)context.layoutConfig->layout.grid.spacingVertical;
-                std::string cellDir = context.layoutConfig->layout.grid.frameDirection;
+                ImVec2 header_p_min, header_p_max;
+                float headerWidth = 0.0f, headerHeight = 0.0f;
 
-                float headerWidth, headerHeight;
-                ImVec2 header_p_min;
+                if (shProps.type == "Badge")
+                {
+                    CalcBadgeGeometry(shProps, grid_p_min, grid_p_max, text_size, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
 
-                if (cellDir == "Top-to-bottom")
-                {
-                    headerWidth = frameWidth;
-                    headerHeight = text_size.y * 3.0f;
-                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y - headerHeight - spacingY);
+                    ImU32 bgCol = shProps.badge.rectangle.color;
+                    float rounding = (float)shProps.badge.rectangle.rounding;
+                    
+                    if (shProps.badge.shape == "Corner Ribbon")
+                    {
+                        DrawCornerRibbon(drawList, header_p_min, header_p_max, headerWidth, headerHeight, (float)shProps.badge.rectangle.borderThickness, bgCol, shProps.badge.rectangle.borderColor);
+                    }
+                    else if (shProps.badge.shape == "Texture")
+                    {
+                        drawList->AddRectFilled(header_p_min, header_p_max, bgCol, rounding);
+                    }
+                    else
+                    {
+                        drawList->AddRectFilled(header_p_min, header_p_max, bgCol, rounding);
+                        if (shProps.badge.rectangle.borderThickness > 0)
+                        {
+                            drawList->AddRect(header_p_min, header_p_max, shProps.badge.rectangle.borderColor, rounding, ImDrawCornerFlags_All, (float)shProps.badge.rectangle.borderThickness);
+                        }
+                    }
                 }
-                else if (cellDir == "Bottom-to-top")
+                else if (shProps.type == "Divider")
                 {
-                    headerWidth = frameWidth;
-                    headerHeight = text_size.y * 3.0f;
-                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y + frameHeight + spacingY);
-                }
-                else if (cellDir == "Left-to-right")
-                {
-                    headerHeight = frameHeight;
-                    headerWidth = frameWidth;
-                    header_p_min = ImVec2(firstCellProps.position.x - headerWidth - spacingX, firstCellProps.position.y);
-                }
-                else if (cellDir == "Right-to-left")
-                {
-                    headerHeight = frameHeight;
-                    headerWidth = frameWidth;
-                    header_p_min = ImVec2(firstCellProps.position.x + frameWidth + spacingX, firstCellProps.position.y);
-                }
-                else
-                {
-                    headerWidth = frameWidth;
-                    headerHeight = text_size.y * 3.0f;
-                    header_p_min = ImVec2(firstCellProps.position.x, firstCellProps.position.y - headerHeight - spacingY);
+                    CalcDividerGeometry(shProps, grid_p_min, grid_p_max, text_size, gridLayout.squadDirection, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
+                    
+                    if (shProps.divider.line.style == "Rectangle" || shProps.divider.line.style == "Texture")
+                    {
+                        ImU32 divCol = shProps.divider.rectangle.color;
+                        float rounding = (float)shProps.divider.rectangle.rounding;
+                        drawList->AddRectFilled(header_p_min, header_p_max, divCol, rounding);
+                        if (shProps.divider.line.style == "Rectangle" && shProps.divider.rectangle.borderThickness > 0)
+                        {
+                            drawList->AddRect(header_p_min, header_p_max, shProps.divider.rectangle.borderColor, rounding, ImDrawCornerFlags_All, (float)shProps.divider.rectangle.borderThickness);
+                        }
+                    }
+                    else
+                    {
+                        std::string autoAnchor = "Top";
+                        if (gridLayout.squadDirection == "Top-to-bottom") autoAnchor = "Top";
+                        else if (gridLayout.squadDirection == "Bottom-to-top") autoAnchor = "Bottom";
+                        else if (gridLayout.squadDirection == "Left-to-right") autoAnchor = "Left";
+                        else if (gridLayout.squadDirection == "Right-to-left") autoAnchor = "Right";
+                        
+                        bool isHorizontal = (autoAnchor == "Top" || autoAnchor == "Bottom");
+                        ImU32 divCol = shProps.divider.line.color;
+                        float thickness = (float)shProps.divider.line.thickness;
+
+                        if (shProps.divider.line.style == "Solid")
+                        {
+                            if (isHorizontal) {
+                                float center_y = header_p_min.y + headerHeight * 0.5f;
+                                drawList->AddRectFilled(ImVec2(header_p_min.x, center_y - thickness * 0.5f), ImVec2(header_p_max.x, center_y + thickness * 0.5f), divCol);
+                            } else {
+                                float center_x = header_p_min.x + headerWidth * 0.5f;
+                                drawList->AddRectFilled(ImVec2(center_x - thickness * 0.5f, header_p_min.y), ImVec2(center_x + thickness * 0.5f, header_p_max.y), divCol);
+                            }
+                        }
+                        else
+                        {
+                            ImVec2 p1 = isHorizontal ? ImVec2(header_p_min.x, header_p_min.y + headerHeight * 0.5f) : ImVec2(header_p_min.x + headerWidth * 0.5f, header_p_min.y);
+                            ImVec2 p2 = isHorizontal ? ImVec2(header_p_max.x, header_p_min.y + headerHeight * 0.5f) : ImVec2(header_p_min.x + headerWidth * 0.5f, header_p_max.y);
+                            float dashLen = (shProps.divider.line.style == "Dotted") ? thickness : thickness * 3.f;
+                            DrawDashedLine(drawList, p1, p2, divCol, thickness, dashLen, dashLen);
+                        }
+                    }
                 }
 
-                ImVec2 header_p_max = ImVec2(header_p_min.x + headerWidth, header_p_min.y + headerHeight);
-
-                ImU32 col_solid = ImColor(0, 0, 0, 255);
-                ImU32 col_trans = ImColor(0, 0, 0, 0);
-
-                if (cellDir == "Top-to-bottom")
-                {
-                    ImGui::AddRectFilledGradientV(drawList, header_p_min, header_p_max, col_trans, col_solid, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
-                }
-                else if (cellDir == "Bottom-to-top")
-                {
-                    ImGui::AddRectFilledGradientV(drawList, header_p_min, header_p_max, col_solid, col_trans, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
-                }
-                else if (cellDir == "Left-to-right")
-                {
-                    ImGui::AddRectFilledGradientH(drawList, header_p_min, header_p_max, col_trans, col_solid, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
-                }
-                else if (cellDir == "Right-to-left")
-                {
-                    ImGui::AddRectFilledGradientH(drawList, header_p_min, header_p_max, col_solid, col_trans, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
-                }
-                else
-                {
-                    ImGui::AddRectFilledGradientV(drawList, header_p_min, header_p_max, col_trans, col_solid, context.layoutConfig->layout.grid.cellRounding, ImDrawCornerFlags_All);
-                }
-
-                bool showCheckbox = context.hiddenSubgroups && (droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1));
+                bool showCheckbox = Addon::isSquadManagerActive && context.hiddenSubgroups && (droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1));
                 float checkboxSize = showCheckbox ? ImGui::GetFrameHeight() : 0.0f;
                 float checkboxSpacing = showCheckbox ? 8.0f : 0.0f;
 
-                ImVec2 checkbox_pos;
-                ImVec2 text_pos;
-                if (cellDir == "Top-to-bottom" || cellDir == "Bottom-to-top" || (cellDir != "Left-to-right" && cellDir != "Right-to-left"))
-                {
-                    float contentWidth = text_size.x + checkboxSpacing + checkboxSize;
-                    float contentStartX = header_p_min.x + (headerWidth - contentWidth) * 0.5f;
-                    
-                    text_pos = ImVec2((float)(int)contentStartX, (float)(int)(header_p_min.y + (headerHeight - text_size.y) * 0.5f));
-                    checkbox_pos = ImVec2((float)(int)(contentStartX + text_size.x + checkboxSpacing), (float)(int)(header_p_min.y + (headerHeight - checkboxSize) * 0.5f));
-                }
-                else if (cellDir == "Right-to-left")
-                {
-                    float leftPadding = 8.0f;
-                    checkbox_pos = ImVec2((float)(int)(header_p_min.x + leftPadding), (float)(int)(header_p_min.y + (headerHeight - checkboxSize) * 0.5f));
-                    text_pos = ImVec2((float)(int)(checkbox_pos.x + checkboxSize + checkboxSpacing), (float)(int)(header_p_min.y + (headerHeight - text_size.y) * 0.5f));
-                }
-                else
-                {
-                    float rightPadding = 8.0f;
-                    checkbox_pos = ImVec2((float)(int)(header_p_max.x - rightPadding - checkboxSize), (float)(int)(header_p_min.y + (headerHeight - checkboxSize) * 0.5f));
-                    text_pos = ImVec2((float)(int)(checkbox_pos.x - checkboxSpacing - text_size.x), (float)(int)(header_p_min.y + (headerHeight - text_size.y) * 0.5f));
-                }
+                DrawProperties_t headerProps = {header_p_min, headerWidth, headerHeight, 0, ImDrawCornerFlags_All};
+                ImVec2 text_pos = CalcItemPosition(headerProps, text_size, shProps.labelPosition.anchor, shProps.labelPosition.offset);
+                ImVec2 checkbox_pos = ImVec2(text_pos.x + text_size.x + checkboxSpacing, text_pos.y + (text_size.y - checkboxSize) * 0.5f);
 
-                if (ConfigText.shadow)
-                {
-                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x + 1, text_pos.y + 1), ConfigText.shadowColor, headerText.c_str());
-                }
-                if (ConfigText.outline)
-                {
-                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x - 1, text_pos.y), ConfigText.outlineColor, headerText.c_str());
-                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x + 1, text_pos.y), ConfigText.outlineColor, headerText.c_str());
-                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x, text_pos.y - 1), ConfigText.outlineColor, headerText.c_str());
-                    drawList->AddText(font, ConfigText.fontSize, ImVec2(text_pos.x, text_pos.y + 1), ConfigText.outlineColor, headerText.c_str());
-                }
-
-                drawList->AddText(font, ConfigText.fontSize, text_pos, ConfigText.color, headerText.c_str());
-                if (font) ImGui::PopFont();
+                DrawTextWithDecorators(drawList, font, effectiveFontSize, text_pos, effectiveColor, effectiveShadow, effectiveShadowColor, effectiveOutline, effectiveOutlineColor, headerText);
 
                 if (showCheckbox)
                 {
