@@ -448,11 +448,36 @@ namespace UI::Grid {
                 float dividerSize = CalcDividerSizeForLayout(*context.layoutConfig, squadDirection, direction);
                 float gridSpacing = (squadDirection == "Top-to-bottom" || squadDirection == "Bottom-to-top") ? context.layoutConfig->layout.grid.spacingVertical : context.layoutConfig->layout.grid.spacingHorizontal;
                 float totalSpacing = dividerSpacing + dividerSize + gridSpacing;
+                
+                int uniqueSubgroupCount = 0;
+                int totalUniqueSubgroups = 1;
+                if (context.index > 0 && context.isValid[0])
+                {
+                    VitalSignsDataLink::SubgroupId_t lastId = context.userData[0].SubgroupId;
+                    for (int i = 1; i < context.index; i++)
+                    {
+                        if (context.isValid[i] && context.userData[i].SubgroupId != lastId)
+                        {
+                            totalUniqueSubgroups++;
+                            if (i <= index) uniqueSubgroupCount++;
+                            lastId = context.userData[i].SubgroupId;
+                        }
+                    }
+                    if (index >= context.index)
+                    {
+                        uniqueSubgroupCount = totalUniqueSubgroups;
+                        totalUniqueSubgroups++;
+                    }
+                }
+                else
+                {
+                    totalUniqueSubgroups = 0;
+                }
     
-                if (squadDirection == "Top-to-bottom") offsetRow += subgroup_index * totalSpacing;
-                else if (squadDirection == "Bottom-to-top") offsetRow += (squadRows - 1 - subgroup_index) * totalSpacing;
-                else if (squadDirection == "Left-to-right") offsetColumn += subgroup_index * totalSpacing;
-                else if (squadDirection == "Right-to-left") offsetColumn += (squadCols - 1 - subgroup_index) * totalSpacing;
+                if (squadDirection == "Top-to-bottom") offsetRow += uniqueSubgroupCount * totalSpacing;
+                else if (squadDirection == "Bottom-to-top") offsetRow += (totalUniqueSubgroups - 1 - uniqueSubgroupCount) * totalSpacing;
+                else if (squadDirection == "Left-to-right") offsetColumn += uniqueSubgroupCount * totalSpacing;
+                else if (squadDirection == "Right-to-left") offsetColumn += (totalUniqueSubgroups - 1 - uniqueSubgroupCount) * totalSpacing;
             }
         }
 
@@ -508,12 +533,28 @@ namespace UI::Grid {
                     float gridSpacing = (gridLayout.squadDirection == "Top-to-bottom" || gridLayout.squadDirection == "Bottom-to-top") ? context.layoutConfig->layout.grid.spacingVertical : context.layoutConfig->layout.grid.spacingHorizontal;
                     float totalSpacing = dividerSpacing + dividerSize + gridSpacing;
     
-                    int cellDirectionMax = (gridLayout.frameDirection == "Left-to-right" || gridLayout.frameDirection == "Right-to-left") ? gridLayout.maxColumns : gridLayout.maxRows;
-                    int squadRowsCols = (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left") ? (columns / cellDirectionMax) : (rows / cellDirectionMax);
-                    if (squadRowsCols > 1)
+                    int totalUniqueSubgroups = 1;
+                    if (context.index > 0 && context.isValid[0])
                     {
-                        if (gridLayout.squadDirection == "Top-to-bottom" || gridLayout.squadDirection == "Bottom-to-top") menuHeight += (squadRowsCols - 1) * totalSpacing;
-                        else menuWidth += (squadRowsCols - 1) * totalSpacing;
+                        VitalSignsDataLink::SubgroupId_t lastId = context.userData[0].SubgroupId;
+                        for (int i = 1; i < context.index; i++)
+                        {
+                            if (context.isValid[i] && context.userData[i].SubgroupId != lastId)
+                            {
+                                totalUniqueSubgroups++;
+                                lastId = context.userData[i].SubgroupId;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        totalUniqueSubgroups = 0;
+                    }
+
+                    if (totalUniqueSubgroups > 1)
+                    {
+                        if (gridLayout.squadDirection == "Top-to-bottom" || gridLayout.squadDirection == "Bottom-to-top") menuHeight += (totalUniqueSubgroups - 1) * totalSpacing;
+                        else menuWidth += (totalUniqueSubgroups - 1) * totalSpacing;
                     }
                 }
             }
