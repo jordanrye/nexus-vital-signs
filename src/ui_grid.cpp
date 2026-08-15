@@ -329,13 +329,22 @@ namespace UI::Grid {
         
         if (shProps.visibility != "Hidden") {
             const auto& textStyle = shProps.textStyle;
-            float fontSize = (textStyle.fontSizeSource == "Custom size") ? (float)textStyle.fontSize : (float)ConfigText.fontSize;
+            float fontSize = ImGui::GetIO().FontDefault->FontSize;
+            if (textStyle.fontSizeSource == "Default font size")
+            {
+                fontSize = (float)ConfigText.fontSize;
+            }
+            else if (textStyle.fontSizeSource == "Custom font size")
+            {
+                fontSize = (float)textStyle.fontSize;
+            }
+
             std::string fontSource = (textStyle.fontSource == "Default font") ? ConfigText.fontSource : textStyle.fontSource;
             std::string fontName = (textStyle.fontSource == "Default font") ? ConfigText.font : textStyle.font;
             ImFont* font = nullptr;
             if (fontSource != "Nexus font" && fontSource != "Default font") font = utils::font::GetFont(fontName, fontSize);
             
-            if (font) ImGui::PushFont(font);
+            ImFont* activeFont = font ? font : ImGui::GetFont();
             
             std::vector<VitalSignsDataLink::SubgroupId_t> activeSubgroups;
             for (int i = 0; i < context.index; i++) {
@@ -349,7 +358,8 @@ namespace UI::Grid {
             
             if (activeSubgroups.empty())
             {
-                ImVec2 textSize = ImGui::CalcTextSize("10");
+                const char* text = "10";
+                ImVec2 textSize = activeFont->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
                 textHeight = textSize.y;
                 textWidth = textSize.x;
             } 
@@ -357,13 +367,12 @@ namespace UI::Grid {
             {
                 for (auto subgroupId : activeSubgroups)
                 {
-                    ImVec2 textSize = ImGui::CalcTextSize(std::to_string(subgroupId).c_str());
+                    std::string str = std::to_string(subgroupId);
+                    ImVec2 textSize = activeFont->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, str.c_str());
                     textHeight = ImMax(textHeight, textSize.y);
                     textWidth = ImMax(textWidth, textSize.x);
                 }
             }
-            
-            if (font) ImGui::PopFont();
         }
         
         float padX = ImGui::GetStyle().FramePadding.x * 4.0f;
@@ -1286,7 +1295,15 @@ namespace UI::Grid {
 
                 SubgroupHeaderProperties_t& shProps = context.layoutConfig->layout.grid.subgroupHeader;
                 
-                float effectiveFontSize = (shProps.textStyle.fontSizeSource == "Custom size") ? (float)shProps.textStyle.fontSize : (float)ConfigText.fontSize;
+                float effectiveFontSize = ImGui::GetIO().FontDefault->FontSize;
+                if (shProps.textStyle.fontSizeSource == "Default font size")
+                {
+                    effectiveFontSize = (float)ConfigText.fontSize;
+                }
+                else if (shProps.textStyle.fontSizeSource == "Custom font size")
+                {
+                    effectiveFontSize = (float)shProps.textStyle.fontSize;
+                }
                 ImColor effectiveColor = (shProps.textStyle.colorSource == "Custom color") ? shProps.textStyle.color : ConfigText.color;
                 bool effectiveShadow = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.shadow : ConfigText.shadow;
                 ImColor effectiveShadowColor = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.shadowColor : ConfigText.shadowColor;
@@ -1302,9 +1319,8 @@ namespace UI::Grid {
                     font = utils::font::GetFont(effectiveFontName, effectiveFontSize);
                 }
 
-                if (font) ImGui::PushFont(font);
-                ImVec2 text_size = ImGui::CalcTextSize(headerText.c_str());
-                if (font) ImGui::PopFont();
+                ImFont* activeFont = font ? font : ImGui::GetFont();
+                ImVec2 text_size = activeFont->CalcTextSizeA(effectiveFontSize, FLT_MAX, 0.0f, headerText.c_str());
 
                 ImVec2 header_p_min, header_p_max;
                 float headerWidth = 0.0f, headerHeight = 0.0f;
