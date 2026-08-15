@@ -46,6 +46,7 @@ namespace UI::Grid {
         struct CheckboxData_t {
             ImVec2 position;
             int subgroupId;
+            float size;
         };
         std::vector<CheckboxData_t> headerCheckboxes;
     } context;
@@ -194,7 +195,7 @@ namespace UI::Grid {
         std::string anchor = (config.positionSource == "Custom position") ? config.position.anchor : globalConfig.position.anchor;
         Coordinate_t offset = (config.positionSource == "Custom position") ? config.position.offset : globalConfig.position.offset;
 
-        ImVec2 textPos = CalcItemPosition(iconProps, textSize, anchor, offset);
+        ImVec2 textPosition = CalcItemPosition(iconProps, textSize, anchor, offset);
 
         ImColor color = (config.textStyle.colorSource == "Custom color") ? config.textStyle.color : globalConfig.textStyle.color;
         bool useShadow = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.shadow : globalConfig.textStyle.shadow;
@@ -202,14 +203,14 @@ namespace UI::Grid {
         bool useOutline = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outline : globalConfig.textStyle.outline;
         ImColor outlineColor = (config.textStyle.decoratorSource == "Custom decorators") ? config.textStyle.outlineColor : globalConfig.textStyle.outlineColor;
 
-        if (useShadow) drawList->AddText(font, fontSize, textPos + ImVec2(1, 1), shadowColor, text);
+        if (useShadow) drawList->AddText(font, fontSize, textPosition + ImVec2(1, 1), shadowColor, text);
         if (useOutline) {
-            drawList->AddText(font, fontSize, textPos + ImVec2(-1, 0), outlineColor, text);
-            drawList->AddText(font, fontSize, textPos + ImVec2(1, 0), outlineColor, text);
-            drawList->AddText(font, fontSize, textPos + ImVec2(0, -1), outlineColor, text);
-            drawList->AddText(font, fontSize, textPos + ImVec2(0, 1), outlineColor, text);
+            drawList->AddText(font, fontSize, textPosition + ImVec2(-1, 0), outlineColor, text);
+            drawList->AddText(font, fontSize, textPosition + ImVec2(1, 0), outlineColor, text);
+            drawList->AddText(font, fontSize, textPosition + ImVec2(0, -1), outlineColor, text);
+            drawList->AddText(font, fontSize, textPosition + ImVec2(0, 1), outlineColor, text);
         }
-        drawList->AddText(font, fontSize, textPos, color, text);
+        drawList->AddText(font, fontSize, textPosition, color, text);
 
         if (font)
         {
@@ -346,6 +347,10 @@ namespace UI::Grid {
             
             ImFont* activeFont = font ? font : ImGui::GetFont();
             
+            bool showCheckbox = Addon::isSquadManagerActive && context.hiddenSubgroups;
+            float checkboxSize = showCheckbox ? fontSize : 0.0f;
+            float checkboxSpacing = showCheckbox ? 8.0f : 0.0f;
+            
             std::vector<VitalSignsDataLink::SubgroupId_t> activeSubgroups;
             for (int i = 0; i < context.index; i++) {
                 if (context.isValid[i]) {
@@ -360,8 +365,8 @@ namespace UI::Grid {
             {
                 const char* text = "10";
                 ImVec2 textSize = activeFont->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
-                textHeight = textSize.y;
-                textWidth = textSize.x;
+                textHeight = ImMax(textSize.y, checkboxSize);
+                textWidth = textSize.x + checkboxSpacing + checkboxSize;
             } 
             else
             {
@@ -369,8 +374,8 @@ namespace UI::Grid {
                 {
                     std::string str = std::to_string(subgroupId);
                     ImVec2 textSize = activeFont->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, str.c_str());
-                    textHeight = ImMax(textHeight, textSize.y);
-                    textWidth = ImMax(textWidth, textSize.x);
+                    textHeight = ImMax(textHeight, ImMax(textSize.y, checkboxSize));
+                    textWidth = ImMax(textWidth, textSize.x + checkboxSpacing + checkboxSize);
                 }
             }
         }
@@ -1322,12 +1327,17 @@ namespace UI::Grid {
                 ImFont* activeFont = font ? font : ImGui::GetFont();
                 ImVec2 text_size = activeFont->CalcTextSizeA(effectiveFontSize, FLT_MAX, 0.0f, headerText.c_str());
 
+                bool showCheckbox = Addon::isSquadManagerActive && context.hiddenSubgroups && (droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1));
+                float checkboxSize = showCheckbox ? text_size.y : 0.0f;
+                float checkboxSpacing = showCheckbox ? 8.0f : 0.0f;
+                ImVec2 totalSize = ImVec2(text_size.x + checkboxSpacing + checkboxSize, text_size.y);
+
                 ImVec2 header_p_min, header_p_max;
                 float headerWidth = 0.0f, headerHeight = 0.0f;
 
                 if (shProps.type == "Badge")
                 {
-                    CalcBadgeGeometry(shProps, grid_p_min, grid_p_max, text_size, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
+                    CalcBadgeGeometry(shProps, grid_p_min, grid_p_max, totalSize, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
 
                     ImU32 bgCol = shProps.badge.rectangle.color;
                     float rounding = (float)shProps.badge.rectangle.rounding;
@@ -1351,7 +1361,7 @@ namespace UI::Grid {
                 }
                 else if (shProps.type == "Divider")
                 {
-                    CalcDividerGeometry(shProps, grid_p_min, grid_p_max, text_size, gridLayout.squadDirection, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
+                    CalcDividerGeometry(shProps, grid_p_min, grid_p_max, totalSize, gridLayout.squadDirection, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
                     
                     if (shProps.divider.line.style == "Rectangle" || shProps.divider.line.style == "Texture")
                     {
@@ -1395,19 +1405,16 @@ namespace UI::Grid {
                     }
                 }
 
-                bool showCheckbox = Addon::isSquadManagerActive && context.hiddenSubgroups && (droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1));
-                float checkboxSize = showCheckbox ? ImGui::GetFrameHeight() : 0.0f;
-                float checkboxSpacing = showCheckbox ? 8.0f : 0.0f;
-
                 DrawProperties_t headerProps = {header_p_min, headerWidth, headerHeight, 0, ImDrawCornerFlags_All};
-                ImVec2 text_pos = CalcItemPosition(headerProps, text_size, shProps.labelPosition.anchor, shProps.labelPosition.offset);
-                ImVec2 checkbox_pos = ImVec2(text_pos.x + text_size.x + checkboxSpacing, text_pos.y + (text_size.y - checkboxSize) * 0.5f);
+                ImVec2 startPosition = CalcItemPosition(headerProps, totalSize, shProps.labelPosition.anchor, shProps.labelPosition.offset);
+                ImVec2 textPosition = ImVec2(startPosition.x, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
+                ImVec2 checkboxPosition = ImVec2(startPosition.x + text_size.x + checkboxSpacing, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
 
-                DrawTextWithDecorators(drawList, font, effectiveFontSize, text_pos, effectiveColor, effectiveShadow, effectiveShadowColor, effectiveOutline, effectiveOutlineColor, headerText);
+                DrawTextWithDecorators(drawList, font, effectiveFontSize, textPosition, effectiveColor, effectiveShadow, effectiveShadowColor, effectiveOutline, effectiveOutlineColor, headerText);
 
                 if (showCheckbox)
                 {
-                    context.headerCheckboxes.push_back({checkbox_pos, droppedSubgroupId});
+                    context.headerCheckboxes.push_back({checkboxPosition, droppedSubgroupId, checkboxSize});
                 }
 
                 if (isHidden)
@@ -1938,13 +1945,17 @@ namespace UI::Grid {
             for (const auto& cb : context.headerCheckboxes)
             {
                 ImGui::SetNextWindowPos(cb.position);
-                float checkboxSize = ImGui::GetFrameHeight();
-                ImGui::SetNextWindowSize(ImVec2(checkboxSize * 2.0f, checkboxSize));
+                float defaultFontSize = ImGui::GetFontSize();
+                float scale = cb.size / defaultFontSize;
+                ImGui::SetNextWindowSize(ImVec2(cb.size * 2.0f, cb.size));
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
                 
                 std::string windowName = "##VisibilityGripWindow" + std::to_string(cb.subgroupId);
                 ImGui::Begin(windowName.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+                
+                ImGui::SetWindowFontScale(scale);
                 
                 bool isVisible = std::find(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), cb.subgroupId) == context.hiddenSubgroups->end();
                 
@@ -1963,7 +1974,7 @@ namespace UI::Grid {
                 ImGui::PopID();
                 
                 ImGui::End();
-                ImGui::PopStyleVar(2);
+                ImGui::PopStyleVar(3);
             }
             
             if (font) ImGui::PopFont();
