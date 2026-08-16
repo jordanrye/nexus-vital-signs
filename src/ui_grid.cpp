@@ -1323,9 +1323,9 @@ namespace UI::Grid {
                 showHeader = ImGui::IsMouseHoveringRect(p_min, p_max, false);
             }
 
-            if (showHeader)
+            if (showHeader && droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1))
             {
-                std::string headerText = (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1)) ? "New" : std::to_string(droppedSubgroupId + 1);
+                std::string headerText = std::to_string(droppedSubgroupId + 1);
                 
                 bool isHidden = false;
                 if (context.hiddenSubgroups)
@@ -1462,6 +1462,21 @@ namespace UI::Grid {
                 {
                     ImGui::PopStyleVar();
                 }
+            }
+            else if (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1) && Addon::isSquadManagerActive)
+            {
+                ImVec2 cell_p_min = firstCellProps.position;
+                ImVec2 cell_p_max = ImVec2(firstCellProps.position.x + firstCellProps.width, firstCellProps.position.y + firstCellProps.height);
+                ImU32 col = ImColor(255, 255, 255, 255);
+                float thickness = ImMax(1.0f, (float)context.layoutConfig->layout.itemBorder);
+                float dashLen = 4.0f;
+                float gapLen = 4.0f;
+                
+                // Ensure p1 < p2 for DrawDashedLine logic
+                DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_min.y), ImVec2(cell_p_max.x, cell_p_min.y), col, thickness, dashLen, gapLen); // Top
+                DrawDashedLine(drawList, ImVec2(cell_p_max.x, cell_p_min.y), ImVec2(cell_p_max.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Right
+                DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_max.y), ImVec2(cell_p_max.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Bottom
+                DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_min.y), ImVec2(cell_p_min.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Left
             }
 
             // Squad Manager: Drag-and-drop (drop)
