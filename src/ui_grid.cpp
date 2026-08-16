@@ -440,8 +440,8 @@ namespace UI::Grid {
         // Apply divider spacing
         if (context.layoutConfig->layout.grid.subgroupHeader.type == "Divider")
         {
-            if ((context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always Show") ||  
-                (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on Hover") ||
+            if ((context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always show") ||  
+                (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on hover") ||
                 (Addon::isSquadManagerActive))
             {
                 float dividerSpacing = (float)context.layoutConfig->layout.grid.subgroupHeader.divider.spacing;
@@ -524,8 +524,8 @@ namespace UI::Grid {
             
             if (context.layoutConfig->layout.grid.subgroupHeader.type == "Divider")
             {
-                if ((context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always Show") ||
-                    (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on Hover") ||
+                if ((context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always show") ||
+                    (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on hover") ||
                     (Addon::isSquadManagerActive))
                 {
                     float dividerSpacing = (float)context.layoutConfig->layout.grid.subgroupHeader.divider.spacing;
@@ -1317,8 +1317,8 @@ namespace UI::Grid {
             ImGui::SetItemAllowOverlap();
 
             // Squad Manager: Subgroup header
-            bool showHeader = Addon::isSquadManagerActive || context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always Show";
-            if (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on Hover" && !showHeader)
+            bool showHeader = Addon::isSquadManagerActive || context.layoutConfig->layout.grid.subgroupHeader.visibility == "Always show";
+            if (context.layoutConfig->layout.grid.subgroupHeader.visibility == "Show on hover" && !showHeader)
             {
                 showHeader = ImGui::IsMouseHoveringRect(p_min, p_max, false);
             }

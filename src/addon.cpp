@@ -699,10 +699,11 @@ namespace Addon {
                 {
                     ImGui::BeginGroupPanel("General", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                     {
-                        static const char* visibilityOptions[] = { "Hidden", "Always Show", "Show on Hover" };
+                        static const char* visibilityOptions[] = { "Always show", "Show on hover", "Hidden" };
                         int vOpt = 0;
-                        if (layout.grid.subgroupHeader.visibility == "Always Show") vOpt = 1;
-                        else if (layout.grid.subgroupHeader.visibility == "Show on Hover") vOpt = 2;
+                        if (layout.grid.subgroupHeader.visibility == "Always show") vOpt = 0;
+                        else if (layout.grid.subgroupHeader.visibility == "Show on hover") vOpt = 1;
+                        else if (layout.grid.subgroupHeader.visibility == "Hidden") vOpt = 2;
                         if (ImGui::Combo("Visibility##SQUAD_MANAGER_VIS", &vOpt, visibilityOptions, IM_ARRAYSIZE(visibilityOptions)))
                         {
                             layout.grid.subgroupHeader.visibility = visibilityOptions[vOpt];

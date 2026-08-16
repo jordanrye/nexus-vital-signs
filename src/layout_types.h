@@ -225,7 +225,7 @@ struct SubgroupHeaderDivider_t
 
 struct SubgroupHeaderProperties_t
 {
-    std::string visibility = "Always Show";
+    std::string visibility = "Always show";
     std::string type = "Badge";
 
     std::string anchor;
