@@ -330,6 +330,21 @@ void dser_SubgroupHeaderBadge_t(json& object, SubgroupHeaderBadge_t& badge)
     }
 }
 
+void dser_SubgroupHeaderBracket_t(json& object, SubgroupHeaderBracket_t& bracket)
+{
+    if (!object.is_null())
+    {
+        dser_Line_t(object["line"], bracket.line);
+        dser_BasicType(object["margin"], bracket.margin);
+        dser_BasicType(object["outer-arm-length"], bracket.outerArmLength);
+        dser_BasicType(object["inner-arm-length"], bracket.innerArmLength);
+        dser_BasicType(object["shadow"], bracket.shadow);
+        dser_ImColor(object["shadow-color"], bracket.shadowColor);
+        dser_BasicType(object["outline"], bracket.outline);
+        dser_ImColor(object["outline-color"], bracket.outlineColor);
+    }
+}
+
 void dser_SubgroupHeaderDivider_t(json& object, SubgroupHeaderDivider_t& divider)
 {
     if (!object.is_null())
@@ -357,6 +372,7 @@ void dser_SubgroupHeaderProperties_t(json& object, SubgroupHeaderProperties_t& p
         dser_Position_t(object["label-position"], properties.labelPosition);
         
         dser_SubgroupHeaderBadge_t(object["badge"], properties.badge);
+        dser_SubgroupHeaderBracket_t(object["bracket"], properties.bracket);
         dser_SubgroupHeaderDivider_t(object["divider"], properties.divider);
     }
 }
@@ -685,6 +701,20 @@ json ser_SubgroupHeaderBadge_t(const SubgroupHeaderBadge_t& badge)
     return object;
 }
 
+json ser_SubgroupHeaderBracket_t(const SubgroupHeaderBracket_t& bracket)
+{
+    json object = json::object();
+    object["line"] = ser_Line_t(bracket.line);
+    object["margin"] = bracket.margin;
+    object["outer-arm-length"] = bracket.outerArmLength;
+    object["inner-arm-length"] = bracket.innerArmLength;
+    object["shadow"] = bracket.shadow;
+    object["shadow-color"] = ser_ImColor(bracket.shadowColor);
+    object["outline"] = bracket.outline;
+    object["outline-color"] = ser_ImColor(bracket.outlineColor);
+    return object;
+}
+
 json ser_SubgroupHeaderDivider_t(const SubgroupHeaderDivider_t& divider)
 {
     json object = json::object();
@@ -710,6 +740,7 @@ json ser_SubgroupHeaderProperties_t(const SubgroupHeaderProperties_t& properties
     object["label-position"] = ser_Position_t(properties.labelPosition);
     
     object["badge"] = ser_SubgroupHeaderBadge_t(properties.badge);
+    object["bracket"] = ser_SubgroupHeaderBracket_t(properties.bracket);
     object["divider"] = ser_SubgroupHeaderDivider_t(properties.divider);
     
     return object;

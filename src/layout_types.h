@@ -213,6 +213,18 @@ struct SubgroupHeaderBadge_t
     Rectangle_t rectangle;
 };
 
+struct SubgroupHeaderBracket_t
+{
+    Line_t line;
+    int margin = 0;
+    int outerArmLength = 10;
+    int innerArmLength = 0;
+    bool shadow = false;
+    ImColor shadowColor = ImColor(0, 0, 0, 255);
+    bool outline = false;
+    ImColor outlineColor = ImColor(0, 0, 0, 255);
+};
+
 struct SubgroupHeaderDivider_t
 {
     int spacing = 0;
@@ -237,6 +249,7 @@ struct SubgroupHeaderProperties_t
     Position_t labelPosition;
 
     SubgroupHeaderBadge_t badge;
+    SubgroupHeaderBracket_t bracket;
     SubgroupHeaderDivider_t divider;
 };
 

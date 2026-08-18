@@ -709,9 +709,11 @@ namespace Addon {
                             layout.grid.subgroupHeader.visibility = visibilityOptions[vOpt];
                         }
                         
-                        static const char* typeOptions[] = { "Badge", "Divider" };
+                        static const char* typeOptions[] = { "Badge", "Bracket", "Divider" };
                         int tOpt = 0;
-                        if (layout.grid.subgroupHeader.type == "Divider") tOpt = 1;
+                        if (layout.grid.subgroupHeader.type == "Badge") tOpt = 0;
+                        else if (layout.grid.subgroupHeader.type == "Bracket") tOpt = 1;
+                        else if (layout.grid.subgroupHeader.type == "Divider") tOpt = 2;
                         if (ImGui::Combo("Type##SQUAD_MANAGER_TYPE", &tOpt, typeOptions, IM_ARRAYSIZE(typeOptions)))
                         {
                             layout.grid.subgroupHeader.type = typeOptions[tOpt];
@@ -721,7 +723,7 @@ namespace Addon {
 
                     ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                     {
-                        if (layout.grid.subgroupHeader.type == "Badge")
+                        if (layout.grid.subgroupHeader.type == "Badge" || layout.grid.subgroupHeader.type == "Bracket")
                         {
                             std::vector<const char*> anchorOptions;
                             if (layout.grid.squadDirection == "Left-to-right" || layout.grid.squadDirection == "Right-to-left")
@@ -812,11 +814,34 @@ namespace Addon {
                         }
                         ImGui::EndGroupPanel();
                     }
+                    else if (layout.grid.subgroupHeader.type == "Bracket")
+                    {
+                        ImGui::BeginGroupPanel("Bracket Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            ImGui::ColorEdit4("Color##SQUAD_MANAGER_BRKT_C", (float*)&layout.grid.subgroupHeader.bracket.line.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                            ImGui::InputInt("Thickness##SQUAD_MANAGER_BRKT_THICK", &layout.grid.subgroupHeader.bracket.line.thickness);
+                            ImGui::InputInt("Margin##SQUAD_MANAGER_BRKT_MARGIN", &layout.grid.subgroupHeader.bracket.margin);
+                            ImGui::InputInt("Arm Length (Outer)##SQUAD_MANAGER_BRKT_LIP", &layout.grid.subgroupHeader.bracket.outerArmLength);
+                            ImGui::InputInt("Arm Length (Inner)##SQUAD_MANAGER_BRKT_CLIP", &layout.grid.subgroupHeader.bracket.innerArmLength);
+                            ImGui::Checkbox("Shadow##SQUAD_MANAGER_BRKT_SHDW", &layout.grid.subgroupHeader.bracket.shadow);
+                            if (layout.grid.subgroupHeader.bracket.shadow)
+                            {
+                                ImGui::SameLine();
+                                ImGui::ColorEdit4("Shadow Color##SQUAD_MANAGER_BRKT_SHDW_C", (float*)&layout.grid.subgroupHeader.bracket.shadowColor, ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_NoInputs);
+                            }
+                            ImGui::Checkbox("Outline##SQUAD_MANAGER_BRKT_OUTL", &layout.grid.subgroupHeader.bracket.outline);
+                            if (layout.grid.subgroupHeader.bracket.outline)
+                            {
+                                ImGui::SameLine();
+                                ImGui::ColorEdit4("Outline Color##SQUAD_MANAGER_BRKT_OUTL_C", (float*)&layout.grid.subgroupHeader.bracket.outlineColor, ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_NoInputs);
+                            }
+                        }
+                        ImGui::EndGroupPanel();
+                    }
                     else if (layout.grid.subgroupHeader.type == "Divider")
                     {
                         ImGui::BeginGroupPanel("Divider Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
-
                             static const char* divOptions[] = { "Solid", "Dotted", "Dashed", "Rectangle", "Texture" };
                             int dOpt = 0;
                             if (layout.grid.subgroupHeader.divider.line.style == "Dotted") dOpt = 1;

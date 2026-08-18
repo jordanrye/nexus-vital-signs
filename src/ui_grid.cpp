@@ -1134,6 +1134,44 @@ namespace UI::Grid {
         out_p_max = ImVec2(out_p_min.x + out_width, out_p_min.y + out_height);
     }
     
+    void CalcBracketGeometry(const SubgroupHeaderProperties_t& shProps, const ImVec2& grid_p_min, const ImVec2& grid_p_max, const ImVec2& text_size, const std::string& frameDirection, float spacingVertical, float spacingHorizontal, ImVec2& out_p_min, ImVec2& out_p_max, float& out_width, float& out_height)
+    {
+        ImVec2 offset = ImVec2((float)shProps.offset.x, (float)shProps.offset.y);
+        float padX = ImGui::GetStyle().FramePadding.x * 4.0f;
+        float padY = ImGui::GetStyle().FramePadding.y * 2.0f + 2.0f;
+        bool isVerticalFrame = (frameDirection == "Top-to-bottom" || frameDirection == "Bottom-to-top");
+
+        if (shProps.stretchToFitWidth) {
+            out_width = isVerticalFrame ? (grid_p_max.x - grid_p_min.x) : (text_size.x + padX);
+        } else {
+            out_width = (float)text_size.x + padX;
+        }
+        
+        if (shProps.stretchToFitHeight) {
+            out_height = isVerticalFrame ? (text_size.y + padY) : (grid_p_max.y - grid_p_min.y);
+        } else {
+            out_height = (float)text_size.y + padY;
+        }
+        
+        float thickness = (float)shProps.bracket.line.thickness;
+        float margin = (float)shProps.bracket.margin;
+
+        if (shProps.anchor == "Top") {
+            out_p_min = ImVec2(grid_p_min.x + margin, grid_p_min.y - spacingVertical - out_height - thickness) + offset;
+            out_width -= margin * 2.0f;
+        } else if (shProps.anchor == "Bottom") {
+            out_p_min = ImVec2(grid_p_min.x + margin, grid_p_max.y + spacingVertical + thickness) + offset;
+            out_width -= margin * 2.0f;
+        } else if (shProps.anchor == "Right") {
+            out_p_min = ImVec2(grid_p_max.x + spacingHorizontal + thickness, grid_p_min.y + margin) + offset;
+            out_height -= margin * 2.0f;
+        } else { // Left
+            out_p_min = ImVec2(grid_p_min.x - spacingHorizontal - out_width - thickness, grid_p_min.y + margin) + offset;
+            out_height -= margin * 2.0f;
+        }
+        out_p_max = ImVec2(out_p_min.x + out_width, out_p_min.y + out_height);
+    }
+    
     void CalcDividerGeometry(const SubgroupHeaderProperties_t& shProps, const ImVec2& grid_p_min, const ImVec2& grid_p_max, const ImVec2& text_size, const std::string& squadDirection, const std::string& frameDirection, float spacingVertical, float spacingHorizontal, ImVec2& out_p_min, ImVec2& out_p_max, float& out_width, float& out_height)
     {
         ImVec2 offset = ImVec2((float)shProps.offset.x, (float)shProps.offset.y);
@@ -1445,9 +1483,91 @@ namespace UI::Grid {
                         }
                     }
                 }
+                else if (shProps.type == "Bracket")
+                {
+                    CalcBracketGeometry(shProps, grid_p_min, grid_p_max, totalSize, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
+                    
+                    ImU32 brktCol = shProps.bracket.line.color;
+                    float thickness = (float)shProps.bracket.line.thickness;
+                    float outerArmLength = (float)shProps.bracket.outerArmLength;
+                    float innerArmLength = (float)shProps.bracket.innerArmLength;
+
+                    std::vector<std::pair<ImVec2, ImVec2>> segments;
+
+                    if (shProps.anchor == "Left") {
+                        segments.push_back({ImVec2(header_p_max.x, header_p_min.y), ImVec2(header_p_max.x - outerArmLength, header_p_min.y)}); // Top arm length
+                        segments.push_back({ImVec2(header_p_max.x - outerArmLength, header_p_min.y), ImVec2(header_p_max.x - outerArmLength, header_p_max.y)}); // Main line
+                        segments.push_back({ImVec2(header_p_max.x - outerArmLength, header_p_max.y), ImVec2(header_p_max.x, header_p_max.y)}); // Bottom arm length
+                        if (innerArmLength > 0) {
+                            float midY = header_p_min.y + headerHeight * 0.5f;
+                            segments.push_back({ImVec2(header_p_max.x - outerArmLength, midY), ImVec2(header_p_max.x - outerArmLength - innerArmLength, midY)}); // Inner arm length
+                        }
+                    } else if (shProps.anchor == "Right") {
+                        segments.push_back({ImVec2(header_p_min.x, header_p_min.y), ImVec2(header_p_min.x + outerArmLength, header_p_min.y)}); // Top arm length
+                        segments.push_back({ImVec2(header_p_min.x + outerArmLength, header_p_min.y), ImVec2(header_p_min.x + outerArmLength, header_p_max.y)}); // Main line
+                        segments.push_back({ImVec2(header_p_min.x + outerArmLength, header_p_max.y), ImVec2(header_p_min.x, header_p_max.y)}); // Bottom arm length
+                        if (innerArmLength > 0) {
+                            float midY = header_p_min.y + headerHeight * 0.5f;
+                            segments.push_back({ImVec2(header_p_min.x + outerArmLength, midY), ImVec2(header_p_min.x + outerArmLength + innerArmLength, midY)}); // Inner arm length
+                        }
+                    } else if (shProps.anchor == "Top") {
+                        segments.push_back({ImVec2(header_p_min.x, header_p_max.y), ImVec2(header_p_min.x, header_p_max.y - outerArmLength)}); // Left arm length
+                        segments.push_back({ImVec2(header_p_min.x, header_p_max.y - outerArmLength), ImVec2(header_p_max.x, header_p_max.y - outerArmLength)}); // Main line
+                        segments.push_back({ImVec2(header_p_max.x, header_p_max.y - outerArmLength), ImVec2(header_p_max.x, header_p_max.y)}); // Right arm length
+                        if (innerArmLength > 0) {
+                            float midX = header_p_min.x + headerWidth * 0.5f;
+                            segments.push_back({ImVec2(midX, header_p_max.y - outerArmLength), ImVec2(midX, header_p_max.y - outerArmLength - innerArmLength)}); // Inner arm length
+                        }
+                    } else if (shProps.anchor == "Bottom") {
+                        segments.push_back({ImVec2(header_p_min.x, header_p_min.y), ImVec2(header_p_min.x, header_p_min.y + outerArmLength)}); // Left arm length
+                        segments.push_back({ImVec2(header_p_min.x, header_p_min.y + outerArmLength), ImVec2(header_p_max.x, header_p_min.y + outerArmLength)}); // Main line
+                        segments.push_back({ImVec2(header_p_max.x, header_p_min.y + outerArmLength), ImVec2(header_p_max.x, header_p_min.y)}); // Right arm length
+                        if (innerArmLength > 0) {
+                            float midX = header_p_min.x + headerWidth * 0.5f;
+                            segments.push_back({ImVec2(midX, header_p_min.y + outerArmLength), ImVec2(midX, header_p_min.y + outerArmLength + innerArmLength)}); // Inner arm length
+                        }
+                    }
+
+                    ImU32 shadowCol = shProps.bracket.shadowColor;
+                    ImU32 outlineCol = shProps.bracket.outlineColor;
+                    for (const auto& seg : segments) {
+                        if (shProps.bracket.shadow) {
+                            drawList->AddLine(ImVec2(seg.first.x + 1.0f, seg.first.y + 1.0f), ImVec2(seg.second.x + 1.0f, seg.second.y + 1.0f), shadowCol, thickness);
+                        }
+                        if (shProps.bracket.outline) {
+                            drawList->AddLine(seg.first, seg.second, outlineCol, thickness + 2.0f);
+                        }
+                    }
+                    for (const auto& seg : segments) {
+                        drawList->AddLine(seg.first, seg.second, brktCol, thickness);
+                    }
+                }
 
                 DrawProperties_t headerProps = {header_p_min, headerWidth, headerHeight, 0, ImDrawCornerFlags_All};
                 ImVec2 startPosition = CalcItemPosition(headerProps, totalSize, shProps.labelPosition.anchor, shProps.labelPosition.offset);
+                
+                // Enforce centered vertical/horizontal position next to the bracket
+                if (shProps.type == "Bracket")
+                {
+                    float outerArmLength = (float)shProps.bracket.outerArmLength;
+                    float innerArmLength = (float)shProps.bracket.innerArmLength;
+                    ImVec2 offset = ImVec2((float)shProps.labelPosition.offset.x, (float)shProps.labelPosition.offset.y);
+                    
+                    if (shProps.anchor == "Left") {
+                        float padding = (float)context.layoutConfig->layout.grid.spacingHorizontal;
+                        startPosition = ImVec2(header_p_max.x - outerArmLength - innerArmLength - totalSize.x - padding, header_p_min.y + (headerHeight - totalSize.y) * 0.5f) + offset;
+                    } else if (shProps.anchor == "Right") {
+                        float padding = (float)context.layoutConfig->layout.grid.spacingHorizontal;
+                        startPosition = ImVec2(header_p_min.x + outerArmLength + innerArmLength + padding, header_p_min.y + (headerHeight - totalSize.y) * 0.5f) + offset;
+                    } else if (shProps.anchor == "Top") {
+                        float padding = (float)context.layoutConfig->layout.grid.spacingVertical;
+                        startPosition = ImVec2(header_p_min.x + (headerWidth - totalSize.x) * 0.5f, header_p_max.y - outerArmLength - innerArmLength - totalSize.y - padding) + offset;
+                    } else if (shProps.anchor == "Bottom") {
+                        float padding = (float)context.layoutConfig->layout.grid.spacingVertical;
+                        startPosition = ImVec2(header_p_min.x + (headerWidth - totalSize.x) * 0.5f, header_p_min.y + outerArmLength + innerArmLength + padding) + offset;
+                    }
+                }
+                
                 ImVec2 textPosition = ImVec2(startPosition.x, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
                 ImVec2 checkboxPosition = ImVec2(startPosition.x + text_size.x + checkboxSpacing, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
 
