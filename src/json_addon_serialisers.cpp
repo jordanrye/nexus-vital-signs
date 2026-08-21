@@ -126,6 +126,21 @@ void dser_Line_t(json& object, Line_t& line)
     }
 }
 
+void dser_Bracket_t(json& object, Bracket_t& bracket)
+{
+    if (!object.is_null())
+    {
+        dser_Line_t(object["line"], bracket.line);
+        dser_BasicType(object["margin"], bracket.margin);
+        dser_BasicType(object["outer-arm-length"], bracket.outerArmLength);
+        dser_BasicType(object["inner-arm-length"], bracket.innerArmLength);
+        dser_BasicType(object["shadow"], bracket.shadow);
+        dser_ImColor(object["shadow-color"], bracket.shadowColor);
+        dser_BasicType(object["outline"], bracket.outline);
+        dser_ImColor(object["outline-color"], bracket.outlineColor);
+    }
+}
+
 void dser_IconTextTrigger_t(json& object, IconTextTrigger_t& trigger)
 {
     if (!object.is_null())
@@ -321,59 +336,26 @@ void dser_FrameStatePreset_t(json& object, FrameStatePreset_t& preset)
     }
 }
 
-void dser_SubgroupHeaderBadge_t(json& object, SubgroupHeaderBadge_t& badge)
-{
-    if (!object.is_null())
-    {
-        dser_BasicType(object["shape"], badge.shape);
-        dser_Rectangle_t(object["rectangle"], badge.rectangle);
-    }
-}
-
-void dser_SubgroupHeaderBracket_t(json& object, SubgroupHeaderBracket_t& bracket)
-{
-    if (!object.is_null())
-    {
-        dser_Line_t(object["line"], bracket.line);
-        dser_BasicType(object["margin"], bracket.margin);
-        dser_BasicType(object["outer-arm-length"], bracket.outerArmLength);
-        dser_BasicType(object["inner-arm-length"], bracket.innerArmLength);
-        dser_BasicType(object["shadow"], bracket.shadow);
-        dser_ImColor(object["shadow-color"], bracket.shadowColor);
-        dser_BasicType(object["outline"], bracket.outline);
-        dser_ImColor(object["outline-color"], bracket.outlineColor);
-    }
-}
-
-void dser_SubgroupHeaderDivider_t(json& object, SubgroupHeaderDivider_t& divider)
-{
-    if (!object.is_null())
-    {
-        dser_BasicType(object["spacing"], divider.spacing);
-        dser_BasicType(object["stretch-to-fit-width"], divider.stretchToFitWidth);
-        dser_BasicType(object["stretch-to-fit-height"], divider.stretchToFitHeight);
-        dser_BasicType(object["alignment"], divider.alignment);
-        dser_Line_t(object["line"], divider.line);
-        dser_Rectangle_t(object["rectangle"], divider.rectangle);
-    }
-}
-
 void dser_SubgroupHeaderProperties_t(json& object, SubgroupHeaderProperties_t& properties)
 {
     if (!object.is_null())
     {
         dser_BasicType(object["visibility"], properties.visibility);
+        dser_BasicType(object["position"], properties.position);
         dser_BasicType(object["type"], properties.type);
         dser_BasicType(object["anchor"], properties.anchor);
+        dser_BasicType(object["alignment"], properties.alignment);
         dser_BasicType(object["stretch-to-fit-width"], properties.stretchToFitWidth);
         dser_BasicType(object["stretch-to-fit-height"], properties.stretchToFitHeight);
         dser_Coordinate_t(object["offset"], properties.offset);
+        dser_BasicType(object["spacing"], properties.spacing);
+
+        dser_Rectangle_t(object["rectangle"], properties.rectangle);
+        dser_Line_t(object["line"], properties.line);
+        dser_Bracket_t(object["bracket"], properties.bracket);
+
         dser_TextStyle_t(object["text-style"], properties.textStyle);
-        dser_Position_t(object["label-position"], properties.labelPosition);
-        
-        dser_SubgroupHeaderBadge_t(object["badge"], properties.badge);
-        dser_SubgroupHeaderBracket_t(object["bracket"], properties.bracket);
-        dser_SubgroupHeaderDivider_t(object["divider"], properties.divider);
+        dser_Position_t(object["text-position"], properties.textPosition);
     }
 }
 
@@ -520,6 +502,20 @@ json ser_Line_t(const Line_t& line)
     object["length"] = line.length;
     object["thickness"] = line.thickness;
     object["color"] = ser_ImColor(line.color);
+    return object;
+}
+
+json ser_Bracket_t(const Bracket_t& bracket)
+{
+    json object = json::object();
+    object["line"] = ser_Line_t(bracket.line);
+    object["margin"] = bracket.margin;
+    object["outer-arm-length"] = bracket.outerArmLength;
+    object["inner-arm-length"] = bracket.innerArmLength;
+    object["shadow"] = bracket.shadow;
+    object["shadow-color"] = ser_ImColor(bracket.shadowColor);
+    object["outline"] = bracket.outline;
+    object["outline-color"] = ser_ImColor(bracket.outlineColor);
     return object;
 }
 
@@ -693,55 +689,25 @@ json ser_FrameStatePreset_t(const FrameStatePreset_t& preset)
     return object;
 }
 
-json ser_SubgroupHeaderBadge_t(const SubgroupHeaderBadge_t& badge)
-{
-    json object = json::object();
-    object["shape"] = badge.shape;
-    object["rectangle"] = ser_Rectangle_t(badge.rectangle);
-    return object;
-}
-
-json ser_SubgroupHeaderBracket_t(const SubgroupHeaderBracket_t& bracket)
-{
-    json object = json::object();
-    object["line"] = ser_Line_t(bracket.line);
-    object["margin"] = bracket.margin;
-    object["outer-arm-length"] = bracket.outerArmLength;
-    object["inner-arm-length"] = bracket.innerArmLength;
-    object["shadow"] = bracket.shadow;
-    object["shadow-color"] = ser_ImColor(bracket.shadowColor);
-    object["outline"] = bracket.outline;
-    object["outline-color"] = ser_ImColor(bracket.outlineColor);
-    return object;
-}
-
-json ser_SubgroupHeaderDivider_t(const SubgroupHeaderDivider_t& divider)
-{
-    json object = json::object();
-    object["spacing"] = divider.spacing;
-    object["stretch-to-fit-width"] = divider.stretchToFitWidth;
-    object["stretch-to-fit-height"] = divider.stretchToFitHeight;
-    object["alignment"] = divider.alignment;
-    object["line"] = ser_Line_t(divider.line);
-    object["rectangle"] = ser_Rectangle_t(divider.rectangle);
-    return object;
-}
-
 json ser_SubgroupHeaderProperties_t(const SubgroupHeaderProperties_t& properties)
 {
     json object = json::object();
     object["visibility"] = properties.visibility;
+    object["position"] = properties.position;
     object["type"] = properties.type;
     object["anchor"] = properties.anchor;
+    object["alignment"] = properties.alignment;
     object["stretch-to-fit-width"] = properties.stretchToFitWidth;
     object["stretch-to-fit-height"] = properties.stretchToFitHeight;
     object["offset"] = ser_Coordinate_t(properties.offset);
-    object["text-style"] = ser_TextStyle_t(properties.textStyle);
-    object["label-position"] = ser_Position_t(properties.labelPosition);
+    object["spacing"] = properties.spacing;
     
-    object["badge"] = ser_SubgroupHeaderBadge_t(properties.badge);
-    object["bracket"] = ser_SubgroupHeaderBracket_t(properties.bracket);
-    object["divider"] = ser_SubgroupHeaderDivider_t(properties.divider);
+    object["rectangle"] = ser_Rectangle_t(properties.rectangle);
+    object["line"] = ser_Line_t(properties.line);
+    object["bracket"] = ser_Bracket_t(properties.bracket);
+    
+    object["text-style"] = ser_TextStyle_t(properties.textStyle);
+    object["text-position"] = ser_Position_t(properties.textPosition);
     
     return object;
 }

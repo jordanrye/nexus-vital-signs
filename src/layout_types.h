@@ -125,6 +125,18 @@ struct Line_t
     ImColor color = ImColor(0, 0, 0, 32);
 };
 
+struct Bracket_t
+{
+    Line_t line;
+    int margin = 0;
+    int outerArmLength = 10;
+    int innerArmLength = 0;
+    bool shadow = false;
+    ImColor shadowColor = ImColor(0, 0, 0, 255);
+    bool outline = false;
+    ImColor outlineColor = ImColor(0, 0, 0, 255);
+};
+
 struct BorderIndicator_t
 {
     ImColor color = ImColor(255, 255, 255, 255);
@@ -207,50 +219,25 @@ struct Indicator_t
     TreeNodeUID id;
 };
 
-struct SubgroupHeaderBadge_t
-{
-    std::string shape = "Rectangle";
-    Rectangle_t rectangle;
-};
-
-struct SubgroupHeaderBracket_t
-{
-    Line_t line;
-    int margin = 0;
-    int outerArmLength = 10;
-    int innerArmLength = 0;
-    bool shadow = false;
-    ImColor shadowColor = ImColor(0, 0, 0, 255);
-    bool outline = false;
-    ImColor outlineColor = ImColor(0, 0, 0, 255);
-};
-
-struct SubgroupHeaderDivider_t
-{
-    int spacing = 0;
-    bool stretchToFitWidth = true;
-    bool stretchToFitHeight = true;
-    std::string alignment = "Centre";
-    Line_t line;
-    Rectangle_t rectangle;
-};
-
 struct SubgroupHeaderProperties_t
 {
     std::string visibility = "Always show";
-    std::string type = "Badge";
+    std::string position = "External";
+    std::string type = "Rectangle";
 
     std::string anchor;
+    std::string alignment = "Centre";
     bool stretchToFitWidth = true;
     bool stretchToFitHeight = true;
     Coordinate_t offset;
+    int spacing = 0;
+
+    Rectangle_t rectangle;
+    Line_t line;
+    Bracket_t bracket;
 
     TextStyle_t textStyle;
-    Position_t labelPosition;
-
-    SubgroupHeaderBadge_t badge;
-    SubgroupHeaderBracket_t bracket;
-    SubgroupHeaderDivider_t divider;
+    Position_t textPosition;
 };
 
 struct GridProperties_t

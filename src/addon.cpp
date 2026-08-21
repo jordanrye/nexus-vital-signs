@@ -708,22 +708,20 @@ namespace Addon {
                         {
                             layout.grid.subgroupHeader.visibility = visibilityOptions[vOpt];
                         }
-                        
-                        static const char* typeOptions[] = { "Badge", "Bracket", "Divider" };
-                        int tOpt = 0;
-                        if (layout.grid.subgroupHeader.type == "Badge") tOpt = 0;
-                        else if (layout.grid.subgroupHeader.type == "Bracket") tOpt = 1;
-                        else if (layout.grid.subgroupHeader.type == "Divider") tOpt = 2;
-                        if (ImGui::Combo("Type##SQUAD_MANAGER_TYPE", &tOpt, typeOptions, IM_ARRAYSIZE(typeOptions)))
-                        {
-                            layout.grid.subgroupHeader.type = typeOptions[tOpt];
-                        }
                     }
                     ImGui::EndGroupPanel();
 
                     ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                     {
-                        if (layout.grid.subgroupHeader.type == "Badge" || layout.grid.subgroupHeader.type == "Bracket")
+                        static const char* positionOptions[] = { "External", "Internal" };
+                        int pOpt = (layout.grid.subgroupHeader.position == "Internal") ? 1 : 0;
+                        if (ImGui::Combo("Position##SQUAD_MANAGER_POS", &pOpt, positionOptions, IM_ARRAYSIZE(positionOptions)))
+                        {
+                            layout.grid.subgroupHeader.position = positionOptions[pOpt];
+                            layout.grid.subgroupHeader.type = (pOpt == 0) ? "Rectangle" : "Line";
+                        }
+                        
+                        if (layout.grid.subgroupHeader.position == "External")
                         {
                             std::vector<const char*> anchorOptions;
                             if (layout.grid.squadDirection == "Left-to-right" || layout.grid.squadDirection == "Right-to-left")
@@ -748,167 +746,169 @@ namespace Addon {
                                 layout.grid.subgroupHeader.anchor = anchorOptions[aOpt];
                             }
                         }
-                        else if (layout.grid.subgroupHeader.type == "Divider")
+                        else if (layout.grid.subgroupHeader.position == "Internal")
                         {
                             std::vector<const char*> alignOptions;
                             if (layout.grid.squadDirection == "Left-to-right" || layout.grid.squadDirection == "Right-to-left")
                             {
                                 alignOptions = { "Top", "Centre", "Bottom" };
-                                if (layout.grid.subgroupHeader.divider.alignment != "Top" && layout.grid.subgroupHeader.divider.alignment != "Bottom") layout.grid.subgroupHeader.divider.alignment = "Centre";
+                                if (layout.grid.subgroupHeader.alignment != "Top" && layout.grid.subgroupHeader.alignment != "Bottom") layout.grid.subgroupHeader.alignment = "Centre";
                             }
                             else
                             {
                                 alignOptions = { "Left", "Centre", "Right" };
-                                if (layout.grid.subgroupHeader.divider.alignment != "Left" && layout.grid.subgroupHeader.divider.alignment != "Right") layout.grid.subgroupHeader.divider.alignment = "Centre";
+                                if (layout.grid.subgroupHeader.alignment != "Left" && layout.grid.subgroupHeader.alignment != "Right") layout.grid.subgroupHeader.alignment = "Centre";
                             }
                             int alignOpt = 0;
                             for (size_t i = 0; i < alignOptions.size(); ++i)
                             {
-                                if (layout.grid.subgroupHeader.divider.alignment == alignOptions[i]) alignOpt = (int)i;
+                                if (layout.grid.subgroupHeader.alignment == alignOptions[i]) alignOpt = (int)i;
                             }
                             if (ImGui::Combo("Alignment##SQUAD_MANAGER_DIV_ALIGN", &alignOpt, alignOptions.data(), (int)alignOptions.size()))
                             {
-                                layout.grid.subgroupHeader.divider.alignment = alignOptions[alignOpt];
+                                layout.grid.subgroupHeader.alignment = alignOptions[alignOpt];
                             }
+                            
+                            ImGui::InputInt("Spacing##SQUAD_MANAGER_DIV_SPACING", &layout.grid.subgroupHeader.spacing);
                         }
+
                         ImGui::InputInt("Offset X##SQUAD_MANAGER_OFFSET_X", &layout.grid.subgroupHeader.offset.x);
                         ImGui::InputInt("Offset Y##SQUAD_MANAGER_OFFSET_Y", &layout.grid.subgroupHeader.offset.y);
                     }
                     ImGui::EndGroupPanel();
 
-                    if (layout.grid.subgroupHeader.type == "Badge")
+                    ImGui::BeginGroupPanel("Header Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                     {
-                        ImGui::BeginGroupPanel("Badge Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        if (layout.grid.subgroupHeader.position == "External")
                         {
-                            static const char* shapeOptions[] = { "Rectangle", "Corner Ribbon", "Texture" };
+                            static const char* extStyleOptions[] = { "Bracket", "Rectangle" };
                             int sOpt = 0;
-                            if (layout.grid.subgroupHeader.badge.shape == "Corner Ribbon") sOpt = 1;
-                            else if (layout.grid.subgroupHeader.badge.shape == "Texture") sOpt = 2;
-                            if (ImGui::Combo("Shape##SQUAD_MANAGER_SHAPE", &sOpt, shapeOptions, IM_ARRAYSIZE(shapeOptions)))
+                            if (layout.grid.subgroupHeader.type == "Bracket") sOpt = 0;
+                            else if (layout.grid.subgroupHeader.type == "Rectangle") sOpt = 1;
+                            if (ImGui::Combo("Type##SQUAD_MANAGER_STYLE", &sOpt, extStyleOptions, IM_ARRAYSIZE(extStyleOptions)))
                             {
-                                layout.grid.subgroupHeader.badge.shape = shapeOptions[sOpt];
+                                layout.grid.subgroupHeader.type = extStyleOptions[sOpt];
                             }
-    
-                            if (!layout.grid.subgroupHeader.stretchToFitWidth) {
-                                ImGui::InputInt("Width##SQUAD_MANAGER_DIM_W", &layout.grid.subgroupHeader.badge.rectangle.dimensions.width);
-                            }
-                            ImGui::Checkbox("Stretch to Fit Width##SQUAD_MANAGER_STRETCH_W", &layout.grid.subgroupHeader.stretchToFitWidth);
-    
-                            if (!layout.grid.subgroupHeader.stretchToFitHeight) {
-                                ImGui::InputInt("Height##SQUAD_MANAGER_DIM_H", &layout.grid.subgroupHeader.badge.rectangle.dimensions.height);
-                            }
-                            ImGui::Checkbox("Stretch to Fit Height##SQUAD_MANAGER_STRETCH_H", &layout.grid.subgroupHeader.stretchToFitHeight);
-    
-                            ImGui::ColorEdit4("Background Color##SQUAD_MANAGER_BG", (float*)&layout.grid.subgroupHeader.badge.rectangle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-    
-                            ImGui::InputInt("Rounding##SQUAD_MANAGER_ROUNDING", &layout.grid.subgroupHeader.badge.rectangle.rounding);
-                            if (layout.grid.subgroupHeader.badge.rectangle.rounding < 0) layout.grid.subgroupHeader.badge.rectangle.rounding = 0;
-    
-                            ImGui::InputInt("Border Thickness##SQUAD_MANAGER_BORDER_T", &layout.grid.subgroupHeader.badge.rectangle.borderThickness);
-                            if (layout.grid.subgroupHeader.badge.rectangle.borderThickness < 0) layout.grid.subgroupHeader.badge.rectangle.borderThickness = 0;
-                            
-                            if (layout.grid.subgroupHeader.badge.rectangle.borderThickness > 0)
+
+                            if (layout.grid.subgroupHeader.type == "Bracket")
                             {
-                                ImGui::ColorEdit4("Border Color##SQUAD_MANAGER_BORDER_C", (float*)&layout.grid.subgroupHeader.badge.rectangle.borderColor, ImGuiColorEditFlags_AlphaPreviewHalf);
-                            }
-                        }
-                        ImGui::EndGroupPanel();
-                    }
-                    else if (layout.grid.subgroupHeader.type == "Bracket")
-                    {
-                        ImGui::BeginGroupPanel("Bracket Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
-                        {
-                            ImGui::ColorEdit4("Color##SQUAD_MANAGER_BRKT_C", (float*)&layout.grid.subgroupHeader.bracket.line.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-                            ImGui::InputInt("Thickness##SQUAD_MANAGER_BRKT_THICK", &layout.grid.subgroupHeader.bracket.line.thickness);
-                            ImGui::InputInt("Margin##SQUAD_MANAGER_BRKT_MARGIN", &layout.grid.subgroupHeader.bracket.margin);
-                            ImGui::InputInt("Arm Length (Outer)##SQUAD_MANAGER_BRKT_LIP", &layout.grid.subgroupHeader.bracket.outerArmLength);
-                            ImGui::InputInt("Arm Length (Inner)##SQUAD_MANAGER_BRKT_CLIP", &layout.grid.subgroupHeader.bracket.innerArmLength);
-                            ImGui::Checkbox("Shadow##SQUAD_MANAGER_BRKT_SHDW", &layout.grid.subgroupHeader.bracket.shadow);
-                            if (layout.grid.subgroupHeader.bracket.shadow)
-                            {
-                                ImGui::SameLine();
-                                ImGui::ColorEdit4("Shadow Color##SQUAD_MANAGER_BRKT_SHDW_C", (float*)&layout.grid.subgroupHeader.bracket.shadowColor, ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_NoInputs);
-                            }
-                            ImGui::Checkbox("Outline##SQUAD_MANAGER_BRKT_OUTL", &layout.grid.subgroupHeader.bracket.outline);
-                            if (layout.grid.subgroupHeader.bracket.outline)
-                            {
-                                ImGui::SameLine();
-                                ImGui::ColorEdit4("Outline Color##SQUAD_MANAGER_BRKT_OUTL_C", (float*)&layout.grid.subgroupHeader.bracket.outlineColor, ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_NoInputs);
-                            }
-                        }
-                        ImGui::EndGroupPanel();
-                    }
-                    else if (layout.grid.subgroupHeader.type == "Divider")
-                    {
-                        ImGui::BeginGroupPanel("Divider Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
-                        {
-                            static const char* divOptions[] = { "Solid", "Dotted", "Dashed", "Rectangle", "Texture" };
-                            int dOpt = 0;
-                            if (layout.grid.subgroupHeader.divider.line.style == "Dotted") dOpt = 1;
-                            else if (layout.grid.subgroupHeader.divider.line.style == "Dashed") dOpt = 2;
-                            else if (layout.grid.subgroupHeader.divider.line.style == "Rectangle") dOpt = 3;
-                            else if (layout.grid.subgroupHeader.divider.line.style == "Texture") dOpt = 4;
-                            if (ImGui::Combo("Divider Style##SQUAD_MANAGER_DIVIDER", &dOpt, divOptions, IM_ARRAYSIZE(divOptions)))
-                            {
-                                layout.grid.subgroupHeader.divider.line.style = divOptions[dOpt];
-                            }
-    
-                            ImGui::InputInt("Spacing##SQUAD_MANAGER_DIV_SPACING", &layout.grid.subgroupHeader.divider.spacing);
-    
-                            bool isRectOrTex = (layout.grid.subgroupHeader.divider.line.style == "Rectangle" || layout.grid.subgroupHeader.divider.line.style == "Texture");
-                            bool isVerticalSquad = (layout.grid.squadDirection == "Left-to-right" || layout.grid.squadDirection == "Right-to-left");
-                            bool isStretchingLine = isVerticalSquad ? layout.grid.subgroupHeader.divider.stretchToFitHeight : layout.grid.subgroupHeader.divider.stretchToFitWidth;
-                            
-                            if (!isRectOrTex) {
-                                if (!isStretchingLine) {
-                                    ImGui::InputInt("Line Length##SQUAD_MANAGER_DIV_LEN", &layout.grid.subgroupHeader.divider.line.length);
-                                }
-                            } else {
-                                if (!layout.grid.subgroupHeader.divider.stretchToFitWidth) {
-                                    ImGui::InputInt("Width##SQUAD_MANAGER_DIV_DIM_W", &layout.grid.subgroupHeader.divider.rectangle.dimensions.width);
-                                }
-                            }
-    
-                            if (isRectOrTex || !isVerticalSquad) {
-                                ImGui::Checkbox("Stretch to Fit Width##SQUAD_MANAGER_DIV_STRETCH_W", &layout.grid.subgroupHeader.divider.stretchToFitWidth);
-                            }
-    
-                            if (!isRectOrTex) {
-                                ImGui::InputInt("Line Thickness##SQUAD_MANAGER_DIV_THICK", &layout.grid.subgroupHeader.divider.line.thickness);
-                            } else {
-                                if (!layout.grid.subgroupHeader.divider.stretchToFitHeight) {
-                                    ImGui::InputInt("Height##SQUAD_MANAGER_DIV_DIM_H", &layout.grid.subgroupHeader.divider.rectangle.dimensions.height);
-                                }
-                            }
-    
-                            if (isRectOrTex || isVerticalSquad) {
-                                ImGui::Checkbox("Stretch to Fit Height##SQUAD_MANAGER_DIV_STRETCH_H", &layout.grid.subgroupHeader.divider.stretchToFitHeight);
-                            }
-    
-                            if (!isRectOrTex) {
-                                ImGui::ColorEdit4("Divider Color##SQUAD_MANAGER_DIV_C", (float*)&layout.grid.subgroupHeader.divider.line.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-                            } else {
-                                ImGui::ColorEdit4("Background Color##SQUAD_MANAGER_DIV_C", (float*)&layout.grid.subgroupHeader.divider.rectangle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-                                
-                                ImGui::InputInt("Rounding##SQUAD_MANAGER_DIV_ROUNDING", &layout.grid.subgroupHeader.divider.rectangle.rounding);
-                                if (layout.grid.subgroupHeader.divider.rectangle.rounding < 0) layout.grid.subgroupHeader.divider.rectangle.rounding = 0;
-                                
-                                ImGui::InputInt("Border Thickness##SQUAD_MANAGER_DIV_BORDER_T", &layout.grid.subgroupHeader.divider.rectangle.borderThickness);
-                                if (layout.grid.subgroupHeader.divider.rectangle.borderThickness < 0) layout.grid.subgroupHeader.divider.rectangle.borderThickness = 0;
-                                
-                                if (layout.grid.subgroupHeader.divider.rectangle.borderThickness > 0)
+                                ImGui::ColorEdit4("Color##SQUAD_MANAGER_BRKT_C", (float*)&layout.grid.subgroupHeader.bracket.line.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                ImGui::InputInt("Thickness##SQUAD_MANAGER_BRKT_THICK", &layout.grid.subgroupHeader.bracket.line.thickness);
+                                ImGui::InputInt("Margin##SQUAD_MANAGER_BRKT_MARGIN", &layout.grid.subgroupHeader.bracket.margin);
+                                ImGui::InputInt("Arm Length (Outer)##SQUAD_MANAGER_BRKT_LIP", &layout.grid.subgroupHeader.bracket.outerArmLength);
+                                ImGui::InputInt("Arm Length (Inner)##SQUAD_MANAGER_BRKT_CLIP", &layout.grid.subgroupHeader.bracket.innerArmLength);
+                                ImGui::Checkbox("Shadow##SQUAD_MANAGER_BRKT_SHDW", &layout.grid.subgroupHeader.bracket.shadow);
+                                if (layout.grid.subgroupHeader.bracket.shadow)
                                 {
-                                    ImGui::ColorEdit4("Border Color##SQUAD_MANAGER_DIV_BORDER_C", (float*)&layout.grid.subgroupHeader.divider.rectangle.borderColor, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                    ImGui::SameLine();
+                                    ImGui::ColorEdit4("Shadow Color##SQUAD_MANAGER_BRKT_SHDW_C", (float*)&layout.grid.subgroupHeader.bracket.shadowColor, ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_NoInputs);
+                                }
+                                ImGui::Checkbox("Outline##SQUAD_MANAGER_BRKT_OUTL", &layout.grid.subgroupHeader.bracket.outline);
+                                if (layout.grid.subgroupHeader.bracket.outline)
+                                {
+                                    ImGui::SameLine();
+                                    ImGui::ColorEdit4("Outline Color##SQUAD_MANAGER_BRKT_OUTL_C", (float*)&layout.grid.subgroupHeader.bracket.outlineColor, ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_NoInputs);
+                                }
+                            }
+                            else if (layout.grid.subgroupHeader.type == "Rectangle")
+                            {
+                                ImGui::ColorEdit4("Color##SQUAD_MANAGER_BG", (float*)&layout.grid.subgroupHeader.rectangle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                
+                                ImGui::Checkbox("Stretch to Fit Width##SQUAD_MANAGER_STRETCH_W", &layout.grid.subgroupHeader.stretchToFitWidth);
+                                if (!layout.grid.subgroupHeader.stretchToFitWidth) {
+                                    ImGui::InputInt("Width##SQUAD_MANAGER_DIM_W", &layout.grid.subgroupHeader.rectangle.dimensions.width);
+                                }
+        
+                                ImGui::Checkbox("Stretch to Fit Height##SQUAD_MANAGER_STRETCH_H", &layout.grid.subgroupHeader.stretchToFitHeight);
+                                if (!layout.grid.subgroupHeader.stretchToFitHeight) {
+                                    ImGui::InputInt("Height##SQUAD_MANAGER_DIM_H", &layout.grid.subgroupHeader.rectangle.dimensions.height);
+                                }
+        
+                                ImGui::InputInt("Rounding##SQUAD_MANAGER_ROUNDING", &layout.grid.subgroupHeader.rectangle.rounding);
+                                if (layout.grid.subgroupHeader.rectangle.rounding < 0) layout.grid.subgroupHeader.rectangle.rounding = 0;
+        
+                                ImGui::InputInt("Border Thickness##SQUAD_MANAGER_BORDER_T", &layout.grid.subgroupHeader.rectangle.borderThickness);
+                                if (layout.grid.subgroupHeader.rectangle.borderThickness < 0) layout.grid.subgroupHeader.rectangle.borderThickness = 0;
+                                
+                                if (layout.grid.subgroupHeader.rectangle.borderThickness > 0)
+                                {
+                                    ImGui::ColorEdit4("Border Color##SQUAD_MANAGER_BORDER_C", (float*)&layout.grid.subgroupHeader.rectangle.borderColor, ImGuiColorEditFlags_AlphaPreviewHalf);
                                 }
                             }
                         }
-                        ImGui::EndGroupPanel();
+                        else if (layout.grid.subgroupHeader.position == "Internal")
+                        {
+                            static const char* intStyleOptions[] = { "Line", "Rectangle" };
+                            int sOpt = 0;
+                            if (layout.grid.subgroupHeader.type == "Line") sOpt = 0;
+                            else if (layout.grid.subgroupHeader.type == "Rectangle") sOpt = 1;
+                            if (ImGui::Combo("Type##SQUAD_MANAGER_STYLE", &sOpt, intStyleOptions, IM_ARRAYSIZE(intStyleOptions)))
+                            {
+                                layout.grid.subgroupHeader.type = intStyleOptions[sOpt];
+                            }
+
+                            if (layout.grid.subgroupHeader.type == "Line")
+                            {
+                                static const char* divOptions[] = { "Solid", "Dotted", "Dashed" };
+                                int dOpt = 0;
+                                if (layout.grid.subgroupHeader.line.style == "Dotted") dOpt = 1;
+                                else if (layout.grid.subgroupHeader.line.style == "Dashed") dOpt = 2;
+                                if (ImGui::Combo("Style##SQUAD_MANAGER_DIVIDER", &dOpt, divOptions, IM_ARRAYSIZE(divOptions)))
+                                {
+                                    layout.grid.subgroupHeader.line.style = divOptions[dOpt];
+                                }
+        
+                                bool isVerticalSquad = (layout.grid.squadDirection == "Left-to-right" || layout.grid.squadDirection == "Right-to-left");
+                                bool isStretchingLine = isVerticalSquad ? layout.grid.subgroupHeader.stretchToFitHeight : layout.grid.subgroupHeader.stretchToFitWidth;
+                                
+                                if (!isVerticalSquad) {
+                                    ImGui::Checkbox("Stretch to Fit Width##SQUAD_MANAGER_DIV_STRETCH_W", &layout.grid.subgroupHeader.stretchToFitWidth);
+                                }
+                                if (!isStretchingLine) {
+                                    ImGui::InputInt("Line Length##SQUAD_MANAGER_DIV_LEN", &layout.grid.subgroupHeader.line.length);
+                                }
+        
+                                ImGui::InputInt("Thickness##SQUAD_MANAGER_DIV_THICK", &layout.grid.subgroupHeader.line.thickness);
+        
+                                if (isVerticalSquad) {
+                                    ImGui::Checkbox("Stretch to Fit Height##SQUAD_MANAGER_DIV_STRETCH_H", &layout.grid.subgroupHeader.stretchToFitHeight);
+                                }
+        
+                                ImGui::ColorEdit4("Color##SQUAD_MANAGER_DIV_C", (float*)&layout.grid.subgroupHeader.line.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                            }
+                            else if (layout.grid.subgroupHeader.type == "Rectangle")
+                            {
+                                ImGui::ColorEdit4("Color##SQUAD_MANAGER_DIV_C", (float*)&layout.grid.subgroupHeader.rectangle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                
+                                ImGui::Checkbox("Stretch to Fit Width##SQUAD_MANAGER_DIV_STRETCH_W", &layout.grid.subgroupHeader.stretchToFitWidth);
+                                if (!layout.grid.subgroupHeader.stretchToFitWidth) {
+                                    ImGui::InputInt("Width##SQUAD_MANAGER_DIV_DIM_W", &layout.grid.subgroupHeader.rectangle.dimensions.width);
+                                }
+        
+                                ImGui::Checkbox("Stretch to Fit Height##SQUAD_MANAGER_DIV_STRETCH_H", &layout.grid.subgroupHeader.stretchToFitHeight);
+                                if (!layout.grid.subgroupHeader.stretchToFitHeight) {
+                                    ImGui::InputInt("Height##SQUAD_MANAGER_DIV_DIM_H", &layout.grid.subgroupHeader.rectangle.dimensions.height);
+                                }
+                                
+                                ImGui::InputInt("Rounding##SQUAD_MANAGER_DIV_ROUNDING", &layout.grid.subgroupHeader.rectangle.rounding);
+                                if (layout.grid.subgroupHeader.rectangle.rounding < 0) layout.grid.subgroupHeader.rectangle.rounding = 0;
+                                
+                                ImGui::InputInt("Border Thickness##SQUAD_MANAGER_DIV_BORDER_T", &layout.grid.subgroupHeader.rectangle.borderThickness);
+                                if (layout.grid.subgroupHeader.rectangle.borderThickness < 0) layout.grid.subgroupHeader.rectangle.borderThickness = 0;
+                                
+                                if (layout.grid.subgroupHeader.rectangle.borderThickness > 0)
+                                {
+                                    ImGui::ColorEdit4("Border Color##SQUAD_MANAGER_DIV_BORDER_C", (float*)&layout.grid.subgroupHeader.rectangle.borderColor, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                }
+                            }
+                        }
                     }
+                    ImGui::EndGroupPanel();
 
                     ImGui::BeginGroupPanel("Text Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                     {
                         ImGui::PushID("SQUAD_MANAGER_LABEL");
-                        form_Position(layout.grid.subgroupHeader.labelPosition);
+                        form_Position(layout.grid.subgroupHeader.textPosition);
                         form_Font(layout.grid.subgroupHeader.textStyle.fontSource, layout.grid.subgroupHeader.textStyle.font);
                         form_FontSize(layout.grid.subgroupHeader.textStyle.fontSizeSource, layout.grid.subgroupHeader.textStyle.fontSize);
                         form_FontColour(layout.grid.subgroupHeader.textStyle.colorSource, layout.grid.subgroupHeader.textStyle.color);
