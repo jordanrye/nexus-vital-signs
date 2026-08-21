@@ -465,8 +465,14 @@ namespace UI::Grid {
                     }
                     if (index >= context.index)
                     {
-                        uniqueSubgroupCount = totalUniqueSubgroups;
-                        totalUniqueSubgroups++;
+                        int lastGroupIndex = (context.index - 1) / cellDirectionMax;
+                        int currentGroupIndex = index / cellDirectionMax;
+                        
+                        if (currentGroupIndex > lastGroupIndex)
+                        {
+                            uniqueSubgroupCount = totalUniqueSubgroups;
+                            totalUniqueSubgroups++;
+                        }
                     }
                 }
                 else
