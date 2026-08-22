@@ -152,6 +152,7 @@
     <ClInclude Include="src\json_imgui_serialisers.h" />
     <ClInclude Include="src\json_serialisers.h" />
     <ClInclude Include="src\imgui_tree_view.h" />
+    <ClInclude Include="src\migration\migration_v1_to_v2.h" />
     <ClInclude Include="src\mumble\Mumble.h" />
     <ClInclude Include="src\nexus\Nexus.h" />
     <ClInclude Include="src\nlohmann\json.hpp" />
@@ -225,6 +226,7 @@
     <ClCompile Include="src\json_imgui_serialisers.cpp" />
     <ClCompile Include="src\imgui_tree_view.cpp" />
     <ClCompile Include="src\layout_manager.cpp" />
+    <ClCompile Include="src\migration\migration_v1_to_v2.cpp" />
     <ClCompile Include="src\settings.cpp" />
     <ClCompile Include="src\shared.cpp" />
     <ClCompile Include="src\ui_common.cpp" />

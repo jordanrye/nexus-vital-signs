@@ -1,121 +1,88 @@
 #include "migration.h"
+#include "migration_v1_to_v2.h"
+#include "../shared.h"
 
 namespace Migration
 {
-    static void MigrateIndicatorsV1ToV2(json& indicators)
+    bool MigrateSettingsConfig(json& config, const std::string& fileName)
     {
-        for (auto& indicator : indicators)
+        if (config.is_null()) return true;
+
+        int version = config.value("schemaVersion", 1);
+
+        if (version > SCHEMA_VERSION)
         {
-            if (indicator.contains("type"))
-            {
-                if (indicator["type"].get<std::string>() == "Highlight")
-                {
-                    json glow = json::object();
-                    
-                    // Convert type
-                    indicator["type"] = "Glow";
-
-                    // Convert properties
-                    if (indicator.contains("highlight"))
-                    {
-                        auto& highlight = indicator["highlight"];
-                        
-                        // New properties hardcoded to mimic old "Highlight" style
-                        glow["position"] = "Inner";
-                        glow["thicknessType"] = "Percentage";
-                        glow["hardness"] = 0.0f;
-
-                        // Old properties which can be copied across
-                        glow["color"] = highlight.contains("color") ? highlight["color"] : json::array({1.0, 1.0, 1.0, 1.0});
-                        glow["thickness"] = highlight.contains("size") ? highlight["size"].get<float>() : 20.0f;
-                        std::string oldPosition = highlight.contains("position") ? highlight["position"].get<std::string>() : "All";
-                        glow["directionTop"] = (oldPosition == "All" || oldPosition == "Top" || oldPosition == "Full");
-                        glow["directionBottom"] = (oldPosition == "All" || oldPosition == "Bottom" || oldPosition == "Full");
-                        glow["directionLeft"] = (oldPosition == "All" || oldPosition == "Left" || oldPosition == "Full");
-                        glow["directionRight"] = (oldPosition == "All" || oldPosition == "Right" || oldPosition == "Full");
-                        if (highlight.contains("trigger") && !highlight["trigger"].is_null() && !highlight["trigger"].empty())
-                        {
-                            glow["trigger"] = highlight["trigger"];
-                        }
-                        
-                        // Erase old properties
-                        indicator.erase("highlight");
-                    }
-                    // Insert new properties
-                    indicator["glow"] = glow;
-                }
-                else if (indicator["type"].get<std::string>() == "Group")
-                {
-                    if (indicator.contains("group") && indicator["group"].contains("indicators") && indicator["group"]["indicators"].is_array())
-                    {
-                        MigrateIndicatorsV1ToV2(indicator["group"]["indicators"]);
-                    }
-                }
-            }
+            std::string message = "Settings file '" + fileName + "' is using an unknown schema version. "
+                "You may be using an older version of Vital Signs, or you've got a configuration file from the future. "
+                "Attempting to parse file, but some data may be lost.";
+            APIDefs->Log(ELogLevel_WARNING, "VitalSigns", message.c_str());
         }
+        else if (version < SCHEMA_VERSION)
+        {
+            std::string message = "Settings file '" + fileName + "' is using an older schema version. "
+                "Migrating to current schema version.";
+            APIDefs->Log(ELogLevel_INFO, "VitalSigns", message.c_str());
+        }
+
+        return true;
     }
 
-    void MigrateLayoutConfig(json& config)
+    bool MigrateLayoutConfig(json& config, const std::string& fileName)
     {
-        if (config.is_null()) return;
+        if (config.is_null()) return true;
 
-        int version = 1;
+        bool isLoaded = false;
+        int version = config.value("schemaVersion", 1);
 
-        if (config.contains("schemaVersion"))
+        if (version > SCHEMA_VERSION)
         {
-            version = config["schemaVersion"].get<int>();
+            std::string message = "Layout file '" + fileName + "' is using an unknown schema version. "
+                "You may be using an older version of Vital Signs, or you've got a configuration file from the future. "
+                "Layout will not be loaded to avoid corruption.";
+            APIDefs->Log(ELogLevel_CRITICAL, "VitalSigns", message.c_str());
+        }
+        else if (version == SCHEMA_VERSION)
+        {
+            isLoaded = true;
+        }
+        else if (version < SCHEMA_VERSION)
+        {
+            std::string message = "Layout file '" + fileName + "' is using an older schema version. "
+                "Migrating to current schema version.";
+            APIDefs->Log(ELogLevel_INFO, "VitalSigns", message.c_str());
+            
+            if (version < 2) { MigrateLayoutV1ToV2(config); }
+    
+            config["schemaVersion"] = SCHEMA_VERSION;
+
+            isLoaded = true;
         }
 
-        if (version < 2)
-        {
-            // Upgrade v1 to v2
-            if (config.contains("indicators") && config["indicators"].is_array())
-            {
-                MigrateIndicatorsV1ToV2(config["indicators"]);
-            }
-
-            if (config.contains("layout") && config["layout"].is_object())
-            {
-                auto& layout = config["layout"];
-                if (layout.contains("spacing"))
-                {
-                    int legacySpacing = layout["spacing"].get<int>();
-                    
-                    if (layout.contains("grid") && layout["grid"].is_object())
-                    {
-                        layout["grid"]["spacing-horizontal"] = legacySpacing;
-                        layout["grid"]["spacing-vertical"] = legacySpacing;
-                    }
-                    
-                    if (layout.contains("radial") && layout["radial"].is_object())
-                    {
-                        layout["radial"]["spacing"] = legacySpacing;
-                    }
-
-                    layout.erase("spacing");
-                }
-            }
-
-            config["schemaVersion"] = 2;
-        }
+        return isLoaded;
     }
 
-    void MigratePresetConfig(json& config)
+    bool MigratePresetConfig(json& config, const std::string& fileName)
     {
-        if (config.is_null()) return;
+        if (config.is_null()) return true;
 
-        int version = 1;
+        int version = config.value("schemaVersion", 1);
 
-        if (config.contains("schemaVersion"))
+        if (version > SCHEMA_VERSION)
         {
-            version = config["schemaVersion"].get<int>();
+            std::string message = "Presets file '" + fileName + "' is using an unknown schema version. "
+                "You may be using an older version of Vital Signs, or you've got a configuration file from the future. "
+                "Attempting to parse file, but some data may be lost.";
+            APIDefs->Log(ELogLevel_WARNING, "VitalSigns", message.c_str());
+        }
+        else if (version < SCHEMA_VERSION)
+        {
+            std::string message = "Presets file '" + fileName + "' is using an older schema version. "
+                "Migrating to current schema version.";
+            APIDefs->Log(ELogLevel_INFO, "VitalSigns", message.c_str());
+            
+            if (version < 2) { MigratePresetV1ToV2(config); }
         }
 
-        if (version < 2)
-        {
-            // Upgrade v1 to v2
-
-            config["schemaVersion"] = 2;
-        }
+        return true;
     }
 }

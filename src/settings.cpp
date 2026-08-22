@@ -32,6 +32,8 @@ namespace Settings
 
         if (jsonParse(APIDefs->Paths.GetAddonDirectory("VitalSigns/settings.json"), settings))
         {
+            Migration::MigrateSettingsConfig(settings, "settings.json");
+
             if (!settings.is_null())
             {
                 dser_GeneralConfig_t(settings, ConfigGeneral);
@@ -69,7 +71,7 @@ namespace Settings
         /* load settings */
         if (jsonParse(APIDefs->Paths.GetAddonDirectory("VitalSigns/presets.json"), settings))
         {
-            Migration::MigratePresetConfig(settings);
+            Migration::MigratePresetConfig(settings, "presets.json");
 
             if (!settings.is_null())
             {
@@ -249,7 +251,9 @@ namespace Settings
 
     json jsonSerialiseSettings()
     {
-        return ser_GeneralConfig_t(ConfigGeneral);
+        json settings = ser_GeneralConfig_t(ConfigGeneral);
+        settings["schemaVersion"] = Migration::SCHEMA_VERSION;
+        return settings;
     }
 
     json jsonSerialisePresets()
@@ -351,7 +355,12 @@ namespace Settings
 
         if (jsonParse(aFilePath, layout))
         {
-            Migration::MigrateLayoutConfig(layout);
+            if (!Migration::MigrateLayoutConfig(layout, aFilePath.filename().string()))
+            {
+                // Unable to parse layout configuration. Return early to avoid corruption.
+                return;
+            }
+
             LayoutConfig_t layoutConfig{};
 
             if (!layout.is_null())
