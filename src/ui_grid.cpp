@@ -1347,6 +1347,22 @@ namespace UI::Grid {
                 }
 
                 SubgroupHeaderProperties_t& shProps = context.layoutConfig->layout.grid.subgroupHeader;
+
+                /// TODO: Bit of a hack to sanitise the anchor position before rendering. Ideally this should not be required.
+                if (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left")
+                {
+                    if (shProps.anchor != "Top" && shProps.anchor != "Bottom") 
+                    {
+                        shProps.anchor = "Top";
+                    }
+                }
+                else
+                {
+                    if (shProps.anchor != "Left" && shProps.anchor != "Right")
+                    {
+                        shProps.anchor = "Left";
+                    }
+                }
                 
                 float effectiveFontSize = ImGui::GetIO().FontDefault->FontSize;
                 if (shProps.textStyle.fontSizeSource == "Default font size")
