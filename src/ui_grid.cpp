@@ -1545,8 +1545,15 @@ namespace UI::Grid {
                     }
                 }
                 
-                ImVec2 textPosition = ImVec2(startPosition.x, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
-                ImVec2 checkboxPosition = ImVec2(startPosition.x + text_size.x + checkboxSpacing, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
+                ImVec2 textPosition;
+                ImVec2 checkboxPosition;
+                if (shProps.anchor == "Left") {
+                    checkboxPosition = ImVec2(startPosition.x, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
+                    textPosition = ImVec2(startPosition.x + (showCheckbox ? checkboxSize + checkboxSpacing : 0.0f), startPosition.y + (totalSize.y - text_size.y) * 0.5f);
+                } else {
+                    textPosition = ImVec2(startPosition.x, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
+                    checkboxPosition = ImVec2(startPosition.x + text_size.x + checkboxSpacing, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
+                }
 
                 DrawTextWithDecorators(drawList, font, effectiveFontSize, textPosition, effectiveColor, effectiveShadow, effectiveShadowColor, effectiveOutline, effectiveOutlineColor, headerText);
 
