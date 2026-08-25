@@ -32,43 +32,6 @@ void dser_Position_t(json& object, Position_t& position)
     }
 }
 
-void dser_GridProperties_t(json& object, GridProperties_t& properties)
-{
-    if (!object.is_null())
-    {
-        dser_BasicType(object["frame-direction"], properties.frameDirection);
-        dser_BasicType(object["squad-direction"], properties.squadDirection);
-        dser_BasicType(object["max-rows"], properties.maxRows);
-        dser_BasicType(object["max-columns"], properties.maxColumns);
-        dser_BasicType(object["cell-width"], properties.cellWidth);
-        dser_BasicType(object["cell-height"], properties.cellHeight);
-        dser_BasicType(object["cell-rounding"], properties.cellRounding);
-    }
-}
-
-void dser_RadialProperties_t(json& object, RadialProperties_t& properties)
-{
-    if (!object.is_null())
-    {
-        dser_BasicType(object["radius-inner"], properties.sectorRadiusInner);
-        dser_BasicType(object["radius-outer"], properties.sectorRadiusOuter);
-        dser_BasicType(object["sector-min"], properties.sectorCountMin);
-        dser_BasicType(object["sector-max"], properties.sectorCountMax);
-    }
-}
-
-void dser_Layout_t(json& object, Layout_t& layout)
-{
-    if (!object.is_null())
-    {
-        dser_BasicType(object["type"], layout.type);
-        dser_GridProperties_t(object["grid"], layout.grid);
-        dser_RadialProperties_t(object["radial"], layout.radial);
-        dser_BasicType(object["border"], layout.itemBorder);
-        dser_BasicType(object["spacing"], layout.itemSpacing);
-    }
-}
-
 void dser_GeneralConfig_t(json& object, GeneralConfig_t& config)
 {
     if (!object.is_null())
@@ -109,29 +72,6 @@ void dser_Trigger_t(json& object, Trigger_t& trigger)
     }
 }
 
-void dser_Group_t(json& object, Group_t& group)
-{
-    if (!object.is_null())
-    {
-        dser_Trigger_t(object["trigger"], group.trigger);
-        dser_BasicType(object["priority-group"], group.priorityGroup);
-
-        if (!object["indicators"].is_null() && object["indicators"].is_array())
-        {
-            for (auto& indicator_json : object["indicators"])
-            {
-                if (!indicator_json.is_null())
-                {
-                    Indicator_t indicator{};
-                    dser_Indicator_t(indicator_json, indicator);
-                    indicator.id = g_LayoutEditor.GenerateUID();
-                    group.indicators.push_back(indicator);
-                }
-            }
-        }
-    }
-}
-
 void dser_Icon_t(json& object, Icon_t& icon)
 {
     if (!object.is_null())
@@ -160,6 +100,44 @@ void dser_TextStyle_t(json& object, TextStyle_t& textStyle)
         dser_ImColor(object["shadow-color"], textStyle.shadowColor);
         dser_BasicType(object["outline"], textStyle.outline);
         dser_ImColor(object["outline-color"], textStyle.outlineColor);
+    }
+}
+
+void dser_Rectangle_t(json& object, Rectangle_t& rectangle)
+{
+    if (!object.is_null())
+    {
+        dser_Size_t(object["dimensions"], rectangle.dimensions);
+        dser_BasicType(object["rounding"], rectangle.rounding);
+        dser_ImColor(object["color"], rectangle.color);
+        dser_BasicType(object["border-thickness"], rectangle.borderThickness);
+        dser_ImColor(object["border-color"], rectangle.borderColor);
+    }
+}
+
+void dser_Line_t(json& object, Line_t& line)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["style"], line.style);
+        dser_BasicType(object["length"], line.length);
+        dser_BasicType(object["thickness"], line.thickness);
+        dser_ImColor(object["color"], line.color);
+    }
+}
+
+void dser_Bracket_t(json& object, Bracket_t& bracket)
+{
+    if (!object.is_null())
+    {
+        dser_Line_t(object["line"], bracket.line);
+        dser_BasicType(object["margin"], bracket.margin);
+        dser_BasicType(object["outer-arm-length"], bracket.outerArmLength);
+        dser_BasicType(object["inner-arm-length"], bracket.innerArmLength);
+        dser_BasicType(object["shadow"], bracket.shadow);
+        dser_ImColor(object["shadow-color"], bracket.shadowColor);
+        dser_BasicType(object["outline"], bracket.outline);
+        dser_ImColor(object["outline-color"], bracket.outlineColor);
     }
 }
 
@@ -249,14 +227,20 @@ void dser_ColourIndicator_t(json& object, ColourIndicator_t& colour)
     }
 }
 
-void dser_HighlightIndicator_t(json& object, HighlightIndicator_t& highlight)
+void dser_GlowIndicator_t(json& object, GlowIndicator_t& glow)
 {
     if (!object.is_null())
     {
-        dser_ImColor(object["color"], highlight.color);
-        dser_BasicType(object["position"], highlight.position);
-        dser_BasicType(object["size"], highlight.size);
-        dser_Trigger_t(object["trigger"], highlight.trigger);
+        dser_ImColor(object["color"], glow.color);
+        dser_BasicType(object["position"], glow.position);
+        dser_BasicType(object["directionTop"], glow.directionTop);
+        dser_BasicType(object["directionBottom"], glow.directionBottom);
+        dser_BasicType(object["directionLeft"], glow.directionLeft);
+        dser_BasicType(object["directionRight"], glow.directionRight);
+        dser_BasicType(object["thicknessType"], glow.thicknessType);
+        dser_BasicType(object["thickness"], glow.thickness);
+        dser_BasicType(object["hardness"], glow.hardness);
+        dser_Trigger_t(object["trigger"], glow.trigger);
     }
 }
 
@@ -284,6 +268,29 @@ void dser_TextIndicator_t(json& object, TextIndicator_t& text)
     }
 }
 
+void dser_Group_t(json& object, Group_t& group)
+{
+    if (!object.is_null())
+    {
+        dser_Trigger_t(object["trigger"], group.trigger);
+        dser_BasicType(object["priority-group"], group.priorityGroup);
+
+        if (!object["indicators"].is_null() && object["indicators"].is_array())
+        {
+            for (auto& indicator_json : object["indicators"])
+            {
+                if (!indicator_json.is_null())
+                {
+                    Indicator_t indicator{};
+                    dser_Indicator_t(indicator_json, indicator);
+                    indicator.id = g_LayoutEditor.GenerateUID();
+                    group.indicators.push_back(indicator);
+                }
+            }
+        }
+    }
+}
+
 void dser_Indicator_t(json& object, Indicator_t& indicator)
 {
     if (!object.is_null())
@@ -307,12 +314,88 @@ void dser_Indicator_t(json& object, Indicator_t& indicator)
         else if ("Colour" == indicator.type) {
             dser_ColourIndicator_t(object["colour"], indicator.colour);
         }
-        else if ("Highlight" == indicator.type) {
-            dser_HighlightIndicator_t(object["highlight"], indicator.highlight);
+        else if ("Glow" == indicator.type) {
+            dser_GlowIndicator_t(object["glow"], indicator.glow);
         }
         else if ("Text" == indicator.type) {
             dser_TextIndicator_t(object["text"], indicator.text);
         }
+    }
+}
+
+void dser_FrameStatePreset_t(json& object, FrameStatePreset_t& preset)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["border-override"], preset.borderOverride);
+        dser_BorderIndicator_t(object["border"], preset.border);
+        dser_BasicType(object["overlay-enabled"], preset.overlayEnabled);
+        dser_ImColor(object["overlay-color"], preset.overlayColor);
+        dser_BasicType(object["glow-enabled"], preset.glowEnabled);
+        dser_GlowIndicator_t(object["glow"], preset.glow);
+    }
+}
+
+void dser_SubgroupHeaderProperties_t(json& object, SubgroupHeaderProperties_t& properties)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["visibility"], properties.visibility);
+        dser_BasicType(object["position"], properties.position);
+        dser_BasicType(object["type"], properties.type);
+        dser_BasicType(object["anchor"], properties.anchor);
+        dser_BasicType(object["alignment"], properties.alignment);
+        dser_BasicType(object["stretch-to-fit-width"], properties.stretchToFitWidth);
+        dser_BasicType(object["stretch-to-fit-height"], properties.stretchToFitHeight);
+        dser_Coordinate_t(object["offset"], properties.offset);
+        dser_BasicType(object["spacing"], properties.spacing);
+
+        dser_Rectangle_t(object["rectangle"], properties.rectangle);
+        dser_Line_t(object["line"], properties.line);
+        dser_Bracket_t(object["bracket"], properties.bracket);
+
+        dser_TextStyle_t(object["text-style"], properties.textStyle);
+        dser_Position_t(object["text-position"], properties.textPosition);
+    }
+}
+
+void dser_GridProperties_t(json& object, GridProperties_t& properties)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["frame-direction"], properties.frameDirection);
+        dser_BasicType(object["squad-direction"], properties.squadDirection);
+        dser_BasicType(object["max-rows"], properties.maxRows);
+        dser_BasicType(object["max-columns"], properties.maxColumns);
+        dser_BasicType(object["cell-width"], properties.cellWidth);
+        dser_BasicType(object["cell-height"], properties.cellHeight);
+        dser_BasicType(object["cell-rounding"], properties.cellRounding);
+        dser_BasicType(object["spacing-horizontal"], properties.spacingHorizontal);
+        dser_BasicType(object["spacing-vertical"], properties.spacingVertical);
+        dser_SubgroupHeaderProperties_t(object["subgroup-header"], properties.subgroupHeader);
+    }
+}
+
+void dser_RadialProperties_t(json& object, RadialProperties_t& properties)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["radius-inner"], properties.sectorRadiusInner);
+        dser_BasicType(object["radius-outer"], properties.sectorRadiusOuter);
+        dser_BasicType(object["sector-min"], properties.sectorCountMin);
+        dser_BasicType(object["sector-max"], properties.sectorCountMax);
+        dser_BasicType(object["spacing"], properties.itemSpacing);
+    }
+}
+
+void dser_Layout_t(json& object, Layout_t& layout)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["type"], layout.type);
+        dser_GridProperties_t(object["grid"], layout.grid);
+        dser_RadialProperties_t(object["radial"], layout.radial);
+        dser_BasicType(object["border"], layout.itemBorder);
     }
 }
 
@@ -337,40 +420,6 @@ json ser_Position_t(const Position_t& position)
     json object = json::object();
     object["anchor"] = position.anchor;
     object["offset"] = ser_Coordinate_t(position.offset);
-    return object;
-}
-
-json ser_GridProperties_t(const GridProperties_t& properties)
-{
-    json object = json::object();
-    object["frame-direction"] = properties.frameDirection;
-    object["squad-direction"] = properties.squadDirection;
-    object["max-rows"] = properties.maxRows;
-    object["max-columns"] = properties.maxColumns;
-    object["cell-width"] = properties.cellWidth;
-    object["cell-height"] = properties.cellHeight;
-    object["cell-rounding"] = properties.cellRounding;
-    return object;
-}
-
-json ser_RadialProperties_t(const RadialProperties_t& properties)
-{
-    json object = json::object();
-    object["radius-inner"] = properties.sectorRadiusInner;
-    object["radius-outer"] = properties.sectorRadiusOuter;
-    object["sector-min"] = properties.sectorCountMin;
-    object["sector-max"] = properties.sectorCountMax;
-    return object;
-}
-
-json ser_Layout_t(const Layout_t& layout)
-{
-    json object = json::object();
-    object["type"] = layout.type;
-    object["grid"] = ser_GridProperties_t(layout.grid);
-    object["radial"] = ser_RadialProperties_t(layout.radial);
-    object["border"] = layout.itemBorder;
-    object["spacing"] = layout.itemSpacing;
     return object;
 }
 
@@ -409,19 +458,6 @@ json ser_Trigger_t(const Trigger_t& trigger)
     return object;
 }
 
-json ser_Group_t(const Group_t& group)
-{
-    json object = json::object();
-    object["trigger"] = ser_Trigger_t(group.trigger);
-    object["priority-group"] = group.priorityGroup;
-    object["indicators"] = json::array();
-    for (const auto& indicator : group.indicators)
-    {
-        object["indicators"].push_back(ser_Indicator_t(indicator));
-    }
-    return object;
-}
-
 json ser_Icon_t(const Icon_t& icon)
 {
     json object = json::object();
@@ -445,6 +481,41 @@ json ser_TextStyle_t(const TextStyle_t& textStyle)
     object["shadow-color"] = ser_ImColor(textStyle.shadowColor);
     object["outline"] = textStyle.outline;
     object["outline-color"] = ser_ImColor(textStyle.outlineColor);
+    return object;
+}
+
+json ser_Rectangle_t(const Rectangle_t& rectangle)
+{
+    json object = json::object();
+    object["dimensions"] = ser_Size_t(rectangle.dimensions);
+    object["rounding"] = rectangle.rounding;
+    object["color"] = ser_ImColor(rectangle.color);
+    object["border-thickness"] = rectangle.borderThickness;
+    object["border-color"] = ser_ImColor(rectangle.borderColor);
+    return object;
+}
+
+json ser_Line_t(const Line_t& line)
+{
+    json object = json::object();
+    object["style"] = line.style;
+    object["length"] = line.length;
+    object["thickness"] = line.thickness;
+    object["color"] = ser_ImColor(line.color);
+    return object;
+}
+
+json ser_Bracket_t(const Bracket_t& bracket)
+{
+    json object = json::object();
+    object["line"] = ser_Line_t(bracket.line);
+    object["margin"] = bracket.margin;
+    object["outer-arm-length"] = bracket.outerArmLength;
+    object["inner-arm-length"] = bracket.innerArmLength;
+    object["shadow"] = bracket.shadow;
+    object["shadow-color"] = ser_ImColor(bracket.shadowColor);
+    object["outline"] = bracket.outline;
+    object["outline-color"] = ser_ImColor(bracket.outlineColor);
     return object;
 }
 
@@ -522,13 +593,19 @@ json ser_ColourIndicator_t(const ColourIndicator_t& colour)
     return object;
 }
 
-json ser_HighlightIndicator_t(const HighlightIndicator_t& highlight)
+json ser_GlowIndicator_t(const GlowIndicator_t& glow)
 {
     json object = json::object();
-    object["color"] = ser_ImColor(highlight.color);
-    object["position"] = highlight.position;
-    object["size"] = highlight.size;
-    object["trigger"] = ser_Trigger_t(highlight.trigger);
+    object["color"] = ser_ImColor(glow.color);
+    object["position"] = glow.position;
+    object["directionTop"] = glow.directionTop;
+    object["directionBottom"] = glow.directionBottom;
+    object["directionLeft"] = glow.directionLeft;
+    object["directionRight"] = glow.directionRight;
+    object["thicknessType"] = glow.thicknessType;
+    object["thickness"] = glow.thickness;
+    object["hardness"] = glow.hardness;
+    object["trigger"] = ser_Trigger_t(glow.trigger);
     return object;
 }
 
@@ -555,6 +632,19 @@ json ser_TextIndicator_t(const TextIndicator_t& text)
     return object;
 }
 
+json ser_Group_t(const Group_t& group)
+{
+    json object = json::object();
+    object["trigger"] = ser_Trigger_t(group.trigger);
+    object["priority-group"] = group.priorityGroup;
+    object["indicators"] = json::array();
+    for (const auto& indicator : group.indicators)
+    {
+        object["indicators"].push_back(ser_Indicator_t(indicator));
+    }
+    return object;
+}
+
 json ser_Indicator_t(const Indicator_t& indicator)
 {
     json object = json::object();
@@ -577,12 +667,84 @@ json ser_Indicator_t(const Indicator_t& indicator)
     else if ("Colour" == indicator.type) {
         object["colour"] = ser_ColourIndicator_t(indicator.colour);
     }
-    else if ("Highlight" == indicator.type) {
-        object["highlight"] = ser_HighlightIndicator_t(indicator.highlight);
+    else if ("Glow" == indicator.type) {
+        object["glow"] = ser_GlowIndicator_t(indicator.glow);
     }
     else if ("Text" == indicator.type) {
         object["text"] = ser_TextIndicator_t(indicator.text);
     }
 
+    return object;
+}
+
+json ser_FrameStatePreset_t(const FrameStatePreset_t& preset)
+{
+    json object = json::object();
+    object["border-override"] = preset.borderOverride;
+    object["border"] = ser_BorderIndicator_t(preset.border);
+    object["overlay-enabled"] = preset.overlayEnabled;
+    object["overlay-color"] = ser_ImColor(preset.overlayColor);
+    object["glow-enabled"] = preset.glowEnabled;
+    object["glow"] = ser_GlowIndicator_t(preset.glow);
+    return object;
+}
+
+json ser_SubgroupHeaderProperties_t(const SubgroupHeaderProperties_t& properties)
+{
+    json object = json::object();
+    object["visibility"] = properties.visibility;
+    object["position"] = properties.position;
+    object["type"] = properties.type;
+    object["anchor"] = properties.anchor;
+    object["alignment"] = properties.alignment;
+    object["stretch-to-fit-width"] = properties.stretchToFitWidth;
+    object["stretch-to-fit-height"] = properties.stretchToFitHeight;
+    object["offset"] = ser_Coordinate_t(properties.offset);
+    object["spacing"] = properties.spacing;
+    
+    object["rectangle"] = ser_Rectangle_t(properties.rectangle);
+    object["line"] = ser_Line_t(properties.line);
+    object["bracket"] = ser_Bracket_t(properties.bracket);
+    
+    object["text-style"] = ser_TextStyle_t(properties.textStyle);
+    object["text-position"] = ser_Position_t(properties.textPosition);
+    
+    return object;
+}
+
+json ser_GridProperties_t(const GridProperties_t& properties)
+{
+    json object = json::object();
+    object["frame-direction"] = properties.frameDirection;
+    object["squad-direction"] = properties.squadDirection;
+    object["max-rows"] = properties.maxRows;
+    object["max-columns"] = properties.maxColumns;
+    object["cell-width"] = properties.cellWidth;
+    object["cell-height"] = properties.cellHeight;
+    object["cell-rounding"] = properties.cellRounding;
+    object["spacing-horizontal"] = properties.spacingHorizontal;
+    object["spacing-vertical"] = properties.spacingVertical;
+    object["subgroup-header"] = ser_SubgroupHeaderProperties_t(properties.subgroupHeader);
+    return object;
+}
+
+json ser_RadialProperties_t(const RadialProperties_t& properties)
+{
+    json object = json::object();
+    object["radius-inner"] = properties.sectorRadiusInner;
+    object["radius-outer"] = properties.sectorRadiusOuter;
+    object["sector-min"] = properties.sectorCountMin;
+    object["sector-max"] = properties.sectorCountMax;
+    object["spacing"] = properties.itemSpacing;
+    return object;
+}
+
+json ser_Layout_t(const Layout_t& layout)
+{
+    json object = json::object();
+    object["type"] = layout.type;
+    object["grid"] = ser_GridProperties_t(layout.grid);
+    object["radial"] = ser_RadialProperties_t(layout.radial);
+    object["border"] = layout.itemBorder;
     return object;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "imgui_tree_view.h"
+#include "migration/migration.h"
 
 struct Size_t
 {
@@ -39,34 +40,6 @@ struct TextStyle_t
     ImColor shadowColor = ImColor(0, 0, 0, 255);
     bool outline = false;
     ImColor outlineColor = ImColor(0, 0, 0, 255);
-};
-
-struct GridProperties_t
-{
-    std::string frameDirection = "Left-to-right";
-    std::string squadDirection = "Top-to-bottom";
-    int maxRows = 5;
-    int maxColumns = 10;
-    int cellWidth = 200;
-    int cellHeight = 60;
-    int cellRounding = 4;
-};
-
-struct RadialProperties_t
-{
-    float sectorRadiusInner = 60;
-    float sectorRadiusOuter = 180;
-    int sectorCountMin = 4;
-    int sectorCountMax = 10;
-};
-
-struct Layout_t
-{
-    std::string type = "Grid";
-    GridProperties_t grid;
-    RadialProperties_t radial;
-    int itemBorder = 1;
-    int itemSpacing = 4;
 };
 
 struct Trigger_t
@@ -135,6 +108,35 @@ struct IconList_t
     IconText_t stacksText;
 };
 
+struct Rectangle_t
+{
+    Size_t dimensions = { 28, 28 };
+    int rounding = 4;
+    ImColor color = ImColor(0, 0, 0, 32);
+    int borderThickness = 1;
+    ImColor borderColor = ImColor(0, 0, 0, 16);
+};
+
+struct Line_t
+{
+    std::string style = "Solid";
+    int length = 200;
+    int thickness = 1;
+    ImColor color = ImColor(0, 0, 0, 32);
+};
+
+struct Bracket_t
+{
+    Line_t line;
+    int margin = 0;
+    int outerArmLength = 10;
+    int innerArmLength = 0;
+    bool shadow = false;
+    ImColor shadowColor = ImColor(0, 0, 0, 255);
+    bool outline = false;
+    ImColor outlineColor = ImColor(0, 0, 0, 255);
+};
+
 struct BorderIndicator_t
 {
     ImColor color = ImColor(255, 255, 255, 255);
@@ -148,11 +150,17 @@ struct ColourIndicator_t
     Trigger_t trigger;
 };
 
-struct HighlightIndicator_t
+struct GlowIndicator_t
 {
     ImColor color = ImColor(255, 255, 255, 255);
-    std::string position = "Bottom";
-    float size = 50.f;
+    std::string position = "Inner";
+    bool directionTop = true;
+    bool directionBottom = true;
+    bool directionLeft = true;
+    bool directionRight = true;
+    std::string thicknessType = "Pixels";
+    float thickness = 20.f;
+    float hardness = 0.0f;
     Trigger_t trigger;
 };
 
@@ -204,15 +212,68 @@ struct Indicator_t
     BorderIndicator_t border;
     Group_t group;
     ColourIndicator_t colour;
-    HighlightIndicator_t highlight;
+    GlowIndicator_t glow;
     TextIndicator_t text;
 
     /* Dynamic identifier. */
     TreeNodeUID id;
 };
 
+struct SubgroupHeaderProperties_t
+{
+    std::string visibility = "Always show";
+    std::string position = "External";
+    std::string type = "Rectangle";
+
+    std::string anchor;
+    std::string alignment = "Centre";
+    bool stretchToFitWidth = true;
+    bool stretchToFitHeight = true;
+    Coordinate_t offset;
+    int spacing = 0;
+
+    Rectangle_t rectangle;
+    Line_t line;
+    Bracket_t bracket;
+
+    TextStyle_t textStyle;
+    Position_t textPosition;
+};
+
+struct GridProperties_t
+{
+    std::string frameDirection = "Left-to-right";
+    std::string squadDirection = "Top-to-bottom";
+    int maxRows = 5;
+    int maxColumns = 10;
+    int cellWidth = 200;
+    int cellHeight = 60;
+    int cellRounding = 4;
+    int spacingVertical = 4;
+    int spacingHorizontal = 4;
+    SubgroupHeaderProperties_t subgroupHeader;
+};
+
+struct RadialProperties_t
+{
+    float sectorRadiusInner = 60;
+    float sectorRadiusOuter = 180;
+    int sectorCountMin = 4;
+    int sectorCountMax = 10;
+    int itemSpacing = 4;
+};
+
+struct Layout_t
+{
+    std::string type = "Grid";
+    GridProperties_t grid;
+    RadialProperties_t radial;
+    int itemBorder = 1;
+};
+
 struct LayoutConfig_t
 {
+    int schemaVersion = Migration::SCHEMA_VERSION;
     std::string name;
     std::string colors = "Default";
     Position_t position;

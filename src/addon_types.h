@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "imgui/imgui.h"
+#include "layout_types.h"
 
 struct GeneralConfig_t
 {
@@ -39,6 +40,7 @@ struct ColourPresets_t
 {
     /* Default Colours */
     ImColor COLOUR_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_BACKGROUND_UNKNOWN = ImColor(0, 0, 0, 0);
     ImColor COLOUR_HEALTH = ImColor(74, 133, 62);
     ImColor COLOUR_HEALTH_DOWNED = ImColor(157, 31, 31);
     ImColor COLOUR_HEALTH_DEFEATED = ImColor(78, 15, 15);
@@ -61,6 +63,7 @@ struct ColourPresets_t
 
     /* Profession Colours */
     ImColor COLOUR_PROF_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_PROF_BACKGROUND_UNKNOWN = ImColor(0, 0, 0, 0);
     ImColor COLOUR_PROF_HEALTH_ELEMENTALIST = ImColor(197, 110, 108);
     ImColor COLOUR_PROF_HEALTH_ENGINEER = ImColor(166, 125, 71);
     ImColor COLOUR_PROF_HEALTH_GUARDIAN = ImColor(91, 154, 174);
@@ -79,6 +82,7 @@ struct ColourPresets_t
     
     /* Heat Map Colours */
     ImColor COLOUR_HEATMAP_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_HEATMAP_BACKGROUND_UNKNOWN = ImColor(0, 0, 0, 0);
     ImColor COLOUR_HEATMAP_HEALTH_100 = ImColor(74, 133, 62);
     ImColor COLOUR_HEATMAP_HEALTH_75 = ImColor(138, 219, 113);
     ImColor COLOUR_HEATMAP_HEALTH_50 = ImColor(219, 172, 113);
@@ -124,6 +128,55 @@ struct BorderPresets_t
     ImColor COLOUR_BORDER_HOVERED = ImColor(255, 255, 255);
     ImColor COLOUR_BORDER_SELECTED = ImColor(34, 153, 238);
     ImColor COLOUR_BORDER_SELF = ImColor(255, 255, 255);
+};
+
+struct FrameStatePreset_t
+{
+    bool borderOverride = false;
+    BorderIndicator_t border;
+
+    bool overlayEnabled = false;
+    ImColor overlayColor = ImColor(255, 255, 255, 32);
+
+    bool glowEnabled = false;
+    GlowIndicator_t glow;
+};
+
+struct FrameStatePresets_t
+{
+    FrameStatePreset_t hovered;
+    FrameStatePreset_t selected;
+    FrameStatePreset_t self;
+    FrameStatePreset_t commander;
+
+    FrameStatePresets_t()
+    {
+        // Hovered
+        hovered.overlayEnabled = true;
+        hovered.overlayColor = ImColor(255, 255, 255, 32);
+
+        // Selected
+        selected.glowEnabled = true;
+        selected.glow.color = ImColor(34, 153, 238, 255);
+        selected.glow.position = "Inner";
+        selected.glow.directionTop = false;
+        selected.glow.directionBottom = false;
+        selected.glow.directionLeft = true;
+        selected.glow.directionRight = false;
+        selected.glow.thicknessType = "Percentage";
+        selected.glow.thickness = 50.0f;
+        selected.glow.hardness = 0.0f;
+
+        // Self
+        self.borderOverride = true;
+        self.border.color = ImColor(255, 255, 255, 255);
+        self.border.thickness = 1;
+
+        // Commander
+        commander.borderOverride = true;
+        commander.border.color = ImColor(255, 255, 255, 255);
+        commander.border.thickness = 1;
+    }
 };
 
 #endif /* SHARED_TYPES_H */

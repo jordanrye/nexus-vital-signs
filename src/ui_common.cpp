@@ -10,19 +10,19 @@
 
 namespace UI {
 
-    ImColor GetBackgroundColour(const ColourPresets_t& config, const std::string& palette)
+    ImColor GetBackgroundColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType)
     {
         if (palette == "Default")
         {
-            return config.COLOUR_BACKGROUND;
+            return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_BACKGROUND_UNKNOWN : config.COLOUR_BACKGROUND;
         }
         else if (palette == "Profession")
         {
-            return config.COLOUR_PROF_BACKGROUND;
+            return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_PROF_BACKGROUND_UNKNOWN : config.COLOUR_PROF_BACKGROUND;
         }
         else if (palette == "Heat Map")
         {
-            return config.COLOUR_HEATMAP_BACKGROUND;
+            return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_HEATMAP_BACKGROUND_UNKNOWN : config.COLOUR_HEATMAP_BACKGROUND;
         }
         return ImColor();
     }

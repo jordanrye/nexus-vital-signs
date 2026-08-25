@@ -578,16 +578,16 @@ namespace Addon {
                 ImGui::InputFloat("Radius (Outer)##RADIUS_MAX", &layout.radial.sectorRadiusOuter, 5.f, 10.f, "%.2f");
                 ImGui::SliderInt("Items (Min)##ITEMS_MIN", &layout.radial.sectorCountMin, 2, 10);
                 ImGui::SliderInt("Items (Max)##ITEMS_MAX", &layout.radial.sectorCountMax, 4, UI::SQUAD_MEMBER_LIMIT);
-                if (ImGui::InputInt("Item Spacing##ITEM_INNER_SPACING", &layout.itemSpacing, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
+                if (ImGui::InputInt("Item Spacing##ITEM_INNER_SPACING", &layout.radial.itemSpacing, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     const float MAX_SPACING = (layout.radial.sectorRadiusOuter - layout.radial.sectorRadiusInner) / 2;
-                    if (layout.itemSpacing > MAX_SPACING)
+                    if (layout.radial.itemSpacing > MAX_SPACING)
                     {
-                        layout.itemSpacing = MAX_SPACING;
+                        layout.radial.itemSpacing = MAX_SPACING;
                     }
-                    else if (layout.itemSpacing < 0)
+                    else if (layout.radial.itemSpacing < 0)
                     {
-                        layout.itemSpacing = 0;
+                        layout.radial.itemSpacing = 0;
                     }
                 }
                 if (ImGui::InputInt("Item Border##ITEM_BORDER", &layout.itemBorder, 1, 2, ImGuiInputTextFlags_EnterReturnsTrue))
@@ -641,6 +641,22 @@ namespace Addon {
                         layout.grid.maxColumns = 1;
                     }
                 }
+                
+                if (ImGui::InputInt("Spacing (Horizontal)##CELL_SPACING_HORIZONTAL", &layout.grid.spacingHorizontal, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
+                {
+                    if (layout.grid.spacingHorizontal < -layout.itemBorder)
+                    {
+                        layout.grid.spacingHorizontal = -layout.itemBorder;
+                    }
+                }
+                
+                if (ImGui::InputInt("Spacing (Vertical)##CELL_SPACING_VERTICAL", &layout.grid.spacingVertical, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
+                {
+                    if (layout.grid.spacingVertical < -layout.itemBorder)
+                    {
+                        layout.grid.spacingVertical = -layout.itemBorder;
+                    }
+                }
             }
 
             ImGui::TextDisabled("Frame Properties");
@@ -674,12 +690,232 @@ namespace Addon {
                         layout.itemBorder = 0;
                     }
                 }
-                if (ImGui::InputInt("Spacing##CELL_SPACING", &layout.itemSpacing, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
+            }
+
+            ImGui::TextDisabled("Advanced");
+            ImGui::Separator();
+            {
+                if (ImGui::CollapsingHeader("Subgroup Headers"))
                 {
-                    if (layout.itemSpacing < -layout.itemBorder)
+                    ImGui::BeginGroupPanel("General", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                     {
-                        layout.itemSpacing = -layout.itemBorder;
+                        static const char* visibilityOptions[] = { "Always show", "Show on hover", "Hidden" };
+                        int vOpt = 0;
+                        if (layout.grid.subgroupHeader.visibility == "Always show") vOpt = 0;
+                        else if (layout.grid.subgroupHeader.visibility == "Show on hover") vOpt = 1;
+                        else if (layout.grid.subgroupHeader.visibility == "Hidden") vOpt = 2;
+                        if (ImGui::Combo("Visibility##SQUAD_MANAGER_VIS", &vOpt, visibilityOptions, IM_ARRAYSIZE(visibilityOptions)))
+                        {
+                            layout.grid.subgroupHeader.visibility = visibilityOptions[vOpt];
+                        }
                     }
+                    ImGui::EndGroupPanel();
+
+                    ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                    {
+                        static const char* positionOptions[] = { "External", "Internal" };
+                        int pOpt = (layout.grid.subgroupHeader.position == "Internal") ? 1 : 0;
+                        if (ImGui::Combo("Position##SQUAD_MANAGER_POS", &pOpt, positionOptions, IM_ARRAYSIZE(positionOptions)))
+                        {
+                            layout.grid.subgroupHeader.position = positionOptions[pOpt];
+                            layout.grid.subgroupHeader.type = (pOpt == 0) ? "Rectangle" : "Line";
+                        }
+                        
+                        if (layout.grid.subgroupHeader.position == "External")
+                        {
+                            std::vector<const char*> anchorOptions;
+                            if (layout.grid.squadDirection == "Left-to-right" || layout.grid.squadDirection == "Right-to-left")
+                            {
+                                anchorOptions = { "Top", "Bottom" };
+                                if (layout.grid.subgroupHeader.anchor != "Top" && layout.grid.subgroupHeader.anchor != "Bottom") layout.grid.subgroupHeader.anchor = "Top";
+                            }
+                            else
+                            {
+                                anchorOptions = { "Left", "Right" };
+                                if (layout.grid.subgroupHeader.anchor != "Left" && layout.grid.subgroupHeader.anchor != "Right") layout.grid.subgroupHeader.anchor = "Left";
+                            }
+                            
+                            int aOpt = 0;
+                            for (size_t i = 0; i < anchorOptions.size(); ++i)
+                            {
+                                if (layout.grid.subgroupHeader.anchor == anchorOptions[i]) aOpt = (int)i;
+                            }
+                            
+                            if (ImGui::Combo("Anchor##SQUAD_MANAGER_ANCHOR", &aOpt, anchorOptions.data(), (int)anchorOptions.size()))
+                            {
+                                layout.grid.subgroupHeader.anchor = anchorOptions[aOpt];
+                            }
+                        }
+                        else if (layout.grid.subgroupHeader.position == "Internal")
+                        {
+                            std::vector<const char*> alignOptions;
+                            if (layout.grid.squadDirection == "Left-to-right" || layout.grid.squadDirection == "Right-to-left")
+                            {
+                                alignOptions = { "Top", "Centre", "Bottom" };
+                                if (layout.grid.subgroupHeader.alignment != "Top" && layout.grid.subgroupHeader.alignment != "Bottom") layout.grid.subgroupHeader.alignment = "Centre";
+                            }
+                            else
+                            {
+                                alignOptions = { "Left", "Centre", "Right" };
+                                if (layout.grid.subgroupHeader.alignment != "Left" && layout.grid.subgroupHeader.alignment != "Right") layout.grid.subgroupHeader.alignment = "Centre";
+                            }
+                            int alignOpt = 0;
+                            for (size_t i = 0; i < alignOptions.size(); ++i)
+                            {
+                                if (layout.grid.subgroupHeader.alignment == alignOptions[i]) alignOpt = (int)i;
+                            }
+                            if (ImGui::Combo("Alignment##SQUAD_MANAGER_DIV_ALIGN", &alignOpt, alignOptions.data(), (int)alignOptions.size()))
+                            {
+                                layout.grid.subgroupHeader.alignment = alignOptions[alignOpt];
+                            }
+                            
+                            ImGui::InputInt("Spacing##SQUAD_MANAGER_DIV_SPACING", &layout.grid.subgroupHeader.spacing);
+                        }
+
+                        ImGui::InputInt("Offset X##SQUAD_MANAGER_OFFSET_X", &layout.grid.subgroupHeader.offset.x);
+                        ImGui::InputInt("Offset Y##SQUAD_MANAGER_OFFSET_Y", &layout.grid.subgroupHeader.offset.y);
+                    }
+                    ImGui::EndGroupPanel();
+
+                    ImGui::BeginGroupPanel("Header Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                    {
+                        if (layout.grid.subgroupHeader.position == "External")
+                        {
+                            static const char* extStyleOptions[] = { "Bracket", "Rectangle" };
+                            int sOpt = 0;
+                            if (layout.grid.subgroupHeader.type == "Bracket") sOpt = 0;
+                            else if (layout.grid.subgroupHeader.type == "Rectangle") sOpt = 1;
+                            if (ImGui::Combo("Type##SQUAD_MANAGER_STYLE", &sOpt, extStyleOptions, IM_ARRAYSIZE(extStyleOptions)))
+                            {
+                                layout.grid.subgroupHeader.type = extStyleOptions[sOpt];
+                            }
+
+                            if (layout.grid.subgroupHeader.type == "Bracket")
+                            {
+                                ImGui::ColorEdit4("Color##SQUAD_MANAGER_BRKT_C", (float*)&layout.grid.subgroupHeader.bracket.line.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                ImGui::InputInt("Thickness##SQUAD_MANAGER_BRKT_THICK", &layout.grid.subgroupHeader.bracket.line.thickness);
+                                ImGui::InputInt("Margin##SQUAD_MANAGER_BRKT_MARGIN", &layout.grid.subgroupHeader.bracket.margin);
+                                ImGui::InputInt("Arm Length (Outer)##SQUAD_MANAGER_BRKT_LIP", &layout.grid.subgroupHeader.bracket.outerArmLength);
+                                ImGui::InputInt("Arm Length (Inner)##SQUAD_MANAGER_BRKT_CLIP", &layout.grid.subgroupHeader.bracket.innerArmLength);
+                                ImGui::Checkbox("Shadow##SQUAD_MANAGER_BRKT_SHDW", &layout.grid.subgroupHeader.bracket.shadow);
+                                if (layout.grid.subgroupHeader.bracket.shadow)
+                                {
+                                    ImGui::SameLine();
+                                    ImGui::ColorEdit4("Shadow Color##SQUAD_MANAGER_BRKT_SHDW_C", (float*)&layout.grid.subgroupHeader.bracket.shadowColor, ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_NoInputs);
+                                }
+                                ImGui::Checkbox("Outline##SQUAD_MANAGER_BRKT_OUTL", &layout.grid.subgroupHeader.bracket.outline);
+                                if (layout.grid.subgroupHeader.bracket.outline)
+                                {
+                                    ImGui::SameLine();
+                                    ImGui::ColorEdit4("Outline Color##SQUAD_MANAGER_BRKT_OUTL_C", (float*)&layout.grid.subgroupHeader.bracket.outlineColor, ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_NoInputs);
+                                }
+                            }
+                            else if (layout.grid.subgroupHeader.type == "Rectangle")
+                            {
+                                ImGui::ColorEdit4("Color##SQUAD_MANAGER_BG", (float*)&layout.grid.subgroupHeader.rectangle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                
+                                ImGui::Checkbox("Stretch to Fit Width##SQUAD_MANAGER_STRETCH_W", &layout.grid.subgroupHeader.stretchToFitWidth);
+                                if (!layout.grid.subgroupHeader.stretchToFitWidth) {
+                                    ImGui::InputInt("Width##SQUAD_MANAGER_DIM_W", &layout.grid.subgroupHeader.rectangle.dimensions.width);
+                                }
+        
+                                ImGui::Checkbox("Stretch to Fit Height##SQUAD_MANAGER_STRETCH_H", &layout.grid.subgroupHeader.stretchToFitHeight);
+                                if (!layout.grid.subgroupHeader.stretchToFitHeight) {
+                                    ImGui::InputInt("Height##SQUAD_MANAGER_DIM_H", &layout.grid.subgroupHeader.rectangle.dimensions.height);
+                                }
+        
+                                ImGui::InputInt("Rounding##SQUAD_MANAGER_ROUNDING", &layout.grid.subgroupHeader.rectangle.rounding);
+                                if (layout.grid.subgroupHeader.rectangle.rounding < 0) layout.grid.subgroupHeader.rectangle.rounding = 0;
+        
+                                ImGui::InputInt("Border Thickness##SQUAD_MANAGER_BORDER_T", &layout.grid.subgroupHeader.rectangle.borderThickness);
+                                if (layout.grid.subgroupHeader.rectangle.borderThickness < 0) layout.grid.subgroupHeader.rectangle.borderThickness = 0;
+                                
+                                if (layout.grid.subgroupHeader.rectangle.borderThickness > 0)
+                                {
+                                    ImGui::ColorEdit4("Border Color##SQUAD_MANAGER_BORDER_C", (float*)&layout.grid.subgroupHeader.rectangle.borderColor, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                }
+                            }
+                        }
+                        else if (layout.grid.subgroupHeader.position == "Internal")
+                        {
+                            static const char* intStyleOptions[] = { "Line", "Rectangle" };
+                            int sOpt = 0;
+                            if (layout.grid.subgroupHeader.type == "Line") sOpt = 0;
+                            else if (layout.grid.subgroupHeader.type == "Rectangle") sOpt = 1;
+                            if (ImGui::Combo("Type##SQUAD_MANAGER_STYLE", &sOpt, intStyleOptions, IM_ARRAYSIZE(intStyleOptions)))
+                            {
+                                layout.grid.subgroupHeader.type = intStyleOptions[sOpt];
+                            }
+
+                            if (layout.grid.subgroupHeader.type == "Line")
+                            {
+                                static const char* divOptions[] = { "Solid", "Dotted", "Dashed" };
+                                int dOpt = 0;
+                                if (layout.grid.subgroupHeader.line.style == "Dotted") dOpt = 1;
+                                else if (layout.grid.subgroupHeader.line.style == "Dashed") dOpt = 2;
+                                if (ImGui::Combo("Style##SQUAD_MANAGER_DIVIDER", &dOpt, divOptions, IM_ARRAYSIZE(divOptions)))
+                                {
+                                    layout.grid.subgroupHeader.line.style = divOptions[dOpt];
+                                }
+        
+                                bool isVerticalSquad = (layout.grid.squadDirection == "Left-to-right" || layout.grid.squadDirection == "Right-to-left");
+                                bool isStretchingLine = isVerticalSquad ? layout.grid.subgroupHeader.stretchToFitHeight : layout.grid.subgroupHeader.stretchToFitWidth;
+                                
+                                if (!isVerticalSquad) {
+                                    ImGui::Checkbox("Stretch to Fit Width##SQUAD_MANAGER_DIV_STRETCH_W", &layout.grid.subgroupHeader.stretchToFitWidth);
+                                }
+                                if (!isStretchingLine) {
+                                    ImGui::InputInt("Line Length##SQUAD_MANAGER_DIV_LEN", &layout.grid.subgroupHeader.line.length);
+                                }
+        
+                                ImGui::InputInt("Thickness##SQUAD_MANAGER_DIV_THICK", &layout.grid.subgroupHeader.line.thickness);
+        
+                                if (isVerticalSquad) {
+                                    ImGui::Checkbox("Stretch to Fit Height##SQUAD_MANAGER_DIV_STRETCH_H", &layout.grid.subgroupHeader.stretchToFitHeight);
+                                }
+        
+                                ImGui::ColorEdit4("Color##SQUAD_MANAGER_DIV_C", (float*)&layout.grid.subgroupHeader.line.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                            }
+                            else if (layout.grid.subgroupHeader.type == "Rectangle")
+                            {
+                                ImGui::ColorEdit4("Color##SQUAD_MANAGER_DIV_C", (float*)&layout.grid.subgroupHeader.rectangle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                
+                                ImGui::Checkbox("Stretch to Fit Width##SQUAD_MANAGER_DIV_STRETCH_W", &layout.grid.subgroupHeader.stretchToFitWidth);
+                                if (!layout.grid.subgroupHeader.stretchToFitWidth) {
+                                    ImGui::InputInt("Width##SQUAD_MANAGER_DIV_DIM_W", &layout.grid.subgroupHeader.rectangle.dimensions.width);
+                                }
+        
+                                ImGui::Checkbox("Stretch to Fit Height##SQUAD_MANAGER_DIV_STRETCH_H", &layout.grid.subgroupHeader.stretchToFitHeight);
+                                if (!layout.grid.subgroupHeader.stretchToFitHeight) {
+                                    ImGui::InputInt("Height##SQUAD_MANAGER_DIV_DIM_H", &layout.grid.subgroupHeader.rectangle.dimensions.height);
+                                }
+                                
+                                ImGui::InputInt("Rounding##SQUAD_MANAGER_DIV_ROUNDING", &layout.grid.subgroupHeader.rectangle.rounding);
+                                if (layout.grid.subgroupHeader.rectangle.rounding < 0) layout.grid.subgroupHeader.rectangle.rounding = 0;
+                                
+                                ImGui::InputInt("Border Thickness##SQUAD_MANAGER_DIV_BORDER_T", &layout.grid.subgroupHeader.rectangle.borderThickness);
+                                if (layout.grid.subgroupHeader.rectangle.borderThickness < 0) layout.grid.subgroupHeader.rectangle.borderThickness = 0;
+                                
+                                if (layout.grid.subgroupHeader.rectangle.borderThickness > 0)
+                                {
+                                    ImGui::ColorEdit4("Border Color##SQUAD_MANAGER_DIV_BORDER_C", (float*)&layout.grid.subgroupHeader.rectangle.borderColor, ImGuiColorEditFlags_AlphaPreviewHalf);
+                                }
+                            }
+                        }
+                    }
+                    ImGui::EndGroupPanel();
+
+                    ImGui::BeginGroupPanel("Text Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                    {
+                        ImGui::PushID("SQUAD_MANAGER_LABEL");
+                        form_Position(layout.grid.subgroupHeader.textPosition);
+                        form_Font(layout.grid.subgroupHeader.textStyle.fontSource, layout.grid.subgroupHeader.textStyle.font);
+                        form_FontSize(layout.grid.subgroupHeader.textStyle.fontSizeSource, layout.grid.subgroupHeader.textStyle.fontSize);
+                        form_FontColour(layout.grid.subgroupHeader.textStyle.colorSource, layout.grid.subgroupHeader.textStyle.color);
+                        form_FontDecorator(layout.grid.subgroupHeader.textStyle.decoratorSource, layout.grid.subgroupHeader.textStyle.shadow, layout.grid.subgroupHeader.textStyle.shadowColor, layout.grid.subgroupHeader.textStyle.outline, layout.grid.subgroupHeader.textStyle.outlineColor);
+                        ImGui::PopID();
+                    }
+                    ImGui::EndGroupPanel();
                 }
             }
         }
@@ -1001,38 +1237,58 @@ namespace Addon {
             }
         }
 
-        if ("Highlight" == indicator.type)
+        if ("Glow" == indicator.type)
         {
-            static const char* directionOptions[] {
-                "Top",
-                "Bottom",
-                "Left",
-                "Right"
+            static const char* positionOptions[] {
+                "Inner",
+                "Outer"
             };
 
-            ImGui::TextDisabled("Highlight Properties");
+            ImGui::TextDisabled("Glow Properties");
             ImGui::Separator();
             {
-                ImGui::ColorEdit4("Color##HIGHLIGHT_COLOR", (float*)&indicator.highlight.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Color##GLOW_COLOR", (float*)&indicator.glow.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 
-                int directionSelection = 1; // Default to "Bottom"
-                if (indicator.highlight.position == "Top") directionSelection = 0;
-                else if (indicator.highlight.position == "Bottom") directionSelection = 1;
-                else if (indicator.highlight.position == "Left") directionSelection = 2;
-                else if (indicator.highlight.position == "Right") directionSelection = 3;
+                int positionSelection = 0; // Default to "Inner"
+                if (indicator.glow.position == "Inner") positionSelection = 0;
+                else if (indicator.glow.position == "Outer") positionSelection = 1;
 
-                if (ImGui::Combo("Position##HIGHLIGHT_POSITION", &directionSelection, directionOptions, IM_ARRAYSIZE(directionOptions)))
+                if (ImGui::Combo("Position##GLOW_POSITION", &positionSelection, positionOptions, IM_ARRAYSIZE(positionOptions)))
                 {
-                    indicator.highlight.position = directionOptions[directionSelection];
+                    indicator.glow.position = positionOptions[positionSelection];
                 }
 
-                ImGui::SliderFloat("Size (%)##HIGHLIGHT_SIZE", &indicator.highlight.size, 0.0f, 100.0f, "%.0f");
+                static const char* thicknessOptions[] {
+                    "Pixels",
+                    "Percentage"
+                };
+
+                int thicknessSelection = 0; // Default to "Pixels"
+                if (indicator.glow.thicknessType == "Pixels") thicknessSelection = 0;
+                else if (indicator.glow.thicknessType == "Percentage") thicknessSelection = 1;
+
+                if (ImGui::Combo("Thickness Type##GLOW_THICKNESS_TYPE", &thicknessSelection, thicknessOptions, IM_ARRAYSIZE(thicknessOptions)))
+                {
+                    indicator.glow.thicknessType = thicknessOptions[thicknessSelection];
+                }
+
+                ImGui::SliderFloat("Thickness##GLOW_THICKNESS", &indicator.glow.thickness, 1.0f, 100.0f, "%.0f");
+                ImGui::SliderFloat("Hardness##GLOW_HARDNESS", &indicator.glow.hardness, 0.0f, 1.0f, "%.2f");
+
+                ImGui::Text("Directions");
+                ImGui::Checkbox("Top##GLOW_TOP", &indicator.glow.directionTop);
+                ImGui::SameLine();
+                ImGui::Checkbox("Bottom##GLOW_BOTTOM", &indicator.glow.directionBottom);
+                ImGui::SameLine();
+                ImGui::Checkbox("Left##GLOW_LEFT", &indicator.glow.directionLeft);
+                ImGui::SameLine();
+                ImGui::Checkbox("Right##GLOW_RIGHT", &indicator.glow.directionRight);
             }
             
             ImGui::TextDisabled("Trigger");
             ImGui::Separator();
             {
-                form_Trigger(indicator.highlight.trigger);
+                form_Trigger(indicator.glow.trigger);
             }
         }
 
@@ -1147,6 +1403,7 @@ namespace Addon {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
                 ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Background (Unknown)", &(ColourPresets.COLOUR_BACKGROUND_UNKNOWN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Alive)", &(ColourPresets.COLOUR_HEALTH.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Downed)", &(ColourPresets.COLOUR_HEALTH_DOWNED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Defeated)", &(ColourPresets.COLOUR_HEALTH_DEFEATED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
@@ -1164,6 +1421,7 @@ namespace Addon {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
                 ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_PROF_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Background (Unknown)", &(ColourPresets.COLOUR_PROF_BACKGROUND_UNKNOWN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Elementalist)", &(ColourPresets.COLOUR_PROF_HEALTH_ELEMENTALIST.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Engineer)", &(ColourPresets.COLOUR_PROF_HEALTH_ENGINEER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Guardian)", &(ColourPresets.COLOUR_PROF_HEALTH_GUARDIAN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
@@ -1189,6 +1447,7 @@ namespace Addon {
                 ImGui::TextDisabled("Color Properties");
                 ImGui::Separator();
                 ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_HEATMAP_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Background (Unknown)", &(ColourPresets.COLOUR_HEATMAP_BACKGROUND_UNKNOWN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Alive: 100%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_100.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Alive: 75%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_75.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Health (Alive: 50%)", &(ColourPresets.COLOUR_HEATMAP_HEALTH_50.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
@@ -1203,6 +1462,83 @@ namespace Addon {
             }
             ImGui::PopID();
         });
+
+        TreeNodeUID frameStatesBranchId = g_PresetConfig.GenerateUID();
+        g_PresetConfig.AppendNode(TreeNodeUID::NONE, frameStatesBranchId, "Frame States", "", TreeNodeType::BRANCH);
+
+        auto AddFrameStateItem = [&](const std::string& name, FrameStatePreset_t& preset) {
+            AddPresetItem(frameStatesBranchId, "Frame States", name, [name, &preset]() {
+                ImGui::PushID(("FrameStates/" + name).c_str());
+                {
+                    ImGui::TextDisabled("Border Override");
+                    ImGui::Separator();
+                    ImGui::Checkbox("Enable Border", &preset.borderOverride);
+                    if (preset.borderOverride)
+                    {
+                        ImGui::ColorEdit4("Color##BORDER_COLOR", (float*)&preset.border.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                        ImGui::InputInt("Thickness##BORDER_THICKNESS", &preset.border.thickness, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue);
+                    }
+
+                    ImGui::TextDisabled("Overlay");
+                    ImGui::Separator();
+                    ImGui::Checkbox("Enable Overlay", &preset.overlayEnabled);
+                    if (preset.overlayEnabled)
+                    {
+                        ImGui::ColorEdit4("Color##OVERLAY_COLOR", (float*)&preset.overlayColor, ImGuiColorEditFlags_AlphaPreviewHalf);
+                    }
+
+                    ImGui::TextDisabled("Glow Effect");
+                    ImGui::Separator();
+                    ImGui::Checkbox("Enable Glow", &preset.glowEnabled);
+                    if (preset.glowEnabled)
+                    {
+                        ImGui::ColorEdit4("Color##GLOW_COLOR", (float*)&preset.glow.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+                        
+                        static const char* positionOptions[] {
+                            "Inner",
+                            "Outer"
+                        };
+                        
+                        int positionSelection = 0; // Default to "Inner"
+                        if (preset.glow.position == "Inner") positionSelection = 0;
+                        else if (preset.glow.position == "Outer") positionSelection = 1;
+
+                        if (ImGui::Combo("Position##GLOW_POSITION", &positionSelection, positionOptions, IM_ARRAYSIZE(positionOptions)))
+                        {
+                            preset.glow.position = positionOptions[positionSelection];
+                        }
+                        
+                        ImGui::Checkbox("Top", &preset.glow.directionTop); ImGui::SameLine();
+                        ImGui::Checkbox("Bottom", &preset.glow.directionBottom); ImGui::SameLine();
+                        ImGui::Checkbox("Left", &preset.glow.directionLeft); ImGui::SameLine();
+                        ImGui::Checkbox("Right", &preset.glow.directionRight);
+                        
+                        static const char* thicknessOptions[] {
+                            "Pixels",
+                            "Percentage"
+                        };
+
+                        int thicknessSelection = 0; // Default to "Pixels"
+                        if (preset.glow.thicknessType == "Pixels") thicknessSelection = 0;
+                        else if (preset.glow.thicknessType == "Percentage") thicknessSelection = 1;
+
+                        if (ImGui::Combo("Thickness Type##GLOW_THICKNESS_TYPE", &thicknessSelection, thicknessOptions, IM_ARRAYSIZE(thicknessOptions)))
+                        {
+                            preset.glow.thicknessType = thicknessOptions[thicknessSelection];
+                        }
+
+                        ImGui::SliderFloat("Thickness##GLOW_THICKNESS", &preset.glow.thickness, 0.0f, 100.0f, "%.0f");
+                        ImGui::SliderFloat("Hardness##GLOW_HARDNESS", &preset.glow.hardness, 0.0f, 1.0f, "%.2f");
+                    }
+                }
+                ImGui::PopID();
+            });
+        };
+
+        AddFrameStateItem("Hovered", FrameStatePresets.hovered);
+        AddFrameStateItem("Selected", FrameStatePresets.selected);
+        AddFrameStateItem("Self", FrameStatePresets.self);
+        AddFrameStateItem("Commander", FrameStatePresets.commander);
 
         TreeNodeUID borderBranchId = g_PresetConfig.GenerateUID();
         g_PresetConfig.AppendNode(TreeNodeUID::NONE, borderBranchId, "Borders", "", TreeNodeType::BRANCH);

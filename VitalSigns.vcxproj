@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\addon.h" />
+    <ClInclude Include="src\migration\migration.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\Behavior.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\EBehaviorFlags.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="src\json_imgui_serialisers.h" />
     <ClInclude Include="src\json_serialisers.h" />
     <ClInclude Include="src\imgui_tree_view.h" />
+    <ClInclude Include="src\migration\migration_v1_to_v2.h" />
     <ClInclude Include="src\mumble\Mumble.h" />
     <ClInclude Include="src\nexus\Nexus.h" />
     <ClInclude Include="src\nlohmann\json.hpp" />
@@ -168,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\addon.cpp" />
+    <ClCompile Include="src\migration\migration.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Chat\ChatContext.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Combat\CbCombatant.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Dialog\DialogManager.cpp" />
@@ -201,6 +204,8 @@
     <ClCompile Include="src\data_link\gw2re\Game\Char\Character.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChCoreStats.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChProfession.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Common.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Text\TextApi.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Game\EventApi.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Player\Player.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Player\Specialization\SpecDef.cpp" />
@@ -221,6 +226,7 @@
     <ClCompile Include="src\json_imgui_serialisers.cpp" />
     <ClCompile Include="src\imgui_tree_view.cpp" />
     <ClCompile Include="src\layout_manager.cpp" />
+    <ClCompile Include="src\migration\migration_v1_to_v2.cpp" />
     <ClCompile Include="src\settings.cpp" />
     <ClCompile Include="src\shared.cpp" />
     <ClCompile Include="src\ui_common.cpp" />

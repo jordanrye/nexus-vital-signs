@@ -8,7 +8,7 @@ void form_SelectIndicatorType(std::string& indicatorType, bool isDisabled)
         "Group",
         "Border",
         "Colour",
-        "Highlight",
+        "Glow",
         "Text"
     };
 
@@ -18,7 +18,7 @@ void form_SelectIndicatorType(std::string& indicatorType, bool isDisabled)
     else if (indicatorType == "Group") option = 2;
     else if (indicatorType == "Border") option = 3;
     else if (indicatorType == "Colour") option = 4;
-    else if (indicatorType == "Highlight") option = 5;
+    else if (indicatorType == "Glow") option = 5;
     else if (indicatorType == "Text") option = 6;
 
     if (isDisabled) { ImGui::BeginDisabled(); }
