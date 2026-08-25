@@ -1293,6 +1293,57 @@ namespace UI::Grid {
         };
 
         /* Draw drop targets and highlights */
+        SubgroupHeaderProperties_t& shProps = context.layoutConfig->layout.grid.subgroupHeader;
+
+        /// TODO: Bit of a hack to sanitise the anchor position before rendering. Ideally this should not be required.
+        if (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left")
+        {
+            if (shProps.anchor != "Top" && shProps.anchor != "Bottom") 
+            {
+                shProps.anchor = "Top";
+            }
+        }
+        else
+        {
+            if (shProps.anchor != "Left" && shProps.anchor != "Right")
+            {
+                shProps.anchor = "Left";
+            }
+        }
+        
+        float effectiveFontSize = ImGui::GetIO().FontDefault->FontSize;
+        if (shProps.textStyle.fontSizeSource == "Default font size")
+        {
+            effectiveFontSize = (float)ConfigText.fontSize;
+        }
+        else if (shProps.textStyle.fontSizeSource == "Custom font size")
+        {
+            effectiveFontSize = (float)shProps.textStyle.fontSize;
+        }
+        ImColor effectiveColor = (shProps.textStyle.colorSource == "Custom color") ? shProps.textStyle.color : ConfigText.color;
+        bool effectiveShadow = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.shadow : ConfigText.shadow;
+        ImColor effectiveShadowColor = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.shadowColor : ConfigText.shadowColor;
+        bool effectiveOutline = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.outline : ConfigText.outline;
+        ImColor effectiveOutlineColor = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.outlineColor : ConfigText.outlineColor;
+
+        std::string effectiveFontSource = (shProps.textStyle.fontSource == "Default font") ? ConfigText.fontSource : shProps.textStyle.fontSource;
+        std::string effectiveFontName = (shProps.textStyle.fontSource == "Default font") ? ConfigText.font : shProps.textStyle.font;
+
+        ImFont* font = nullptr;
+        if (effectiveFontSource != "Nexus font" && effectiveFontSource != "Default font")
+        {
+            font = utils::font::GetFont(effectiveFontName, effectiveFontSize);
+        }
+
+        ImFont* activeFont = font ? font : ImGui::GetFont();
+        
+        ImVec2 max_text_size = ImVec2(0.0f, 0.0f);
+        for (int i = 1; i <= 15; i++)
+        {
+            ImVec2 s = activeFont->CalcTextSizeA(effectiveFontSize, FLT_MAX, 0.0f, std::to_string(i).c_str());
+            max_text_size.x = ImMax(max_text_size.x, s.x);
+            max_text_size.y = ImMax(max_text_size.y, s.y);
+        }
         int groupIndex = 0;
         ImGui::PushID("DragAndDrop");
         while (groupIndex <= lastPopulatedGroupIndex)
@@ -1345,56 +1396,12 @@ namespace UI::Grid {
                     /// FIXME: Opacity not working for hidden subgroups
                     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
                 }
-
-                SubgroupHeaderProperties_t& shProps = context.layoutConfig->layout.grid.subgroupHeader;
-
-                /// TODO: Bit of a hack to sanitise the anchor position before rendering. Ideally this should not be required.
-                if (gridLayout.squadDirection == "Left-to-right" || gridLayout.squadDirection == "Right-to-left")
-                {
-                    if (shProps.anchor != "Top" && shProps.anchor != "Bottom") 
-                    {
-                        shProps.anchor = "Top";
-                    }
-                }
-                else
-                {
-                    if (shProps.anchor != "Left" && shProps.anchor != "Right")
-                    {
-                        shProps.anchor = "Left";
-                    }
-                }
-                
-                float effectiveFontSize = ImGui::GetIO().FontDefault->FontSize;
-                if (shProps.textStyle.fontSizeSource == "Default font size")
-                {
-                    effectiveFontSize = (float)ConfigText.fontSize;
-                }
-                else if (shProps.textStyle.fontSizeSource == "Custom font size")
-                {
-                    effectiveFontSize = (float)shProps.textStyle.fontSize;
-                }
-                ImColor effectiveColor = (shProps.textStyle.colorSource == "Custom color") ? shProps.textStyle.color : ConfigText.color;
-                bool effectiveShadow = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.shadow : ConfigText.shadow;
-                ImColor effectiveShadowColor = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.shadowColor : ConfigText.shadowColor;
-                bool effectiveOutline = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.outline : ConfigText.outline;
-                ImColor effectiveOutlineColor = (shProps.textStyle.decoratorSource == "Custom decorators") ? shProps.textStyle.outlineColor : ConfigText.outlineColor;
-
-                std::string effectiveFontSource = (shProps.textStyle.fontSource == "Default font") ? ConfigText.fontSource : shProps.textStyle.fontSource;
-                std::string effectiveFontName = (shProps.textStyle.fontSource == "Default font") ? ConfigText.font : shProps.textStyle.font;
-
-                ImFont* font = nullptr;
-                if (effectiveFontSource != "Nexus font" && effectiveFontSource != "Default font")
-                {
-                    font = utils::font::GetFont(effectiveFontName, effectiveFontSize);
-                }
-
-                ImFont* activeFont = font ? font : ImGui::GetFont();
                 ImVec2 text_size = activeFont->CalcTextSizeA(effectiveFontSize, FLT_MAX, 0.0f, headerText.c_str());
 
                 bool showCheckbox = Addon::isSquadManagerActive && context.hiddenSubgroups && (droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1));
-                float checkboxSize = showCheckbox ? text_size.y : 0.0f;
+                float checkboxSize = showCheckbox ? max_text_size.y : 0.0f;
                 float checkboxSpacing = showCheckbox ? 8.0f : 0.0f;
-                ImVec2 totalSize = ImVec2(text_size.x + checkboxSpacing + checkboxSize, text_size.y);
+                ImVec2 totalSize = ImVec2(max_text_size.x + checkboxSpacing + checkboxSize, max_text_size.y);
 
                 ImVec2 header_p_min, header_p_max;
                 float headerWidth = 0.0f, headerHeight = 0.0f;
@@ -1547,12 +1554,13 @@ namespace UI::Grid {
                 
                 ImVec2 textPosition;
                 ImVec2 checkboxPosition;
+                
                 if (shProps.anchor == "Left") {
                     checkboxPosition = ImVec2(startPosition.x, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
-                    textPosition = ImVec2(startPosition.x + (showCheckbox ? checkboxSize + checkboxSpacing : 0.0f), startPosition.y + (totalSize.y - text_size.y) * 0.5f);
+                    textPosition = ImVec2(startPosition.x + (showCheckbox ? checkboxSize + checkboxSpacing : 0.0f) + (max_text_size.x - text_size.x) * 0.5f, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
                 } else {
-                    textPosition = ImVec2(startPosition.x, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
-                    checkboxPosition = ImVec2(startPosition.x + text_size.x + checkboxSpacing, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
+                    textPosition = ImVec2(startPosition.x + (max_text_size.x - text_size.x) * 0.5f, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
+                    checkboxPosition = ImVec2(startPosition.x + max_text_size.x + checkboxSpacing, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
                 }
 
                 DrawTextWithDecorators(drawList, font, effectiveFontSize, textPosition, effectiveColor, effectiveShadow, effectiveShadowColor, effectiveOutline, effectiveOutlineColor, headerText);
