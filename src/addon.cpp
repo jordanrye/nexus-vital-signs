@@ -329,7 +329,7 @@ namespace Addon {
             form_SelectLayout(layoutNames, ConfigGeneral.raidLayout);
             form_Visibility(ConfigGeneral.raidVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfRaid);
-            ImGui::Checkbox("Hide subgroups", &ConfigGeneral.isHiddenSubgroupsRaid);
+            ImGui::Checkbox("Hide other subgroups", &ConfigGeneral.isHiddenSubgroupsRaid);
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeRaid);
         }
         ImGui::PopID();
@@ -341,7 +341,7 @@ namespace Addon {
             form_SelectLayout(layoutNames, ConfigGeneral.squadLayout);
             form_Visibility(ConfigGeneral.squadVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfSquad);
-            ImGui::Checkbox("Hide subgroups", &ConfigGeneral.isHiddenSubgroupsSquad);
+            ImGui::Checkbox("Hide other subgroups", &ConfigGeneral.isHiddenSubgroupsSquad);
             ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
         }
         ImGui::PopID();

@@ -103,6 +103,7 @@ private:
     std::string m_createButtonText = "Create";
     std::string m_saveButtonText = "Save";
     std::string m_reloadButtonText = "Reload";
+    bool m_autoSaveEnabled = false;
     float m_menuWidth = 200.0f;
 
     // Internal helpers

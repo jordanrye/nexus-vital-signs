@@ -134,16 +134,34 @@ void TreeView::RenderTreeView(CreateCallback createCb, DeleteNodeCallback delete
 
             if (saveCb || reloadCb)
             {
-                float buttonWidth = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
-                
-                if (ImGui::Button(m_saveButtonText.c_str(), ImVec2(buttonWidth, 0)) && saveCb)
-                {
-                    saveCb();
-                }
+                ImGui::Checkbox("", &m_autoSaveEnabled);
+                ImGui::TooltipGeneric("Auto-Save");
                 ImGui::SameLine();
-                if (ImGui::Button(m_reloadButtonText.c_str(), ImVec2(buttonWidth, 0)) && reloadCb)
+
+                if (m_autoSaveEnabled)
                 {
-                    reloadCb();
+                    if (saveCb && m_saveButtonText.find('*') != std::string::npos)
+                    {
+                        saveCb();
+                    }
+
+                    ImGui::BeginDisabled();
+                    ImGui::Button("Auto-Save Enabled", ImVec2(-1, 0));
+                    ImGui::EndDisabled();
+                }
+                else
+                {
+                    float buttonWidth = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+                    
+                    if (ImGui::Button(m_saveButtonText.c_str(), ImVec2(buttonWidth, 0)) && saveCb)
+                    {
+                        saveCb();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button(m_reloadButtonText.c_str(), ImVec2(buttonWidth, 0)) && reloadCb)
+                    {
+                        reloadCb();
+                    }
                 }
             }
         }
