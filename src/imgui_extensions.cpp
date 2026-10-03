@@ -1,8 +1,10 @@
 #include "imgui_extensions.h"
 
 #include <Windows.h>
+#include <shobjidl.h>
 #include <filesystem>
 #include <thread>
+#include <vector>
 
 #include "utilities.h"
 
@@ -333,33 +335,69 @@ namespace ImGui
         if (ImGui::Button(filePath.c_str(), ImVec2(ImGui::CalcItemWidth(), 0)))
         {
             std::thread([=, &filePath] {
-                OPENFILENAME ofn{};
-                TCHAR szFile[MAX_PATH]{};
-                TCHAR initialDir[MAX_PATH]{};
-
-                std::wstring wIconsDir(targetDir.begin(), targetDir.end());
-                swprintf_s(initialDir, MAX_PATH, L"%s", wIconsDir.c_str());
-
-                ofn.lStructSize = sizeof(ofn);
-                ofn.hwndOwner = static_cast<HWND>(nullptr);
-                ofn.lpstrFile = szFile;
-                ofn.nMaxFile = sizeof(szFile);
-                ofn.lpstrFilter = filter;
-                ofn.nFilterIndex = 2;
-                ofn.lpstrInitialDir = initialDir;
-                ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-                if (GetOpenFileName(&ofn) == TRUE)
+                HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+                if (SUCCEEDED(hr))
                 {
-                    // Get file path
-                    std::wstring wFilePath(ofn.lpstrFile);
-                    std::string selectedFilePath(wFilePath.begin(), wFilePath.end());
-                    
-                    // Get substr to hide
-                    std::wstring wGameDir(hiddenSubstr.begin(), hiddenSubstr.end());
-                    std::string pathToRemove = hiddenSubstr + "\\";
+                    IFileOpenDialog* pFileOpen = nullptr;
+                    hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileOpenDialog, reinterpret_cast<void**>(&pFileOpen));
+                    if (SUCCEEDED(hr))
+                    {
+                        if (filter)
+                        {
+                            std::vector<COMDLG_FILTERSPEC> specs;
+                            const wchar_t* p = filter;
+                            while (p && *p)
+                            {
+                                COMDLG_FILTERSPEC spec;
+                                spec.pszName = p;
+                                p += wcslen(p) + 1;
+                                if (*p)
+                                {
+                                    spec.pszSpec = p;
+                                    p += wcslen(p) + 1;
+                                    specs.push_back(spec);
+                                }
+                                else
+                                    break;
+                            }
+                            if (!specs.empty())
+                                pFileOpen->SetFileTypes(specs.size(), specs.data());
+                        }
 
-                    filePath = string_utils::replace_substr(selectedFilePath, pathToRemove, "");
+                        IShellItem* pFolder = nullptr;
+                        std::filesystem::path targetPath = std::filesystem::absolute(targetDir);
+                        HRESULT hrFolder = SHCreateItemFromParsingName(targetPath.c_str(), NULL, IID_PPV_ARGS(&pFolder));
+                        if (SUCCEEDED(hrFolder))
+                        {
+                            pFileOpen->SetFolder(pFolder);
+                            pFolder->Release();
+                        }
+
+                        hr = pFileOpen->Show(NULL);
+                        if (SUCCEEDED(hr))
+                        {
+                            IShellItem* pItem = nullptr;
+                            hr = pFileOpen->GetResult(&pItem);
+                            if (SUCCEEDED(hr))
+                            {
+                                PWSTR pszFilePath = nullptr;
+                                hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+                                if (SUCCEEDED(hr))
+                                {
+                                    std::wstring wFilePath(pszFilePath);
+                                    std::string selectedFilePath(wFilePath.begin(), wFilePath.end());
+                                    
+                                    std::string pathToRemove = hiddenSubstr + "\\";
+                                    filePath = string_utils::replace_substr(selectedFilePath, pathToRemove, "");
+
+                                    CoTaskMemFree(pszFilePath);
+                                }
+                                pItem->Release();
+                            }
+                        }
+                        pFileOpen->Release();
+                    }
+                    CoUninitialize();
                 }
             }).detach();
         }
