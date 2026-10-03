@@ -57,6 +57,9 @@ void dser_GeneralConfig_t(json& object, GeneralConfig_t& config)
         dser_BasicType(object["squad-hide-subgroups-list"], config.hiddenSubgroupsSquad);
 
         dser_BasicType(object["solo-layout"], config.soloLayout);
+        
+        dser_BasicType(object["auto-save-enabled"], config.autoSaveEnabled);
+        dser_BasicType(object["menu-width"], config.menuWidth);
     }
 }
 
@@ -444,6 +447,8 @@ json ser_GeneralConfig_t(const GeneralConfig_t& config)
     object["squad-hide-native"] = config.isHiddenNativeSquad;
     object["squad-hide-subgroups-list"] = config.hiddenSubgroupsSquad;
     object["solo-layout"] = config.soloLayout;
+    object["auto-save-enabled"] = config.autoSaveEnabled;
+    object["menu-width"] = config.menuWidth;
     return object;
 }
 

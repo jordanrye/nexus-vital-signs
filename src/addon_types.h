@@ -34,6 +34,10 @@ struct GeneralConfig_t
 
     /* Solo (No Group) */
     std::string soloLayout;
+
+    /* Editor Settings */
+    bool autoSaveEnabled = false;
+    float menuWidth = 200.0f;
 };
 
 struct ColourPresets_t

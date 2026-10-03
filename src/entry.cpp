@@ -128,6 +128,9 @@ void AddonLoad(AddonAPI* aApi)
     Settings::LoadSettings();
     Settings::LoadPresets();
     Settings::LoadAllLayouts();
+
+    g_LayoutEditor.UpdateSettingsPointers(&ConfigGeneral.menuWidth, &ConfigGeneral.autoSaveEnabled);
+    g_PresetConfig.UpdateSettingsPointers(&ConfigGeneral.menuWidth, &ConfigGeneral.autoSaveEnabled);
 }
 
 void AddonUnload()

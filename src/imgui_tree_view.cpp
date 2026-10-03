@@ -86,7 +86,7 @@ void TreeView::RegisterContentView(TreeNodeUID id, ContentRenderer&& renderer)
 void TreeView::RenderTreeView(CreateCallback createCb, DeleteNodeCallback deleteCb, AddIndicatorCallback addCb, ReorderNodeCallback reorderCb, SaveCallback saveCb, ReloadCallback reloadCb)
 {
     /* Tree View */
-    if (ImGui::BeginChild("TreeViewView", ImVec2(m_menuWidth, 0), true))
+    if (ImGui::BeginChild("TreeViewView", ImVec2(*m_menuWidth, 0), true))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.f, 2.f));
         ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.f);
@@ -134,11 +134,11 @@ void TreeView::RenderTreeView(CreateCallback createCb, DeleteNodeCallback delete
 
             if (saveCb || reloadCb)
             {
-                ImGui::Checkbox("", &m_autoSaveEnabled);
+                ImGui::Checkbox("", m_autoSaveEnabled);
                 ImGui::TooltipGeneric("Auto-Save");
                 ImGui::SameLine();
 
-                if (m_autoSaveEnabled)
+                if (*m_autoSaveEnabled)
                 {
                     if (saveCb && m_saveButtonText.find('*') != std::string::npos)
                     {
@@ -187,8 +187,8 @@ void TreeView::RenderTreeView(CreateCallback createCb, DeleteNodeCallback delete
             separatorColour = ImGui::GetColorU32(ImGuiCol_SeparatorActive);
     
             // Get new column width and clamp to reasonable limits
-            m_menuWidth += ImGui::GetIO().MouseDelta.x;
-            if (m_menuWidth < 100.0f) m_menuWidth = 100.0f;
+            *m_menuWidth += ImGui::GetIO().MouseDelta.x;
+            if (*m_menuWidth < 100.0f) *m_menuWidth = 100.0f;
         }
     
         // Draw adjustable sepatator 
@@ -454,7 +454,6 @@ bool TreeView::RenderNode(const char* labelName, const char* labelType, TreeNode
             ImGui::TextDisabled(labelName);
         }
     }
-
 
     return ((flags & ImGuiTreeNodeFlags_Leaf) ? false : is_open);
 }

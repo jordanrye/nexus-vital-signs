@@ -88,6 +88,7 @@ public:
     void UpdateTreeViewCreateText(const std::string& text) { m_createButtonText = text; }
     void UpdateTreeViewSaveText(const std::string& text) { m_saveButtonText = text; }
     void UpdateTreeViewReloadText(const std::string& text) { m_reloadButtonText = text; }
+    void UpdateSettingsPointers(float* menuWidth, bool* autoSaveEnabled) { m_menuWidth = menuWidth; m_autoSaveEnabled = autoSaveEnabled; }
 
     // Helper functions
     TreeNodeUID GenerateUID() { return m_nextId++; }
@@ -103,8 +104,11 @@ private:
     std::string m_createButtonText = "Create";
     std::string m_saveButtonText = "Save";
     std::string m_reloadButtonText = "Reload";
-    bool m_autoSaveEnabled = false;
-    float m_menuWidth = 200.0f;
+    
+    bool m_defaultAutoSaveEnabled = false;
+    float m_defaultMenuWidth = 200.0f;
+    bool* m_autoSaveEnabled = &m_defaultAutoSaveEnabled;
+    float* m_menuWidth = &m_defaultMenuWidth;
 
     // Internal helpers
     TreeNode* FindNode(std::vector<TreeNode>& nodes, TreeNodeUID id);
