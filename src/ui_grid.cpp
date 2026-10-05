@@ -886,11 +886,7 @@ namespace UI::Grid {
 
     static void DrawIndicator(ImDrawList* const drawList, const DrawProperties_t& parentProperties, const DrawProperties_t& contentProperties, const Indicator_t* indicator, VitalSignsDataLink::UserData_t& userData, bool isPreviewed)
     {
-        if (indicator->type == "Glow")
-        {
-            DrawGlow(drawList, contentProperties, indicator->glow);
-        }
-        else if (indicator->type == "Icon")
+        if (indicator->type == "Icon")
         {
             Texture* texture = UI::GetOrCreateTexture(indicator->iconSingle.icon.source, indicator->iconSingle.icon.path);
             float duration = userData.Effects[indicator->iconSingle.icon.trigger.effect].duration;
@@ -1827,6 +1823,14 @@ namespace UI::Grid {
                     }
                 }
 
+                for (const auto& pair : drawables)
+                {
+                    if (pair.first->type == "Glow" && pair.first->glow.position == "Outer")
+                    {
+                        DrawGlow(drawList, borderProps, pair.first->glow);
+                    }
+                }
+
                 // Channel 1: Cell Content
                 splitter.SetCurrentChannel(drawList, 1);
 
@@ -1900,6 +1904,14 @@ namespace UI::Grid {
                     if (preset->glowEnabled && preset->glow.position == "Inner")
                     {
                         DrawGlow(drawList, contentProps, preset->glow);
+                    }
+                }
+
+                for (const auto& pair : drawables)
+                {
+                    if (pair.first->type == "Glow" && pair.first->glow.position == "Inner")
+                    {
+                        DrawGlow(drawList, contentProps, pair.first->glow);
                     }
                 }
 
