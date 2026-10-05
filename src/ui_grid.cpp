@@ -1709,6 +1709,10 @@ namespace UI::Grid {
                         {
                             if (ImGui::Button("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
                         }
+                        if (userData.IsHomesteadOwner && !userData.IsInInstance)
+                        {
+                            if (ImGui::Button("Join in Homestead")) { VitalsData->joinUserHomestead(userData.UserId); }
+                        }
 
                         ImGui::Separator();
                         if (userData.ContactType != VitalSignsDataLink::EContactType::Friend)
