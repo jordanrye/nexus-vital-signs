@@ -1755,6 +1755,24 @@ namespace UI::Grid {
                                     if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
                                 }
                             }
+                        }
+                        if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
+                        {
+                            if (ImGui::BeginMenu("Set Marker"))
+                            {
+                                if (ImGui::MenuItem("Arrow")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Arrow); }
+                                if (ImGui::MenuItem("Circle")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Circle); }
+                                if (ImGui::MenuItem("Heart")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Heart); }
+                                if (ImGui::MenuItem("Square")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Square); }
+                                if (ImGui::MenuItem("Star")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Star); }
+                                if (ImGui::MenuItem("Spiral")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Spiral); }
+                                if (ImGui::MenuItem("Triangle")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Triangle); }
+                                if (ImGui::MenuItem("X")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::X); }
+                                ImGui::EndMenu();
+                            }
+                        }
+                        if (clientId != userData.UserId)
+                        {
                             if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
                             {
                                 if (ImGui::Button("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
