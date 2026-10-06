@@ -98,6 +98,7 @@ void form_Trigger(Trigger_t& trigger)
     static const char* triggerRoleOptions[] {
         "Commander",
         "Lieutenant",
+        "Homestead Owner",
         "Hovered",
         "Selected",
         "Self",

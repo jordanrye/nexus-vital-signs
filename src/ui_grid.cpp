@@ -649,6 +649,7 @@ namespace UI::Grid {
         {
             if (trigger.effect == "Commander" && userData.SquadRole == VitalSignsDataLink::ESquadRole::Commander) return true;
             if (trigger.effect == "Lieutenant" && userData.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant) return true;
+            if (trigger.effect == "Homestead Owner" && userData.IsHomesteadOwner) return true;
             if (trigger.effect == "Self" && VitalsData && userData.UserId == VitalsData->getClientId()) return true;
             if (trigger.effect == "Hovered" && userData.IsHovered) return true;
             if (trigger.effect == "Selected" && userData.IsSelected) return true;
