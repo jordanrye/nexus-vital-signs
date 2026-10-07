@@ -1712,37 +1712,37 @@ namespace UI::Grid {
 
                     if (clientId != userData.UserId)
                     {
-                        if (ImGui::Button("Whisper")) { VitalsData->whisperUser(userData.UserId); }
-                        if (ImGui::Button("Send Mail")) { VitalsData->sendMail(userData.AccountName); }
+                        if (ImGui::MenuItem("Whisper")) { VitalsData->whisperUser(userData.UserId); }
+                        if (ImGui::MenuItem("Send Mail")) { VitalsData->sendMail(userData.AccountName); }
                         if (userData.IsInInstance)
                         {
-                            if (ImGui::Button("Inspect Cosmetics")) { VitalsData->inspectCosmetics(userData.UserId); }
+                            if (ImGui::MenuItem("Inspect Cosmetics")) { VitalsData->inspectCosmetics(userData.UserId); }
                         }
                         if (clientMap == userData.MapName && !userData.IsInInstance)
                         {
-                            if (ImGui::Button("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
+                            if (ImGui::MenuItem("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
                         }
                         if (userData.IsHomesteadOwner && !userData.IsInInstance)
                         {
-                            if (ImGui::Button("Join in Homestead")) { VitalsData->joinUserHomestead(userData.UserId); }
+                            if (ImGui::MenuItem("Join in Homestead")) { VitalsData->joinUserHomestead(userData.UserId); }
                         }
 
                         ImGui::Separator();
                         if (userData.ContactType != VitalSignsDataLink::EContactType::Friend)
                         {
-                            if (ImGui::Button("Add Friend")) { VitalsData->addFriend(userData.UserId); }
+                            if (ImGui::MenuItem("Add Friend")) { VitalsData->addFriend(userData.UserId); }
                         }
                         else
                         {
-                            if (ImGui::Button("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
+                            if (ImGui::MenuItem("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
                         }
                         if (userData.ContactType != VitalSignsDataLink::EContactType::Blocked)
                         {
-                            if (ImGui::Button("Block")) { VitalsData->blockUser(userData.UserId); }
+                            if (ImGui::MenuItem("Block")) { VitalsData->blockUser(userData.UserId); }
                         }
                         else
                         {
-                            if (ImGui::Button("Unblock")) { VitalsData->unblockUser(userData.UserId); }
+                            if (ImGui::MenuItem("Unblock")) { VitalsData->unblockUser(userData.UserId); }
                         }
                     }
 
@@ -1756,15 +1756,15 @@ namespace UI::Grid {
                             {
                                 if (userData.IsCommanderUnlocked)
                                 {
-                                    if (ImGui::Button("Appoint Squad Leader")) { VitalsData->setCommander(userData.UserId); }
+                                    if (ImGui::MenuItem("Appoint Squad Leader")) { VitalsData->setCommander(userData.UserId); }
                                 }
                                 if (userData.SquadRole == VitalSignsDataLink::ESquadRole::None)
                                 {
-                                    if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
+                                    if (ImGui::MenuItem("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
                                 }
                                 if (userData.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant)
                                 {
-                                    if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
+                                    if (ImGui::MenuItem("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
                                 }
                             }
                         }
@@ -1772,14 +1772,14 @@ namespace UI::Grid {
                         {
                             if (ImGui::BeginMenu("Set Marker"))
                             {
-                                if (ImGui::MenuItem("Arrow")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Arrow); }
-                                if (ImGui::MenuItem("Circle")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Circle); }
-                                if (ImGui::MenuItem("Heart")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Heart); }
-                                if (ImGui::MenuItem("Square")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Square); }
-                                if (ImGui::MenuItem("Star")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Star); }
-                                if (ImGui::MenuItem("Spiral")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Spiral); }
-                                if (ImGui::MenuItem("Triangle")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Triangle); }
-                                if (ImGui::MenuItem("X")) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::X); }
+                                if (ImGui::MenuItem("Arrow", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Arrow)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Arrow); }
+                                if (ImGui::MenuItem("Circle", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Circle)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Circle); }
+                                if (ImGui::MenuItem("Heart", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Heart)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Heart); }
+                                if (ImGui::MenuItem("Square", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Square)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Square); }
+                                if (ImGui::MenuItem("Star", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Star)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Star); }
+                                if (ImGui::MenuItem("Spiral", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Spiral)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Spiral); }
+                                if (ImGui::MenuItem("Triangle", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Triangle)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Triangle); }
+                                if (ImGui::MenuItem("X", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::X)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::X); }
                                 ImGui::EndMenu();
                             }
                         }
@@ -1787,10 +1787,10 @@ namespace UI::Grid {
                         {
                             if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
                             {
-                                if (ImGui::Button("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
+                                if (ImGui::MenuItem("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
                             }
                         }
-                        if (ImGui::Button("Leave Squad")) { VitalsData->leaveGroup(); }
+                        if (ImGui::MenuItem("Leave Squad")) { VitalsData->leaveGroup(); }
                     }
 
                     if (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_PARTY)
@@ -1798,15 +1798,15 @@ namespace UI::Grid {
                         ImGui::Separator();
                         if (clientId != userData.UserId)
                         {
-                            if (ImGui::Button("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
+                            if (ImGui::MenuItem("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
                         }
-                        if (ImGui::Button("Leave Party")) { VitalsData->leaveGroup(); }
+                        if (ImGui::MenuItem("Leave Party")) { VitalsData->leaveGroup(); }
                     }
 
                     if (clientId != userData.UserId)
                     {
                         ImGui::Separator();
-                        if (ImGui::Button("Report")) { VitalsData->reportUser(userData.UserId); }
+                        if (ImGui::MenuItem("Report")) { VitalsData->reportUser(userData.UserId); }
                     }
 
                     ImGui::EndPopup();
