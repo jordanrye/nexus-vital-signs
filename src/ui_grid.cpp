@@ -656,6 +656,18 @@ namespace UI::Grid {
             return false;
         }
 
+        if (trigger.category == "Squad Markers")
+        {
+            if (trigger.effect == "Arrow" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Arrow) return true;
+            if (trigger.effect == "Circle" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Circle) return true;
+            if (trigger.effect == "Heart" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Heart) return true;
+            if (trigger.effect == "Square" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Square) return true;
+            if (trigger.effect == "Star" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Star) return true;
+            if (trigger.effect == "Spiral" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Spiral) return true;
+            if (trigger.effect == "Triangle" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Triangle) return true;
+            if (trigger.effect == "X" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::X) return true;
+        }
+
         if (trigger.category == "Health")
         {
             bool statusMatch = false;
