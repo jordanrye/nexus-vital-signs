@@ -24,10 +24,14 @@ namespace UI {
         {
             return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_HEATMAP_BACKGROUND_UNKNOWN : config.COLOUR_HEATMAP_BACKGROUND;
         }
+        else if (palette == "Role")
+        {
+            return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_ROLE_BACKGROUND_UNKNOWN : config.COLOUR_ROLE_BACKGROUND;
+        }
         return ImColor();
     }
 
-    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType, float health, VitalSignsDataLink::EProfession profession)
+    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType, float health, VitalSignsDataLink::EProfession profession, VitalSignsDataLink::EPrimaryRole primaryRole)
     {
         ImColor colour{};
 
@@ -158,6 +162,48 @@ namespace UI {
                 }
             }
         }
+        else if (palette == "Role")
+        {
+            switch (healthType)
+            {
+                case VitalSignsDataLink::E_HEALTH_DOWNED:
+                    colour = config.COLOUR_ROLE_HEALTH_DOWNED;
+                    break;
+                case VitalSignsDataLink::E_HEALTH_DEFEATED:
+                    colour = config.COLOUR_ROLE_HEALTH_DEFEATED;
+                    break;
+                case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
+                    colour = config.COLOUR_ROLE_SHROUD_NECROMANCER;
+                    break;
+                case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
+                    colour = config.COLOUR_ROLE_SHROUD_SPECTER;
+                    break;
+                case VitalSignsDataLink::E_HEALTH_ALIVE:
+                default:
+                {
+                    switch (primaryRole)
+                    {
+                        case VitalSignsDataLink::EPrimaryRole::Damage:
+                            colour = config.COLOUR_ROLE_HEALTH_DAMAGE;
+                            break;
+                        case VitalSignsDataLink::EPrimaryRole::DamageAlacrity:
+                        case VitalSignsDataLink::EPrimaryRole::DamageQuickness:
+                            colour = config.COLOUR_ROLE_HEALTH_DAMAGE_BOON;
+                            break;
+                        case VitalSignsDataLink::EPrimaryRole::HealerAlacrity:
+                        case VitalSignsDataLink::EPrimaryRole::HealerQuickness:
+                            colour = config.COLOUR_ROLE_HEALTH_HEALER_BOON;
+                            break;
+                        case VitalSignsDataLink::EPrimaryRole::Flexible:
+                        case VitalSignsDataLink::EPrimaryRole::None:
+                        default:
+                            colour = config.COLOUR_ROLE_HEALTH_DAMAGE;
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
 
         return colour;
     }
@@ -175,6 +221,10 @@ namespace UI {
         else if (palette == "Heat Map")
         {
             return config.COLOUR_HEATMAP_BARRIER;
+        }
+        else if (palette == "Role")
+        {
+            return config.COLOUR_ROLE_BARRIER;
         }
         return ImColor();
     }

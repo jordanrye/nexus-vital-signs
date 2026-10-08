@@ -13,7 +13,7 @@ namespace UI {
     const int CONDITION_LIMIT = 14; // max number of conditions
 
     ImColor GetBackgroundColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType);
-    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType, float health, VitalSignsDataLink::EProfession profession);
+    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType, float health, VitalSignsDataLink::EProfession profession, VitalSignsDataLink::EPrimaryRole primaryRole);
     ImColor GetBarrierColour(const ColourPresets_t& config, const std::string& palette);
 
     Texture* GetOrCreateTexture(const std::string& textureSource, const std::string& texturePath);

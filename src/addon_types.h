@@ -53,17 +53,18 @@ struct ColourPresets_t
     ImColor COLOUR_BARRIER = ImColor(170, 144, 78, 128);
     ImColor COLOUR_HOVERED = ImColor(255, 255, 255, 32);
 
-    /** TODO: Role Colours */
-    // ImColor COLOUR_ROLE_BACKGROUND = ImColor(0, 0, 0);
-    // ImColor COLOUR_ROLE_HEALTH_DAMAGE = ImColor(74, 133, 62);
-    // ImColor COLOUR_ROLE_HEALTH_BOON_SUPPORT = ImColor(198, 128, 28);
-    // ImColor COLOUR_ROLE_HEALTH_HEALER = ImColor(28, 143, 198);
-    // ImColor COLOUR_ROLE_HEALTH_DOWNED = ImColor(157, 31, 31);
-    // ImColor COLOUR_ROLE_HEALTH_DEFEATED = ImColor(78, 15, 15);
-    // ImColor COLOUR_ROLE_SHROUD_NECROMANCER = ImColor(38, 70, 45);
-    // ImColor COLOUR_ROLE_SHROUD_SPECTER = ImColor(108, 21, 95);
-    // ImColor COLOUR_ROLE_BARRIER = ImColor(170, 144, 78, 128);
-    // ImColor COLOUR_ROLE_HOVERED = ImColor(255, 255, 255, 32);
+    /* Role Colours */
+    ImColor COLOUR_ROLE_BACKGROUND = ImColor(0, 0, 0);
+    ImColor COLOUR_ROLE_BACKGROUND_UNKNOWN = ImColor(0, 0, 0, 0);
+    ImColor COLOUR_ROLE_HEALTH_DAMAGE = ImColor(74, 133, 62);
+    ImColor COLOUR_ROLE_HEALTH_DAMAGE_BOON = ImColor(198, 141, 61);
+    ImColor COLOUR_ROLE_HEALTH_HEALER_BOON = ImColor(62, 133, 198);
+    ImColor COLOUR_ROLE_HEALTH_DOWNED = ImColor(157, 31, 31);
+    ImColor COLOUR_ROLE_HEALTH_DEFEATED = ImColor(78, 15, 15);
+    ImColor COLOUR_ROLE_SHROUD_NECROMANCER = ImColor(38, 70, 45);
+    ImColor COLOUR_ROLE_SHROUD_SPECTER = ImColor(108, 21, 95);
+    ImColor COLOUR_ROLE_BARRIER = ImColor(255, 255, 255, 128);
+    ImColor COLOUR_ROLE_HOVERED = ImColor(255, 255, 255, 32);
 
     /* Profession Colours */
     ImColor COLOUR_PROF_BACKGROUND = ImColor(0, 0, 0);
