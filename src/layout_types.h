@@ -266,6 +266,7 @@ struct RadialProperties_t
 struct Layout_t
 {
     std::string type = "Grid";
+    std::string sortBy = "Default";
     GridProperties_t grid;
     RadialProperties_t radial;
     int itemBorder = 1;

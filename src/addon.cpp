@@ -570,6 +570,21 @@ namespace Addon {
             }
         }
 
+        ImGui::TextDisabled("Sort");
+        ImGui::Separator();
+        {
+            static const char* sortOptions[] = { "Default", "Roles" };
+            static int sortSelection = 0;
+            if (layout.sortBy == "Default") sortSelection = 0;
+            else if (layout.sortBy == "Roles") sortSelection = 1;
+
+            if (ImGui::Combo("Sort By", &sortSelection, sortOptions, IM_ARRAYSIZE(sortOptions)))
+            {
+                if (sortSelection == 0) layout.sortBy = "Default";
+                else if (sortSelection == 1) layout.sortBy = "Roles";
+            }
+        }
+
         /* Radial*/
         if (0U == layoutSelection)
         {

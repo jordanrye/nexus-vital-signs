@@ -396,6 +396,7 @@ void dser_Layout_t(json& object, Layout_t& layout)
     if (!object.is_null())
     {
         dser_BasicType(object["type"], layout.type);
+        dser_BasicType(object["sort-by"], layout.sortBy);
         dser_GridProperties_t(object["grid"], layout.grid);
         dser_RadialProperties_t(object["radial"], layout.radial);
         dser_BasicType(object["border"], layout.itemBorder);
@@ -748,6 +749,7 @@ json ser_Layout_t(const Layout_t& layout)
 {
     json object = json::object();
     object["type"] = layout.type;
+    object["sort-by"] = layout.sortBy;
     object["grid"] = ser_GridProperties_t(layout.grid);
     object["radial"] = ser_RadialProperties_t(layout.radial);
     object["border"] = layout.itemBorder;

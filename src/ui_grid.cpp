@@ -1247,14 +1247,41 @@ namespace UI::Grid {
                 scanIdx++;
             }
 
-            std::stable_sort(validUsers.begin(), validUsers.end(), [clientId](const VitalSignsDataLink::UserData_t& a, const VitalSignsDataLink::UserData_t& b) {
-                auto getPriority = [clientId](const VitalSignsDataLink::UserData_t& user) -> int {
+            std::string sortBy = context.layoutConfig->layout.sortBy;
+            std::stable_sort(validUsers.begin(), validUsers.end(), [clientId, sortBy](const VitalSignsDataLink::UserData_t& a, const VitalSignsDataLink::UserData_t& b) {
+                auto getDefaultPriority = [clientId](const VitalSignsDataLink::UserData_t& user) -> int {
                     if (user.SquadRole == VitalSignsDataLink::ESquadRole::Commander) return 0;
                     if (user.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant) return 1;
                     if (user.UserId == clientId) return 2;
                     return 3;
                 };
-                return getPriority(a) < getPriority(b);
+
+                if (sortBy == "Roles")
+                {
+                    auto getRolePriority = [](const VitalSignsDataLink::UserData_t& user) -> int {
+                        switch (user.PrimaryRole)
+                        {
+                            case VitalSignsDataLink::EPrimaryRole::HealerAlacrity: return 0;
+                            case VitalSignsDataLink::EPrimaryRole::HealerQuickness: return 1;
+                            case VitalSignsDataLink::EPrimaryRole::DamageAlacrity: return 2;
+                            case VitalSignsDataLink::EPrimaryRole::DamageQuickness: return 3;
+                            case VitalSignsDataLink::EPrimaryRole::Flexible: return 4;
+                            case VitalSignsDataLink::EPrimaryRole::Damage: return 5;
+                            case VitalSignsDataLink::EPrimaryRole::None:
+                            default: return 6;
+                        }
+                    };
+                    
+                    int priorityA = getRolePriority(a);
+                    int priorityB = getRolePriority(b);
+                    
+                    if (priorityA != priorityB) 
+                        return priorityA < priorityB;
+                        
+                    return getDefaultPriority(a) < getDefaultPriority(b);
+                }
+
+                return getDefaultPriority(a) < getDefaultPriority(b);
             });
 
             for (size_t i = 0; i < subgroupIndices.size(); i++)
