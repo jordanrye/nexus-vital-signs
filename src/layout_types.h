@@ -190,6 +190,21 @@ struct TextIndicator_t
     Trigger_t trigger;
 };
 
+struct BarIndicator_t
+{
+    Position_t position;
+    Size_t size = { 100, 20 };
+    ImColor backgroundColor = ImColor(0, 0, 0, 255);
+    ImColor foregroundColor = ImColor(0, 255, 0, 255);
+    int rounding = 4;
+    int borderThickness = 1;
+    ImColor borderColor = ImColor(0, 0, 0, 255);
+    std::string dataSource = "Health percentage";
+    std::string dataEffect;
+    float dataMaxValue = 0.0f;
+    Trigger_t trigger;
+};
+
 // Forward declare so that Group_t can both be and contain an Indicator_t.
 struct Indicator_t;
 
@@ -214,6 +229,7 @@ struct Indicator_t
     ColourIndicator_t colour;
     GlowIndicator_t glow;
     TextIndicator_t text;
+    BarIndicator_t bar;
 
     /* Dynamic identifier. */
     TreeNodeUID id;

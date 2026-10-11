@@ -271,6 +271,24 @@ void dser_TextIndicator_t(json& object, TextIndicator_t& text)
     }
 }
 
+void dser_BarIndicator_t(json& object, BarIndicator_t& bar)
+{
+    if (!object.is_null())
+    {
+        dser_Position_t(object["position"], bar.position);
+        dser_Size_t(object["size"], bar.size);
+        dser_ImColor(object["background-color"], bar.backgroundColor);
+        dser_ImColor(object["foreground-color"], bar.foregroundColor);
+        dser_BasicType(object["rounding"], bar.rounding);
+        dser_BasicType(object["border-thickness"], bar.borderThickness);
+        dser_ImColor(object["border-color"], bar.borderColor);
+        dser_BasicType(object["data-source"], bar.dataSource);
+        dser_BasicType(object["data-effect"], bar.dataEffect);
+        dser_BasicType(object["data-max-value"], bar.dataMaxValue);
+        dser_Trigger_t(object["trigger"], bar.trigger);
+    }
+}
+
 void dser_Group_t(json& object, Group_t& group)
 {
     if (!object.is_null())
@@ -322,6 +340,9 @@ void dser_Indicator_t(json& object, Indicator_t& indicator)
         }
         else if ("Text" == indicator.type) {
             dser_TextIndicator_t(object["text"], indicator.text);
+        }
+        else if ("Bar" == indicator.type) {
+            dser_BarIndicator_t(object["bar"], indicator.bar);
         }
     }
 }
@@ -638,6 +659,23 @@ json ser_TextIndicator_t(const TextIndicator_t& text)
     return object;
 }
 
+json ser_BarIndicator_t(const BarIndicator_t& bar)
+{
+    json object = json::object();
+    object["position"] = ser_Position_t(bar.position);
+    object["size"] = ser_Size_t(bar.size);
+    object["background-color"] = ser_ImColor(bar.backgroundColor);
+    object["foreground-color"] = ser_ImColor(bar.foregroundColor);
+    object["rounding"] = bar.rounding;
+    object["border-thickness"] = bar.borderThickness;
+    object["border-color"] = ser_ImColor(bar.borderColor);
+    object["data-source"] = bar.dataSource;
+    object["data-effect"] = bar.dataEffect;
+    object["data-max-value"] = bar.dataMaxValue;
+    object["trigger"] = ser_Trigger_t(bar.trigger);
+    return object;
+}
+
 json ser_Group_t(const Group_t& group)
 {
     json object = json::object();
@@ -678,6 +716,9 @@ json ser_Indicator_t(const Indicator_t& indicator)
     }
     else if ("Text" == indicator.type) {
         object["text"] = ser_TextIndicator_t(indicator.text);
+    }
+    else if ("Bar" == indicator.type) {
+        object["bar"] = ser_BarIndicator_t(indicator.bar);
     }
 
     return object;

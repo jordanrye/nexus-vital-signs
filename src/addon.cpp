@@ -1317,10 +1317,10 @@ namespace Addon {
                 form_Position(indicator.text.position);
             }
 
-            ImGui::TextDisabled("Text");
+            ImGui::TextDisabled("Data Source");
             ImGui::Separator();
             {
-                form_TextContent(indicator.text.textContent, indicator.text.textCustom);
+                form_TextDataSource(indicator.text.textContent, indicator.text.textCustom);
             }
 
             ImGui::TextDisabled("Text Style");
@@ -1337,6 +1337,33 @@ namespace Addon {
             ImGui::Separator();
             {
                 form_Trigger(indicator.text.trigger);
+            }
+        }
+
+        if ("Bar" == indicator.type)
+        {
+            ImGui::TextDisabled("Position");
+            ImGui::Separator();
+            {
+                form_Position(indicator.bar.position);
+            }
+
+            ImGui::TextDisabled("Data Source");
+            ImGui::Separator();
+            {
+                form_BarDataSource(indicator.bar.dataSource, indicator.bar.dataEffect, indicator.bar.dataMaxValue);
+            }
+
+            ImGui::TextDisabled("Bar Properties");
+            ImGui::Separator();
+            {
+                form_BarProperties(indicator.bar.size, indicator.bar.backgroundColor, indicator.bar.foregroundColor, indicator.bar.rounding, indicator.bar.borderThickness, indicator.bar.borderColor);
+            }
+
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.bar.trigger);
             }
         }
     }

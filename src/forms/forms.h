@@ -10,6 +10,8 @@
 
 #include "shared.h"
 
+void form_BarDataSource(std::string& dataSource, std::string& dataEffect, float& dataMaxValue);
+void form_BarProperties(Size_t& size, ImColor& backgroundColor, ImColor& foregroundColor, int& rounding, int& borderThickness, ImColor& borderColor);
 void form_Direction(std::string& direction, const std::string label = "Direction");
 void form_Font(std::string& fontSource, std::string& fontFilePath);
 void form_FontPreset(std::string& fontSource, std::string& fontFilePath);
@@ -29,7 +31,7 @@ void form_SelectIndicatorType(std::string& indicatorType, bool isDisabled = fals
 void form_SelectLayoutType(std::string& layoutType, bool isDisabled = false);
 void form_SelectLayout(const std::vector<std::string>& layouts, std::string& selectedLayout);
 void form_Size(Size_t& size);
-void form_TextContent(std::string& textType, std::string& textCustom);
+void form_TextDataSource(std::string& textType, std::string& textCustom);
 void form_TextLimit(std::string& limitType, float& limitValue);
 void form_Texture(std::string& textureSource, std::string& texturePath);
 void form_Trigger(Trigger_t& trigger);

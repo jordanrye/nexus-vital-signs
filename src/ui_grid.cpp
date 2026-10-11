@@ -159,12 +159,13 @@ namespace UI::Grid {
     void DrawBorder(ImDrawList * const drawList, DrawProperties_t properties, ImColor colour, float thickness)
     {
         /* Calculate an offset so that the border is positioned inside the cell. */
-        float offset = thickness / 2.f;
+        float offset = ImMax(0.0f, (thickness - 1.0f) / 2.0f);
+        float rounding = (properties.rounding > 0.0f) ? ImMax(0.0f, properties.rounding - offset) : 0.0f;
  
         ImVec2 p_min(properties.position.x + offset, properties.position.y + offset);
         ImVec2 p_max(properties.position.x + properties.width - offset, properties.position.y + properties.height - offset);
 
-        drawList->AddRect(p_min, p_max, colour, properties.rounding, properties.roundingCorners, thickness);
+        drawList->AddRect(p_min, p_max, colour, rounding, properties.roundingCorners, thickness);
     }
 
     void DrawIconText(ImDrawList* const drawList, const ImVec2& iconPosition, const ImVec2& iconSize, const char* text, const IconText_t& config, const IconText_t& globalConfig)
@@ -827,6 +828,14 @@ namespace UI::Grid {
                         isApplied = true;
                     }
                 }
+                else if (indicator.type == "Bar")
+                {
+                    if (IsTriggerMet(indicator.bar.trigger, userData, isPreviewed) || isTraversalForced)
+                    {
+                        outDrawables.push_back({ &indicator, isPreviewed });
+                        isApplied = true;
+                    }
+                }
     
                 if (isApplied)
                 {
@@ -1061,6 +1070,85 @@ namespace UI::Grid {
             }
                     
             drawList->AddText(font, fontSize, pos, color, text.c_str());
+        }
+        else if (indicator->type == "Bar")
+        {
+            float fillRatio = 0.0f;
+            if (indicator->bar.dataSource == "Health percentage")
+            {
+                /// FIXME: To be implemented in data link.
+                fillRatio = userData.GetRawHealthRatio();
+            }
+            else if (indicator->bar.dataSource == "Barrier percentage")
+            {
+                /* Maximum barrier is equal to half of the user's maximum health */
+                fillRatio = userData.GetBarrierRatio() * 2.0f;
+            }
+            else if (indicator->bar.dataSource == "Shroud percentage")
+            {
+                /// FIXME: To be implemented in data link.
+                fillRatio = userData.GetShroudRatio();
+            }
+            else if (indicator->bar.dataSource == "Effect duration")
+            {
+                if (indicator->bar.dataMaxValue > 0.0f)
+                {
+                    fillRatio = (userData.Effects[indicator->bar.dataEffect].duration / 1000.0f) / indicator->bar.dataMaxValue;
+                }
+            }
+            else if (indicator->bar.dataSource == "Effect stacks")
+            {
+                if (indicator->bar.dataMaxValue > 0.0f)
+                {
+                    fillRatio = (float)userData.Effects[indicator->bar.dataEffect].stacks / indicator->bar.dataMaxValue;
+                }
+            }
+            fillRatio = ImClamp(fillRatio, 0.0f, 1.0f);
+
+            ImVec2 barSize = ImVec2((float)indicator->bar.size.width, (float)indicator->bar.size.height);
+            ImVec2 barPosition = CalcItemPosition(parentProperties, barSize, indicator->bar.position.anchor, indicator->bar.position.offset);
+
+            // Floor the position to ensure crisp 1px borders
+            barPosition.x = std::floor(barPosition.x);
+            barPosition.y = std::floor(barPosition.y);
+
+            DrawProperties_t barProps;
+            barProps.position = barPosition;
+            barProps.width = barSize.x;
+            barProps.height = barSize.y;
+            barProps.rounding = indicator->bar.rounding;
+            barProps.roundingCorners = ImDrawCornerFlags_All;
+
+            float borderThickness = (float)indicator->bar.borderThickness;
+
+            DrawProperties_t bgProps = barProps;
+            if (borderThickness > 0.0f)
+            {
+                bgProps.position.x += borderThickness;
+                bgProps.position.y += borderThickness;
+                bgProps.width -= borderThickness * 2.0f;
+                bgProps.height -= borderThickness * 2.0f;
+                bgProps.rounding = ImMax(0.0f, bgProps.rounding - borderThickness);
+            }
+
+            // Background
+            DrawCell(drawList, bgProps, indicator->bar.backgroundColor);
+
+            // Fill
+            if (fillRatio > 0.0f)
+            {
+                DrawProperties_t fillProps = bgProps;
+                fillProps.width *= fillRatio;
+                fillProps.roundingCorners = (fillProps.width < (bgProps.width - bgProps.rounding)) ? ImDrawCornerFlags_Left : ImDrawCornerFlags_All;
+                
+                DrawCell(drawList, fillProps, indicator->bar.foregroundColor);
+            }
+
+            // Border
+            if (indicator->bar.borderThickness > 0)
+            {
+                DrawBorder(drawList, barProps, indicator->bar.borderColor, (float)indicator->bar.borderThickness);
+            }
         }
     }
 
@@ -1971,6 +2059,7 @@ namespace UI::Grid {
                 contentProps.position.y += borderThickness;
                 contentProps.width -= 2.0f * borderThickness;
                 contentProps.height -= 2.0f * borderThickness;
+                contentProps.rounding = ImMax(0.0f, contentProps.rounding - borderThickness);
                 
                 /* Background */
                 DrawCell(drawList, contentProps, backgroundColour);
