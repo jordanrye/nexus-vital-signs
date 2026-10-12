@@ -836,6 +836,14 @@ namespace UI::Grid {
                         isApplied = true;
                     }
                 }
+                else if (indicator.type == "Threshold")
+                {
+                    if (IsTriggerMet(indicator.threshold.trigger, userData, isPreviewed) || isTraversalForced)
+                    {
+                        outDrawables.push_back({ &indicator, isPreviewed });
+                        isApplied = true;
+                    }
+                }
     
                 if (isApplied)
                 {
@@ -1184,6 +1192,34 @@ namespace UI::Grid {
                 ImVec2 rMax = ImVec2(p1.x + thickness * 0.5f, p1.y + t + currentDashLen);
                 drawList->AddRectFilled(rMin, rMax, color);
             }
+        }
+    }
+
+    void DrawThreshold(ImDrawList* const drawList, const DrawProperties_t& properties, const ThresholdIndicator_t& threshold)
+    {
+        float clampedPct = ImClamp(threshold.percentage, 0.0f, 100.0f);
+        float xPos = std::floor(properties.position.x + (properties.width * (clampedPct / 100.0f)));
+
+        float height = threshold.stretchToFitHeight ? properties.height : (float)threshold.line.length;
+        if (height <= 0.0f) return;
+
+        float yPos = std::floor(properties.position.y + (properties.height - height) * 0.5f);
+        float thickness = ImMax(1.0f, (float)threshold.line.thickness);
+        float xOffset = std::floor(thickness * 0.5f);
+
+        if (threshold.line.style == "Dashed")
+        {
+            DrawDashedLine(drawList, ImVec2(xPos, yPos), ImVec2(xPos, yPos + height), threshold.line.color, thickness, 4.0f, 4.0f);
+        }
+        else if (threshold.line.style == "Dotted")
+        {
+            DrawDashedLine(drawList, ImVec2(xPos, yPos), ImVec2(xPos, yPos + height), threshold.line.color, thickness, thickness, 2.0f);
+        }
+        else
+        {
+            ImVec2 rMin = ImVec2(xPos - xOffset, yPos);
+            ImVec2 rMax = ImVec2(xPos - xOffset + thickness, yPos + height);
+            drawList->AddRectFilled(rMin, rMax, threshold.line.color);
         }
     }
 
@@ -2104,6 +2140,15 @@ namespace UI::Grid {
                     }
                 }
     
+                /* Threshold */
+                for (const auto& pair : drawables)
+                {
+                    if (pair.first->type == "Threshold")
+                    {
+                        DrawThreshold(drawList, contentProps, pair.first->threshold);
+                    }
+                }
+
                 // Inner glows
                 for (auto preset : activePresets)
                 {

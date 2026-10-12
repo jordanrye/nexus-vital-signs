@@ -205,6 +205,21 @@ struct BarIndicator_t
     Trigger_t trigger;
 };
 
+struct ThresholdIndicator_t
+{
+    float percentage = 50.0f;
+    bool stretchToFitHeight = true;
+    Line_t line;
+    Trigger_t trigger;
+
+    ThresholdIndicator_t()
+    {
+        line.color = ImColor(255, 255, 255, 255);
+        line.thickness = 1;
+        line.length = 20;
+    }
+};
+
 // Forward declare so that Group_t can both be and contain an Indicator_t.
 struct Indicator_t;
 
@@ -230,6 +245,7 @@ struct Indicator_t
     GlowIndicator_t glow;
     TextIndicator_t text;
     BarIndicator_t bar;
+    ThresholdIndicator_t threshold;
 
     /* Dynamic identifier. */
     TreeNodeUID id;

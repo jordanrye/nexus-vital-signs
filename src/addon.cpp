@@ -1366,6 +1366,21 @@ namespace Addon {
                 form_Trigger(indicator.bar.trigger);
             }
         }
+
+        if ("Threshold" == indicator.type)
+        {
+            ImGui::TextDisabled("Threshold Properties");
+            ImGui::Separator();
+            {
+                form_Threshold(indicator.threshold.percentage, indicator.threshold.stretchToFitHeight, indicator.threshold.line);
+            }
+
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.threshold.trigger);
+            }
+        }
     }
 
     void RegisterLayoutEditorViewsDFS(std::vector<TreeNode>& nodes, const std::vector<Indicator_t>& indicators)

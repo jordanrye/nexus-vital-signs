@@ -289,6 +289,17 @@ void dser_BarIndicator_t(json& object, BarIndicator_t& bar)
     }
 }
 
+void dser_ThresholdIndicator_t(json& object, ThresholdIndicator_t& threshold)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["percentage"], threshold.percentage);
+        dser_BasicType(object["stretch-to-fit-height"], threshold.stretchToFitHeight);
+        dser_Line_t(object["line"], threshold.line);
+        dser_Trigger_t(object["trigger"], threshold.trigger);
+    }
+}
+
 void dser_Group_t(json& object, Group_t& group)
 {
     if (!object.is_null())
@@ -343,6 +354,9 @@ void dser_Indicator_t(json& object, Indicator_t& indicator)
         }
         else if ("Bar" == indicator.type) {
             dser_BarIndicator_t(object["bar"], indicator.bar);
+        }
+        else if ("Threshold" == indicator.type) {
+            dser_ThresholdIndicator_t(object["threshold"], indicator.threshold);
         }
     }
 }
@@ -676,6 +690,16 @@ json ser_BarIndicator_t(const BarIndicator_t& bar)
     return object;
 }
 
+json ser_ThresholdIndicator_t(const ThresholdIndicator_t& threshold)
+{
+    json object = json::object();
+    object["percentage"] = threshold.percentage;
+    object["stretch-to-fit-height"] = threshold.stretchToFitHeight;
+    object["line"] = ser_Line_t(threshold.line);
+    object["trigger"] = ser_Trigger_t(threshold.trigger);
+    return object;
+}
+
 json ser_Group_t(const Group_t& group)
 {
     json object = json::object();
@@ -719,6 +743,9 @@ json ser_Indicator_t(const Indicator_t& indicator)
     }
     else if ("Bar" == indicator.type) {
         object["bar"] = ser_BarIndicator_t(indicator.bar);
+    }
+    else if ("Threshold" == indicator.type) {
+        object["threshold"] = ser_ThresholdIndicator_t(indicator.threshold);
     }
 
     return object;

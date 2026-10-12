@@ -34,5 +34,6 @@ void form_Size(Size_t& size);
 void form_TextDataSource(std::string& textType, std::string& textCustom);
 void form_TextLimit(std::string& limitType, float& limitValue);
 void form_Texture(std::string& textureSource, std::string& texturePath);
+void form_Threshold(float& percentage, bool& stretchToFitHeight, Line_t& line);
 void form_Trigger(Trigger_t& trigger);
 void form_Visibility(std::string& visibility);

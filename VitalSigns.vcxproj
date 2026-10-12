@@ -199,6 +199,7 @@
     <ClCompile Include="src\forms\texture.cpp" />
     <ClCompile Include="src\forms\text_data_source.cpp" />
     <ClCompile Include="src\forms\text_limit.cpp" />
+    <ClCompile Include="src\forms\threshold.cpp" />
     <ClCompile Include="src\forms\trigger.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Agent\Agent.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\AgentSelection\AsContext.cpp" />
