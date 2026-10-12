@@ -696,7 +696,9 @@ namespace UI::Grid {
             else if (trigger.effect == "Shroud (Specter)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER) statusMatch = true;
             else if (trigger.effect == "Unknown" && userData.HealthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) statusMatch = true;
 
-            float healthRatio = userData.GetHealthRatio() * 100.0f; // Scale to match UI values (0-100)
+            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+            float ratio = (isShrouded && (trigger.effect == "Shroud (Necromancer)" || trigger.effect == "Shroud (Specter)")) ? userData.GetShroudRatio() : userData.GetHealthRatio();
+            float healthRatio = ratio * 100.0f; // Scale to match UI values (0-100)
 
             if ((trigger.condition == "Status: Active" && statusMatch) ||
                 (trigger.condition == "Status: Inactive" && !statusMatch) ||
@@ -1084,8 +1086,7 @@ namespace UI::Grid {
             float fillRatio = 0.0f;
             if (indicator->bar.dataSource == "Health percentage")
             {
-                /// FIXME: To be implemented in data link.
-                fillRatio = userData.GetRawHealthRatio();
+                fillRatio = userData.GetHealthRatio();
             }
             else if (indicator->bar.dataSource == "Barrier percentage")
             {
@@ -1094,7 +1095,6 @@ namespace UI::Grid {
             }
             else if (indicator->bar.dataSource == "Shroud percentage")
             {
-                /// FIXME: To be implemented in data link.
                 fillRatio = userData.GetShroudRatio();
             }
             else if (indicator->bar.dataSource == "Effect duration")
@@ -2020,7 +2020,24 @@ namespace UI::Grid {
 
                 const bool isHovered = IsItemHovered(parentProperties);
                 const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType);
-                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType, userData.GetHealthRatio(), userData.Profession, userData.PrimaryRole);
+                
+                const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+                const std::string& shroudMode = context.layoutConfig->layout.grid.playerFrames.shroudMode;
+
+                VitalSignsDataLink::E_HEALTH_TYPE effectiveHealthType = userData.HealthType;
+                float effectiveHealthRatio = userData.GetHealthRatio();
+                if (isShrouded)
+                {
+                    if (shroudMode == "None" || shroudMode == "Split View")
+                    {
+                        effectiveHealthType = VitalSignsDataLink::E_HEALTH_ALIVE;
+                    }
+                    else // "Default"
+                    {
+                        effectiveHealthRatio = userData.GetShroudRatio();
+                    }
+                }
+                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig->colors, effectiveHealthType, effectiveHealthRatio, userData.Profession, userData.PrimaryRole);
                 const ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig->colors);
                 const Indicator_t* borderStyle = nullptr;
     
@@ -2100,43 +2117,114 @@ namespace UI::Grid {
                 /* Background */
                 DrawCell(drawList, contentProps, backgroundColour);
                 
-                /* Health */
-                float health = userData.GetHealthRatio();
-                float barrier = userData.GetBarrierRatio();
+                /* Health, Shroud & Barrier */
+                if (isShrouded && shroudMode == "Split View")
+                {
+                    /* Split View: Top half is Health, Bottom half is Shroud with Barrier */
+                    float topHeight = std::floor(contentProps.height * 0.5f);
+                    float bottomHeight = contentProps.height - topHeight;
 
-                if (health > 0.001f)
-                {
-                    float healthWidth = contentProps.width * health;
-                    ImDrawCornerFlags roundingCorners = ((contentProps.width - healthWidth) < (float)contentProps.rounding) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
-                    DrawProperties_t properties = contentProps;
-                    properties.width = healthWidth;
-                    properties.roundingCorners = roundingCorners;
-    
-                    DrawCell(drawList, properties, healthColour);
-                }
-                
-                /* Barrier */
-                if (barrier > 0.001f)
-                {
-                    float barrierWidth = contentProps.width * barrier;
-                    DrawProperties_t properties = contentProps;
-                    properties.width = barrierWidth;
-    
-                    if ((barrier + health) > 0.999f)
+                    DrawProperties_t topProps = contentProps;
+                    topProps.height = topHeight;
+
+                    DrawProperties_t bottomProps = contentProps;
+                    bottomProps.position.y += topHeight;
+                    bottomProps.height = bottomHeight;
+
+                    /* Top Half: Health */
+                    float health = userData.GetHealthRatio();
+                    if (health > 0.001f)
                     {
-                        /* Overflow barrier */
-                        properties.position.x += contentProps.width - barrierWidth;
-                        properties.roundingCorners = ImDrawCornerFlags_Right;
-                        DrawCell(drawList, properties, barrierColour);
-                    }
-                    else
-                    {
-                        /* Padding barrier */
-                        float healthWidth = contentProps.width * health;
-                        ImDrawCornerFlags roundingCorners = ((healthWidth + barrierWidth) < (contentProps.width - (float)contentProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_Right;
-                        properties.position.x += healthWidth;
+                        float healthWidth = topProps.width * health;
+                        ImDrawCornerFlags roundingCorners = ((topProps.width - healthWidth) < (float)topProps.rounding) ? ImDrawCornerFlags_Top : ImDrawCornerFlags_TopLeft;
+                        DrawProperties_t properties = topProps;
+                        properties.width = healthWidth;
                         properties.roundingCorners = roundingCorners;
-                        DrawCell(drawList, properties, barrierColour);
+
+                        DrawCell(drawList, properties, healthColour);
+                    }
+
+                    /* Bottom Half: Shroud */
+                    float shroud = userData.GetShroudRatio();
+                    float barrier = userData.GetBarrierRatio();
+                    ImColor shroudColour = GetHealthColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType, shroud, userData.Profession, userData.PrimaryRole);
+
+                    if (shroud > 0.001f)
+                    {
+                        float shroudWidth = bottomProps.width * shroud;
+                        ImDrawCornerFlags roundingCorners = ((bottomProps.width - shroudWidth) < (float)bottomProps.rounding) ? ImDrawCornerFlags_Bot : ImDrawCornerFlags_BotLeft;
+                        DrawProperties_t properties = bottomProps;
+                        properties.width = shroudWidth;
+                        properties.roundingCorners = roundingCorners;
+
+                        DrawCell(drawList, properties, shroudColour);
+                    }
+
+                    /* Bottom Half: Barrier (accompanying Shroud) */
+                    if (barrier > 0.001f)
+                    {
+                        float barrierWidth = bottomProps.width * barrier;
+                        DrawProperties_t properties = bottomProps;
+                        properties.width = barrierWidth;
+
+                        if ((barrier + shroud) > 0.999f)
+                        {
+                            /* Overflow barrier */
+                            properties.position.x += bottomProps.width - barrierWidth;
+                            properties.roundingCorners = ImDrawCornerFlags_BotRight;
+                            DrawCell(drawList, properties, barrierColour);
+                        }
+                        else
+                        {
+                            /* Padding barrier */
+                            float shroudWidth = bottomProps.width * shroud;
+                            ImDrawCornerFlags roundingCorners = ((shroudWidth + barrierWidth) < (bottomProps.width - (float)bottomProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_BotRight;
+                            properties.position.x += shroudWidth;
+                            properties.roundingCorners = roundingCorners;
+                            DrawCell(drawList, properties, barrierColour);
+                        }
+                    }
+                }
+                else
+                {
+                    /* Single Bar View: Default (switches to Shroud if shrouded) or None / Non-shrouded (Health) */
+                    float displayedResource = (isShrouded && (shroudMode != "None")) ? userData.GetShroudRatio() : userData.GetHealthRatio();
+                    float barrier = userData.GetBarrierRatio();
+
+                    if (displayedResource > 0.001f)
+                    {
+                        float resourceWidth = contentProps.width * displayedResource;
+                        ImDrawCornerFlags roundingCorners = ((contentProps.width - resourceWidth) < (float)contentProps.rounding) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
+                        DrawProperties_t properties = contentProps;
+                        properties.width = resourceWidth;
+                        properties.roundingCorners = roundingCorners;
+
+                        DrawCell(drawList, properties, healthColour);
+                    }
+
+                    /* Barrier */
+                    if (barrier > 0.001f)
+                    {
+                        float barrierWidth = contentProps.width * barrier;
+                        DrawProperties_t properties = contentProps;
+                        properties.width = barrierWidth;
+
+                        if ((barrier + displayedResource) > 0.999f)
+                        {
+                            /* Overflow barrier */
+                            properties.position.x += contentProps.width - barrierWidth;
+                            properties.roundingCorners = ImDrawCornerFlags_Right;
+                            DrawCell(drawList, properties, barrierColour);
+                        }
+                        else
+                        {
+                            /* Padding barrier */
+                            float resourceWidth = contentProps.width * displayedResource;
+                            ImDrawCornerFlags roundingCorners = ((resourceWidth + barrierWidth) < (contentProps.width - (float)contentProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_Right;
+                            properties.position.x += resourceWidth;
+                            properties.roundingCorners = roundingCorners;
+                            DrawCell(drawList, properties, barrierColour);
+                        }
                     }
                 }
     

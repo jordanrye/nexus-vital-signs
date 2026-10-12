@@ -712,6 +712,36 @@ namespace Addon {
             ImGui::TextDisabled("Advanced");
             ImGui::Separator();
             {
+                if (ImGui::CollapsingHeader("Player Frames"))
+                {
+                    ImGui::BeginGroupPanel("Health Bar", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                    {
+                        static const char* shroudOptions[] = {
+                            "Default",
+                            "Split View",
+                            "None"
+                        };
+                        
+                        int sOpt = 0;
+                        if (layout.grid.playerFrames.shroudMode == "Default") sOpt = 0;
+                        else if (layout.grid.playerFrames.shroudMode == "Split View") sOpt = 1;
+                        else if (layout.grid.playerFrames.shroudMode == "None") sOpt = 2;
+                        if (ImGui::Combo("Shroud Mode##GRID_SHROUD_DISPLAY", &sOpt, shroudOptions, IM_ARRAYSIZE(shroudOptions)))
+                        {
+                            layout.grid.playerFrames.shroudMode = shroudOptions[sOpt];
+                        }
+
+
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(?)");
+                        ImGui::TooltipGeneric(
+                            "Controls how Necromancer and Specter's\n" \
+                            "Shroud Forms are displayed in relation\n" \
+                            "to the Health Bar.");
+                    }
+                    ImGui::EndGroupPanel();
+                }
+
                 if (ImGui::CollapsingHeader("Subgroup Headers"))
                 {
                     ImGui::BeginGroupPanel("General", ImVec2(ImGui::GetContentRegionMax().x, 0.f));

@@ -368,10 +368,12 @@ namespace UI::Radial {
 
         if (context.index < context.layoutConfig.radial.sectorCountMax)
         {
+            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+            
             context.charName[context.index] = userData.GetDisplayName();
             context.profession[context.index] = userData.Profession;
             context.primaryRole[context.index] = userData.PrimaryRole;
-            context.health[context.index] = userData.GetHealthRatio();
+            context.health[context.index] = isShrouded ? userData.GetShroudRatio() : userData.GetHealthRatio();
             context.healthType[context.index] = userData.HealthType;
             context.barrier[context.index] = userData.GetBarrierRatio();
             context.effects[context.index] = userData.Effects;

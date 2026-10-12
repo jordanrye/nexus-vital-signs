@@ -374,6 +374,14 @@ void dser_FrameStatePreset_t(json& object, FrameStatePreset_t& preset)
     }
 }
 
+void dser_PlayerFrameProperties_t(json& object, PlayerFrameProperties_t& properties)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["shroud-mode"], properties.shroudMode);
+    }
+}
+
 void dser_SubgroupHeaderProperties_t(json& object, SubgroupHeaderProperties_t& properties)
 {
     if (!object.is_null())
@@ -410,6 +418,7 @@ void dser_GridProperties_t(json& object, GridProperties_t& properties)
         dser_BasicType(object["cell-rounding"], properties.cellRounding);
         dser_BasicType(object["spacing-horizontal"], properties.spacingHorizontal);
         dser_BasicType(object["spacing-vertical"], properties.spacingVertical);
+        dser_PlayerFrameProperties_t(object["player-frames"], properties.playerFrames);
         dser_SubgroupHeaderProperties_t(object["subgroup-header"], properties.subgroupHeader);
     }
 }
@@ -763,6 +772,13 @@ json ser_FrameStatePreset_t(const FrameStatePreset_t& preset)
     return object;
 }
 
+json ser_PlayerFrameProperties_t(const PlayerFrameProperties_t& properties)
+{
+    json object = json::object();
+    object["shroud-mode"] = properties.shroudMode;
+    return object;
+}
+
 json ser_SubgroupHeaderProperties_t(const SubgroupHeaderProperties_t& properties)
 {
     json object = json::object();
@@ -798,6 +814,7 @@ json ser_GridProperties_t(const GridProperties_t& properties)
     object["cell-rounding"] = properties.cellRounding;
     object["spacing-horizontal"] = properties.spacingHorizontal;
     object["spacing-vertical"] = properties.spacingVertical;
+    object["player-frames"] = ser_PlayerFrameProperties_t(properties.playerFrames);
     object["subgroup-header"] = ser_SubgroupHeaderProperties_t(properties.subgroupHeader);
     return object;
 }

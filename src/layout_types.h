@@ -251,6 +251,11 @@ struct Indicator_t
     TreeNodeUID id;
 };
 
+struct PlayerFrameProperties_t
+{
+    std::string shroudMode = "Default";
+};
+
 struct SubgroupHeaderProperties_t
 {
     std::string visibility = "Always show";
@@ -283,6 +288,7 @@ struct GridProperties_t
     int cellRounding = 4;
     int spacingVertical = 4;
     int spacingHorizontal = 4;
+    PlayerFrameProperties_t playerFrames;
     SubgroupHeaderProperties_t subgroupHeader;
 };
 
