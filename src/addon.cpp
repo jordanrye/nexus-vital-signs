@@ -53,6 +53,7 @@ namespace Addon {
     static bool isRadialMenuActive = false;
     static bool isPreviewModeActive = false;
     bool isSquadManagerActive = false;
+    bool isPlayerFramesHidden = false;
 
     /* Option tabs */
     void OptionsGeneral();
@@ -99,6 +100,16 @@ namespace Addon {
             else
             {
                 isSquadManagerActive = false;
+            }
+        }
+        else if (strcmp(aIdentifier, "KB_VS_TOGGLE_PLAYER_FRAMES") == 0)
+        {
+            if (isValidGameState())
+            {
+                if (!aIsRelease)
+                {
+                    isPlayerFramesHidden = !isPlayerFramesHidden;
+                }
             }
         }
     }
@@ -167,6 +178,11 @@ namespace Addon {
                 activeLayoutName = ConfigGeneral.soloLayout;
                 activeHiddenSubgroups = nullptr;
                 break;
+        }
+
+        if (isPlayerFramesHidden)
+        {
+            return;
         }
 
         for (auto& layout : g_LayoutManager.GetAllLayouts())
@@ -994,7 +1010,7 @@ namespace Addon {
                             "Manager keybind.");
 
                         ImGui::Spacing();
-                        ImGui::TextDisabled("Tip: Hold the 'Toggle Squad Manager' keybind to reveal all controls and unhide subgroups.");
+                        ImGui::TextDisabled("Tip: Hold the 'Activate Squad Manager' keybind to reveal all controls and unhide subgroups.");
                     }
                     ImGui::EndGroupPanel();
                 }

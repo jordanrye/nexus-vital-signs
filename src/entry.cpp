@@ -79,7 +79,10 @@ void AddonLoad(AddonAPI* aApi)
 		APIDefs->Localization.Set("KB_HEALING_RADIAL", "en", "Activate Radial Menu");
 
 		APIDefs->InputBinds.RegisterWithString("KB_VS_TOGGLE_SQUAD_MANAGER", Addon::KeybindHandler, "SHIFT");
-		APIDefs->Localization.Set("KB_VS_TOGGLE_SQUAD_MANAGER", "en", "Toggle Squad Manager");
+		APIDefs->Localization.Set("KB_VS_TOGGLE_SQUAD_MANAGER", "en", "Activate Squad Manager");
+
+		APIDefs->InputBinds.RegisterWithString("KB_VS_TOGGLE_PLAYER_FRAMES", Addon::KeybindHandler, "(null)");
+		APIDefs->Localization.Set("KB_VS_TOGGLE_PLAYER_FRAMES", "en", "Show/Hide Player Frames");
 	}
 
     NexusLink = (NexusLinkData*)APIDefs->DataLink.Get("DL_NEXUS_LINK");
@@ -143,6 +146,9 @@ void AddonUnload()
     {
         APIDefs->InputBinds.Deregister("KB_HEALING_RADIAL");
         APIDefs->InputBinds.Deregister("KB_VS_TOGGLE_SQUAD_MANAGER");
+        APIDefs->InputBinds.Deregister("KB_VS_TOGGLE_PLAYER_FRAMES");
+
+        Addon::isPlayerFramesHidden = false;
 
         APIDefs->Renderer.Deregister(Addon::Options);
         APIDefs->Renderer.Deregister(Addon::Render);

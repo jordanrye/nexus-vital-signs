@@ -8,6 +8,7 @@
 namespace Addon {
 
 extern bool isSquadManagerActive;
+extern bool isPlayerFramesHidden;
 
 void KeybindHandler(const char* aIdentifier, bool aIsRelease);
 void Render();
