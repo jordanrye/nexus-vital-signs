@@ -1008,9 +1008,6 @@ namespace Addon {
                             "Shows the resize grip at all times\n" \
                             "without needing to hold the Squad\n" \
                             "Manager keybind.");
-
-                        ImGui::Spacing();
-                        ImGui::TextDisabled("Tip: Hold the 'Activate Squad Manager' keybind to reveal all controls and unhide subgroups.");
                     }
                     ImGui::EndGroupPanel();
                 }
