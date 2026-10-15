@@ -28,6 +28,7 @@ namespace UI::Radial {
         // Item state
         std::string charName[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::EProfession profession[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::EPrimaryRole primaryRole[SQUAD_MEMBER_LIMIT];
         float health[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
         float barrier[SQUAD_MEMBER_LIMIT];
@@ -264,7 +265,7 @@ namespace UI::Radial {
                 float healthRadiusMin = annulusRadiusMin;
                 float healthRadiusMax = annulusRadiusMin + (annulusWidth * context.health[i]);
                 SectorDrawProperties_t healthProperties = CalcSectorProperties(centralAngle, arcSegments, healthRadiusMin, healthRadiusMax, itemSpacing, i);
-                DrawSector(drawList, healthProperties, context.menuPosition, GetHealthColour(context.colourPresets, context.palette, context.healthType[i], context.health[i], context.profession[i]));
+                DrawSector(drawList, healthProperties, context.menuPosition, GetHealthColour(context.colourPresets, context.palette, context.healthType[i], context.health[i], context.profession[i], context.primaryRole[i]));
 
                 if (isHovered)
                 {
@@ -367,9 +368,12 @@ namespace UI::Radial {
 
         if (context.index < context.layoutConfig.radial.sectorCountMax)
         {
+            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+            
             context.charName[context.index] = userData.GetDisplayName();
             context.profession[context.index] = userData.Profession;
-            context.health[context.index] = userData.GetHealthRatio();
+            context.primaryRole[context.index] = userData.PrimaryRole;
+            context.health[context.index] = isShrouded ? userData.GetShroudRatio() : userData.GetHealthRatio();
             context.healthType[context.index] = userData.HealthType;
             context.barrier[context.index] = userData.GetBarrierRatio();
             context.effects[context.index] = userData.Effects;

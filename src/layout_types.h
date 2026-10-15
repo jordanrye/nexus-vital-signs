@@ -190,6 +190,36 @@ struct TextIndicator_t
     Trigger_t trigger;
 };
 
+struct BarIndicator_t
+{
+    Position_t position;
+    Size_t size = { 100, 20 };
+    ImColor backgroundColor = ImColor(0, 0, 0, 255);
+    ImColor foregroundColor = ImColor(0, 255, 0, 255);
+    int rounding = 4;
+    int borderThickness = 1;
+    ImColor borderColor = ImColor(0, 0, 0, 255);
+    std::string dataSource = "Health percentage";
+    std::string dataEffect;
+    float dataMaxValue = 0.0f;
+    Trigger_t trigger;
+};
+
+struct ThresholdIndicator_t
+{
+    float percentage = 50.0f;
+    bool stretchToFitHeight = true;
+    Line_t line;
+    Trigger_t trigger;
+
+    ThresholdIndicator_t()
+    {
+        line.color = ImColor(255, 255, 255, 255);
+        line.thickness = 1;
+        line.length = 20;
+    }
+};
+
 // Forward declare so that Group_t can both be and contain an Indicator_t.
 struct Indicator_t;
 
@@ -214,9 +244,16 @@ struct Indicator_t
     ColourIndicator_t colour;
     GlowIndicator_t glow;
     TextIndicator_t text;
+    BarIndicator_t bar;
+    ThresholdIndicator_t threshold;
 
     /* Dynamic identifier. */
     TreeNodeUID id;
+};
+
+struct PlayerFrameProperties_t
+{
+    std::string shroudMode = "Default";
 };
 
 struct SubgroupHeaderProperties_t
@@ -240,6 +277,13 @@ struct SubgroupHeaderProperties_t
     Position_t textPosition;
 };
 
+struct SquadManagerProperties_t
+{
+    bool allowDragDropWithoutKeybind = true;
+    bool allowMoveWithoutKeybind = false;
+    bool allowResizeWithoutKeybind = false;
+};
+
 struct GridProperties_t
 {
     std::string frameDirection = "Left-to-right";
@@ -251,7 +295,9 @@ struct GridProperties_t
     int cellRounding = 4;
     int spacingVertical = 4;
     int spacingHorizontal = 4;
+    PlayerFrameProperties_t playerFrames;
     SubgroupHeaderProperties_t subgroupHeader;
+    SquadManagerProperties_t squadManager;
 };
 
 struct RadialProperties_t
@@ -266,6 +312,7 @@ struct RadialProperties_t
 struct Layout_t
 {
     std::string type = "Grid";
+    std::string sortBy = "Default";
     GridProperties_t grid;
     RadialProperties_t radial;
     int itemBorder = 1;

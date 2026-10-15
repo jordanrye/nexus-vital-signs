@@ -53,6 +53,7 @@ namespace Addon {
     static bool isRadialMenuActive = false;
     static bool isPreviewModeActive = false;
     bool isSquadManagerActive = false;
+    bool isPlayerFramesHidden = false;
 
     /* Option tabs */
     void OptionsGeneral();
@@ -99,6 +100,16 @@ namespace Addon {
             else
             {
                 isSquadManagerActive = false;
+            }
+        }
+        else if (strcmp(aIdentifier, "KB_VS_TOGGLE_PLAYER_FRAMES") == 0)
+        {
+            if (isValidGameState())
+            {
+                if (!aIsRelease)
+                {
+                    isPlayerFramesHidden = !isPlayerFramesHidden;
+                }
             }
         }
     }
@@ -167,6 +178,11 @@ namespace Addon {
                 activeLayoutName = ConfigGeneral.soloLayout;
                 activeHiddenSubgroups = nullptr;
                 break;
+        }
+
+        if (isPlayerFramesHidden)
+        {
+            return;
         }
 
         for (auto& layout : g_LayoutManager.GetAllLayouts())
@@ -527,7 +543,8 @@ namespace Addon {
         static const char* colorsOptions[] {
             "Default Color Palette",
             "Profession Color Palette",
-            "Heat Map Color Palette"
+            "Heat Map Color Palette",
+            "Role Color Palette",
         };
 
         static int layoutSelection = 0; // Default to "Radial"
@@ -557,7 +574,7 @@ namespace Addon {
             if (colors == "Default") colorsSelection = 0;
             else if (colors == "Profession") colorsSelection = 1;
             else if (colors == "Heat Map") colorsSelection = 2;
-            // else if (colors == "Role") colorsSelection = -1;
+            else if (colors == "Role") colorsSelection = 3;
             // else if (colors == "Party") colorsSelection = -1;
 
             if (ImGui::Combo("Color Palette", &colorsSelection, colorsOptions, IM_ARRAYSIZE(colorsOptions)))
@@ -565,6 +582,22 @@ namespace Addon {
                 if (colorsSelection == 0) colors = "Default";
                 else if (colorsSelection == 1) colors = "Profession";
                 else if (colorsSelection == 2) colors = "Heat Map";
+                else if (colorsSelection == 3) colors = "Role";
+            }
+        }
+
+        ImGui::TextDisabled("Sort");
+        ImGui::Separator();
+        {
+            static const char* sortOptions[] = { "Default", "Roles" };
+            static int sortSelection = 0;
+            if (layout.sortBy == "Default") sortSelection = 0;
+            else if (layout.sortBy == "Roles") sortSelection = 1;
+
+            if (ImGui::Combo("Sort By", &sortSelection, sortOptions, IM_ARRAYSIZE(sortOptions)))
+            {
+                if (sortSelection == 0) layout.sortBy = "Default";
+                else if (sortSelection == 1) layout.sortBy = "Roles";
             }
         }
 
@@ -695,6 +728,36 @@ namespace Addon {
             ImGui::TextDisabled("Advanced");
             ImGui::Separator();
             {
+                if (ImGui::CollapsingHeader("Player Frames"))
+                {
+                    ImGui::BeginGroupPanel("Health Bar", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                    {
+                        static const char* shroudOptions[] = {
+                            "Default",
+                            "Split View",
+                            "None"
+                        };
+                        
+                        int sOpt = 0;
+                        if (layout.grid.playerFrames.shroudMode == "Default") sOpt = 0;
+                        else if (layout.grid.playerFrames.shroudMode == "Split View") sOpt = 1;
+                        else if (layout.grid.playerFrames.shroudMode == "None") sOpt = 2;
+                        if (ImGui::Combo("Shroud Mode##GRID_SHROUD_DISPLAY", &sOpt, shroudOptions, IM_ARRAYSIZE(shroudOptions)))
+                        {
+                            layout.grid.playerFrames.shroudMode = shroudOptions[sOpt];
+                        }
+
+
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(?)");
+                        ImGui::TooltipGeneric(
+                            "Controls how Necromancer and Specter's\n" \
+                            "Shroud Forms are displayed in relation\n" \
+                            "to the Health Bar.");
+                    }
+                    ImGui::EndGroupPanel();
+                }
+
                 if (ImGui::CollapsingHeader("Subgroup Headers"))
                 {
                     ImGui::BeginGroupPanel("General", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
@@ -914,6 +977,37 @@ namespace Addon {
                         form_FontColour(layout.grid.subgroupHeader.textStyle.colorSource, layout.grid.subgroupHeader.textStyle.color);
                         form_FontDecorator(layout.grid.subgroupHeader.textStyle.decoratorSource, layout.grid.subgroupHeader.textStyle.shadow, layout.grid.subgroupHeader.textStyle.shadowColor, layout.grid.subgroupHeader.textStyle.outline, layout.grid.subgroupHeader.textStyle.outlineColor);
                         ImGui::PopID();
+                    }
+                    ImGui::EndGroupPanel();
+                }
+
+                if (ImGui::CollapsingHeader("Squad Manager"))
+                {
+                    ImGui::BeginGroupPanel("General", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                    {
+                        ImGui::Checkbox("Allow drag-and-drop without keybind##SM_ALLOW_DND", &layout.grid.squadManager.allowDragDropWithoutKeybind);
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(?)");
+                        ImGui::TooltipGeneric(
+                            "Allows dragging and dropping players\n" \
+                            "between subgroups without needing to\n" \
+                            "hold the Squad Manager keybind.");
+
+                        ImGui::Checkbox("Allow moving grid without keybind##SM_ALLOW_MOVE", &layout.grid.squadManager.allowMoveWithoutKeybind);
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(?)");
+                        ImGui::TooltipGeneric(
+                            "Shows the move grip at all times without\n" \
+                            "needing to hold the Squad Manager\n" \
+                            "keybind.");
+
+                        ImGui::Checkbox("Allow resizing grid without keybind##SM_ALLOW_RESIZE", &layout.grid.squadManager.allowResizeWithoutKeybind);
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(?)");
+                        ImGui::TooltipGeneric(
+                            "Shows the resize grip at all times\n" \
+                            "without needing to hold the Squad\n" \
+                            "Manager keybind.");
                     }
                     ImGui::EndGroupPanel();
                 }
@@ -1300,10 +1394,10 @@ namespace Addon {
                 form_Position(indicator.text.position);
             }
 
-            ImGui::TextDisabled("Text");
+            ImGui::TextDisabled("Data Source");
             ImGui::Separator();
             {
-                form_TextContent(indicator.text.textContent, indicator.text.textCustom);
+                form_TextDataSource(indicator.text.textContent, indicator.text.textCustom);
             }
 
             ImGui::TextDisabled("Text Style");
@@ -1320,6 +1414,48 @@ namespace Addon {
             ImGui::Separator();
             {
                 form_Trigger(indicator.text.trigger);
+            }
+        }
+
+        if ("Bar" == indicator.type)
+        {
+            ImGui::TextDisabled("Position");
+            ImGui::Separator();
+            {
+                form_Position(indicator.bar.position);
+            }
+
+            ImGui::TextDisabled("Data Source");
+            ImGui::Separator();
+            {
+                form_BarDataSource(indicator.bar.dataSource, indicator.bar.dataEffect, indicator.bar.dataMaxValue);
+            }
+
+            ImGui::TextDisabled("Bar Properties");
+            ImGui::Separator();
+            {
+                form_BarProperties(indicator.bar.size, indicator.bar.backgroundColor, indicator.bar.foregroundColor, indicator.bar.rounding, indicator.bar.borderThickness, indicator.bar.borderColor);
+            }
+
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.bar.trigger);
+            }
+        }
+
+        if ("Threshold" == indicator.type)
+        {
+            ImGui::TextDisabled("Threshold Properties");
+            ImGui::Separator();
+            {
+                form_Threshold(indicator.threshold.percentage, indicator.threshold.stretchToFitHeight, indicator.threshold.line);
+            }
+
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.threshold.trigger);
             }
         }
     }
@@ -1459,6 +1595,26 @@ namespace Addon {
                 ImGui::ColorEdit4("Shroud (Specter)", &(ColourPresets.COLOUR_HEATMAP_SHROUD_SPECTER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_HEATMAP_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_HEATMAP_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+            }
+            ImGui::PopID();
+        });
+
+        AddPresetItem(coloursBranchId, "Colors", "Role", []() {
+            ImGui::PushID("Colors/Role");
+            {
+                ImGui::TextDisabled("Color Properties");
+                ImGui::Separator();
+                ImGui::ColorEdit4("Background", &(ColourPresets.COLOUR_ROLE_BACKGROUND.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Background (Unknown)", &(ColourPresets.COLOUR_ROLE_BACKGROUND_UNKNOWN.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Damage)", &(ColourPresets.COLOUR_ROLE_HEALTH_DAMAGE.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Damage Boon)", &(ColourPresets.COLOUR_ROLE_HEALTH_DAMAGE_BOON.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Healer Boon)", &(ColourPresets.COLOUR_ROLE_HEALTH_HEALER_BOON.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Downed)", &(ColourPresets.COLOUR_ROLE_HEALTH_DOWNED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Health (Defeated)", &(ColourPresets.COLOUR_ROLE_HEALTH_DEFEATED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Necromancer)", &(ColourPresets.COLOUR_ROLE_SHROUD_NECROMANCER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Shroud (Specter)", &(ColourPresets.COLOUR_ROLE_SHROUD_SPECTER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Barrier", &(ColourPresets.COLOUR_ROLE_BARRIER.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
+                ImGui::ColorEdit4("Hovered", &(ColourPresets.COLOUR_ROLE_HOVERED.Value.x), ImGuiColorEditFlags_AlphaPreviewHalf);
             }
             ImGui::PopID();
         });

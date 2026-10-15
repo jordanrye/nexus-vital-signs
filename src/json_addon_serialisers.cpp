@@ -271,6 +271,35 @@ void dser_TextIndicator_t(json& object, TextIndicator_t& text)
     }
 }
 
+void dser_BarIndicator_t(json& object, BarIndicator_t& bar)
+{
+    if (!object.is_null())
+    {
+        dser_Position_t(object["position"], bar.position);
+        dser_Size_t(object["size"], bar.size);
+        dser_ImColor(object["background-color"], bar.backgroundColor);
+        dser_ImColor(object["foreground-color"], bar.foregroundColor);
+        dser_BasicType(object["rounding"], bar.rounding);
+        dser_BasicType(object["border-thickness"], bar.borderThickness);
+        dser_ImColor(object["border-color"], bar.borderColor);
+        dser_BasicType(object["data-source"], bar.dataSource);
+        dser_BasicType(object["data-effect"], bar.dataEffect);
+        dser_BasicType(object["data-max-value"], bar.dataMaxValue);
+        dser_Trigger_t(object["trigger"], bar.trigger);
+    }
+}
+
+void dser_ThresholdIndicator_t(json& object, ThresholdIndicator_t& threshold)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["percentage"], threshold.percentage);
+        dser_BasicType(object["stretch-to-fit-height"], threshold.stretchToFitHeight);
+        dser_Line_t(object["line"], threshold.line);
+        dser_Trigger_t(object["trigger"], threshold.trigger);
+    }
+}
+
 void dser_Group_t(json& object, Group_t& group)
 {
     if (!object.is_null())
@@ -323,6 +352,12 @@ void dser_Indicator_t(json& object, Indicator_t& indicator)
         else if ("Text" == indicator.type) {
             dser_TextIndicator_t(object["text"], indicator.text);
         }
+        else if ("Bar" == indicator.type) {
+            dser_BarIndicator_t(object["bar"], indicator.bar);
+        }
+        else if ("Threshold" == indicator.type) {
+            dser_ThresholdIndicator_t(object["threshold"], indicator.threshold);
+        }
     }
 }
 
@@ -336,6 +371,14 @@ void dser_FrameStatePreset_t(json& object, FrameStatePreset_t& preset)
         dser_ImColor(object["overlay-color"], preset.overlayColor);
         dser_BasicType(object["glow-enabled"], preset.glowEnabled);
         dser_GlowIndicator_t(object["glow"], preset.glow);
+    }
+}
+
+void dser_PlayerFrameProperties_t(json& object, PlayerFrameProperties_t& properties)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["shroud-mode"], properties.shroudMode);
     }
 }
 
@@ -362,6 +405,16 @@ void dser_SubgroupHeaderProperties_t(json& object, SubgroupHeaderProperties_t& p
     }
 }
 
+void dser_SquadManagerProperties_t(json& object, SquadManagerProperties_t& properties)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["allow-drag-drop-without-keybind"], properties.allowDragDropWithoutKeybind);
+        dser_BasicType(object["allow-move-without-keybind"], properties.allowMoveWithoutKeybind);
+        dser_BasicType(object["allow-resize-without-keybind"], properties.allowResizeWithoutKeybind);
+    }
+}
+
 void dser_GridProperties_t(json& object, GridProperties_t& properties)
 {
     if (!object.is_null())
@@ -375,7 +428,9 @@ void dser_GridProperties_t(json& object, GridProperties_t& properties)
         dser_BasicType(object["cell-rounding"], properties.cellRounding);
         dser_BasicType(object["spacing-horizontal"], properties.spacingHorizontal);
         dser_BasicType(object["spacing-vertical"], properties.spacingVertical);
+        dser_PlayerFrameProperties_t(object["player-frames"], properties.playerFrames);
         dser_SubgroupHeaderProperties_t(object["subgroup-header"], properties.subgroupHeader);
+        dser_SquadManagerProperties_t(object["squad-manager"], properties.squadManager);
     }
 }
 
@@ -396,6 +451,7 @@ void dser_Layout_t(json& object, Layout_t& layout)
     if (!object.is_null())
     {
         dser_BasicType(object["type"], layout.type);
+        dser_BasicType(object["sort-by"], layout.sortBy);
         dser_GridProperties_t(object["grid"], layout.grid);
         dser_RadialProperties_t(object["radial"], layout.radial);
         dser_BasicType(object["border"], layout.itemBorder);
@@ -637,6 +693,33 @@ json ser_TextIndicator_t(const TextIndicator_t& text)
     return object;
 }
 
+json ser_BarIndicator_t(const BarIndicator_t& bar)
+{
+    json object = json::object();
+    object["position"] = ser_Position_t(bar.position);
+    object["size"] = ser_Size_t(bar.size);
+    object["background-color"] = ser_ImColor(bar.backgroundColor);
+    object["foreground-color"] = ser_ImColor(bar.foregroundColor);
+    object["rounding"] = bar.rounding;
+    object["border-thickness"] = bar.borderThickness;
+    object["border-color"] = ser_ImColor(bar.borderColor);
+    object["data-source"] = bar.dataSource;
+    object["data-effect"] = bar.dataEffect;
+    object["data-max-value"] = bar.dataMaxValue;
+    object["trigger"] = ser_Trigger_t(bar.trigger);
+    return object;
+}
+
+json ser_ThresholdIndicator_t(const ThresholdIndicator_t& threshold)
+{
+    json object = json::object();
+    object["percentage"] = threshold.percentage;
+    object["stretch-to-fit-height"] = threshold.stretchToFitHeight;
+    object["line"] = ser_Line_t(threshold.line);
+    object["trigger"] = ser_Trigger_t(threshold.trigger);
+    return object;
+}
+
 json ser_Group_t(const Group_t& group)
 {
     json object = json::object();
@@ -678,6 +761,12 @@ json ser_Indicator_t(const Indicator_t& indicator)
     else if ("Text" == indicator.type) {
         object["text"] = ser_TextIndicator_t(indicator.text);
     }
+    else if ("Bar" == indicator.type) {
+        object["bar"] = ser_BarIndicator_t(indicator.bar);
+    }
+    else if ("Threshold" == indicator.type) {
+        object["threshold"] = ser_ThresholdIndicator_t(indicator.threshold);
+    }
 
     return object;
 }
@@ -691,6 +780,13 @@ json ser_FrameStatePreset_t(const FrameStatePreset_t& preset)
     object["overlay-color"] = ser_ImColor(preset.overlayColor);
     object["glow-enabled"] = preset.glowEnabled;
     object["glow"] = ser_GlowIndicator_t(preset.glow);
+    return object;
+}
+
+json ser_PlayerFrameProperties_t(const PlayerFrameProperties_t& properties)
+{
+    json object = json::object();
+    object["shroud-mode"] = properties.shroudMode;
     return object;
 }
 
@@ -717,6 +813,15 @@ json ser_SubgroupHeaderProperties_t(const SubgroupHeaderProperties_t& properties
     return object;
 }
 
+json ser_SquadManagerProperties_t(const SquadManagerProperties_t& properties)
+{
+    json object = json::object();
+    object["allow-drag-drop-without-keybind"] = properties.allowDragDropWithoutKeybind;
+    object["allow-move-without-keybind"] = properties.allowMoveWithoutKeybind;
+    object["allow-resize-without-keybind"] = properties.allowResizeWithoutKeybind;
+    return object;
+}
+
 json ser_GridProperties_t(const GridProperties_t& properties)
 {
     json object = json::object();
@@ -729,7 +834,9 @@ json ser_GridProperties_t(const GridProperties_t& properties)
     object["cell-rounding"] = properties.cellRounding;
     object["spacing-horizontal"] = properties.spacingHorizontal;
     object["spacing-vertical"] = properties.spacingVertical;
+    object["player-frames"] = ser_PlayerFrameProperties_t(properties.playerFrames);
     object["subgroup-header"] = ser_SubgroupHeaderProperties_t(properties.subgroupHeader);
+    object["squad-manager"] = ser_SquadManagerProperties_t(properties.squadManager);
     return object;
 }
 
@@ -748,6 +855,7 @@ json ser_Layout_t(const Layout_t& layout)
 {
     json object = json::object();
     object["type"] = layout.type;
+    object["sort-by"] = layout.sortBy;
     object["grid"] = ser_GridProperties_t(layout.grid);
     object["radial"] = ser_RadialProperties_t(layout.radial);
     object["border"] = layout.itemBorder;

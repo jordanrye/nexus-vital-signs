@@ -185,6 +185,7 @@
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChCliOrder.cpp" />
     <ClCompile Include="src\data_link\data_link.cpp" />
     <ClCompile Include="src\entry.cpp" />
+    <ClCompile Include="src\forms\bar.cpp" />
     <ClCompile Include="src\forms\select_layout.cpp" />
     <ClCompile Include="src\forms\direction.cpp" />
     <ClCompile Include="src\forms\font.cpp" />
@@ -196,8 +197,9 @@
     <ClCompile Include="src\forms\select_layout_type.cpp" />
     <ClCompile Include="src\forms\size.cpp" />
     <ClCompile Include="src\forms\texture.cpp" />
-    <ClCompile Include="src\forms\text_content.cpp" />
+    <ClCompile Include="src\forms\text_data_source.cpp" />
     <ClCompile Include="src\forms\text_limit.cpp" />
+    <ClCompile Include="src\forms\threshold.cpp" />
     <ClCompile Include="src\forms\trigger.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Agent\Agent.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\AgentSelection\AsContext.cpp" />

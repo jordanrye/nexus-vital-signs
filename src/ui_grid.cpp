@@ -41,14 +41,6 @@ namespace UI::Grid {
         bool isValid[MAX_GRID_CELLS];
         VitalSignsDataLink::UserData_t userData[MAX_GRID_CELLS];
         VitalSignsDataLink::UserId_t userIdHovered;
-
-        // Checkbox state
-        struct CheckboxData_t {
-            ImVec2 position;
-            int subgroupId;
-            float size;
-        };
-        std::vector<CheckboxData_t> headerCheckboxes;
     } context;
 
     struct GridDrawProperties_t 
@@ -159,12 +151,13 @@ namespace UI::Grid {
     void DrawBorder(ImDrawList * const drawList, DrawProperties_t properties, ImColor colour, float thickness)
     {
         /* Calculate an offset so that the border is positioned inside the cell. */
-        float offset = thickness / 2.f;
+        float offset = ImMax(0.0f, (thickness - 1.0f) / 2.0f);
+        float rounding = (properties.rounding > 0.0f) ? ImMax(0.0f, properties.rounding - offset) : 0.0f;
  
         ImVec2 p_min(properties.position.x + offset, properties.position.y + offset);
         ImVec2 p_max(properties.position.x + properties.width - offset, properties.position.y + properties.height - offset);
 
-        drawList->AddRect(p_min, p_max, colour, properties.rounding, properties.roundingCorners, thickness);
+        drawList->AddRect(p_min, p_max, colour, rounding, properties.roundingCorners, thickness);
     }
 
     void DrawIconText(ImDrawList* const drawList, const ImVec2& iconPosition, const ImVec2& iconSize, const char* text, const IconText_t& config, const IconText_t& globalConfig)
@@ -347,10 +340,6 @@ namespace UI::Grid {
             
             ImFont* activeFont = font ? font : ImGui::GetFont();
             
-            bool showCheckbox = Addon::isSquadManagerActive && context.hiddenSubgroups;
-            float checkboxSize = showCheckbox ? fontSize : 0.0f;
-            float checkboxSpacing = showCheckbox ? 8.0f : 0.0f;
-            
             std::vector<VitalSignsDataLink::SubgroupId_t> activeSubgroups;
             for (int i = 0; i < context.index; i++) {
                 if (context.isValid[i]) {
@@ -365,8 +354,8 @@ namespace UI::Grid {
             {
                 const char* text = "10";
                 ImVec2 textSize = activeFont->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
-                textHeight = ImMax(textSize.y, checkboxSize);
-                textWidth = textSize.x + checkboxSpacing + checkboxSize;
+                textHeight = textSize.y;
+                textWidth = textSize.x;
             } 
             else
             {
@@ -374,8 +363,8 @@ namespace UI::Grid {
                 {
                     std::string str = std::to_string(subgroupId);
                     ImVec2 textSize = activeFont->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, str.c_str());
-                    textHeight = ImMax(textHeight, ImMax(textSize.y, checkboxSize));
-                    textWidth = ImMax(textWidth, textSize.x + checkboxSpacing + checkboxSize);
+                    textHeight = ImMax(textHeight, textSize.y);
+                    textWidth = ImMax(textWidth, textSize.x);
                 }
             }
         }
@@ -511,7 +500,6 @@ namespace UI::Grid {
             context.hiddenSubgroups = hiddenSubgroups;
             context.colourPresets = colours;
             context.borderPresets = borders;
-            context.headerCheckboxes.clear();
 
             context.isActive = isActive;
             context.isClose = false;
@@ -656,6 +644,35 @@ namespace UI::Grid {
             return false;
         }
 
+        if (trigger.category == "Primary Roles")
+        {
+            if (trigger.effect == "Damage" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Damage) return true;
+            if (trigger.effect == "Damage (Alacrity)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageAlacrity) return true;
+            if (trigger.effect == "Damage (Quickness)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageQuickness) return true;
+            if (trigger.effect == "Healer (Alacrity)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerAlacrity) return true;
+            if (trigger.effect == "Healer (Quickness)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerQuickness) return true;
+            if (trigger.effect == "Flexible" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Flexible) return true;
+        }
+
+        if (trigger.category == "Secondary Roles")
+        {
+            if (trigger.effect == "Tank" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Tank) return true;
+            if (trigger.effect == "Kiter" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Kiter) return true;
+            if (trigger.effect == "Utility" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Utility) return true;
+        }
+
+        if (trigger.category == "Squad Markers")
+        {
+            if (trigger.effect == "Arrow" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Arrow) return true;
+            if (trigger.effect == "Circle" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Circle) return true;
+            if (trigger.effect == "Heart" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Heart) return true;
+            if (trigger.effect == "Square" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Square) return true;
+            if (trigger.effect == "Star" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Star) return true;
+            if (trigger.effect == "Spiral" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Spiral) return true;
+            if (trigger.effect == "Triangle" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Triangle) return true;
+            if (trigger.effect == "X" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::X) return true;
+        }
+
         if (trigger.category == "Health")
         {
             bool statusMatch = false;
@@ -666,7 +683,9 @@ namespace UI::Grid {
             else if (trigger.effect == "Shroud (Specter)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER) statusMatch = true;
             else if (trigger.effect == "Unknown" && userData.HealthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) statusMatch = true;
 
-            float healthRatio = userData.GetHealthRatio() * 100.0f; // Scale to match UI values (0-100)
+            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+            float ratio = (isShrouded && (trigger.effect == "Shroud (Necromancer)" || trigger.effect == "Shroud (Specter)")) ? userData.GetShroudRatio() : userData.GetHealthRatio();
+            float healthRatio = ratio * 100.0f; // Scale to match UI values (0-100)
 
             if ((trigger.condition == "Status: Active" && statusMatch) ||
                 (trigger.condition == "Status: Inactive" && !statusMatch) ||
@@ -793,6 +812,22 @@ namespace UI::Grid {
                 else if (indicator.type == "Text")
                 {
                     if (IsTriggerMet(indicator.text.trigger, userData, isPreviewed) || isTraversalForced)
+                    {
+                        outDrawables.push_back({ &indicator, isPreviewed });
+                        isApplied = true;
+                    }
+                }
+                else if (indicator.type == "Bar")
+                {
+                    if (IsTriggerMet(indicator.bar.trigger, userData, isPreviewed) || isTraversalForced)
+                    {
+                        outDrawables.push_back({ &indicator, isPreviewed });
+                        isApplied = true;
+                    }
+                }
+                else if (indicator.type == "Threshold")
+                {
+                    if (IsTriggerMet(indicator.threshold.trigger, userData, isPreviewed) || isTraversalForced)
                     {
                         outDrawables.push_back({ &indicator, isPreviewed });
                         isApplied = true;
@@ -1033,6 +1068,83 @@ namespace UI::Grid {
                     
             drawList->AddText(font, fontSize, pos, color, text.c_str());
         }
+        else if (indicator->type == "Bar")
+        {
+            float fillRatio = 0.0f;
+            if (indicator->bar.dataSource == "Health percentage")
+            {
+                fillRatio = userData.GetHealthRatio();
+            }
+            else if (indicator->bar.dataSource == "Barrier percentage")
+            {
+                /* Maximum barrier is equal to half of the user's maximum health */
+                fillRatio = userData.GetBarrierRatio() * 2.0f;
+            }
+            else if (indicator->bar.dataSource == "Shroud percentage")
+            {
+                fillRatio = userData.GetShroudRatio();
+            }
+            else if (indicator->bar.dataSource == "Effect duration")
+            {
+                if (indicator->bar.dataMaxValue > 0.0f)
+                {
+                    fillRatio = (userData.Effects[indicator->bar.dataEffect].duration / 1000.0f) / indicator->bar.dataMaxValue;
+                }
+            }
+            else if (indicator->bar.dataSource == "Effect stacks")
+            {
+                if (indicator->bar.dataMaxValue > 0.0f)
+                {
+                    fillRatio = (float)userData.Effects[indicator->bar.dataEffect].stacks / indicator->bar.dataMaxValue;
+                }
+            }
+            fillRatio = ImClamp(fillRatio, 0.0f, 1.0f);
+
+            ImVec2 barSize = ImVec2((float)indicator->bar.size.width, (float)indicator->bar.size.height);
+            ImVec2 barPosition = CalcItemPosition(parentProperties, barSize, indicator->bar.position.anchor, indicator->bar.position.offset);
+
+            // Floor the position to ensure crisp 1px borders
+            barPosition.x = std::floor(barPosition.x);
+            barPosition.y = std::floor(barPosition.y);
+
+            DrawProperties_t barProps;
+            barProps.position = barPosition;
+            barProps.width = barSize.x;
+            barProps.height = barSize.y;
+            barProps.rounding = indicator->bar.rounding;
+            barProps.roundingCorners = ImDrawCornerFlags_All;
+
+            float borderThickness = (float)indicator->bar.borderThickness;
+
+            DrawProperties_t bgProps = barProps;
+            if (borderThickness > 0.0f)
+            {
+                bgProps.position.x += borderThickness;
+                bgProps.position.y += borderThickness;
+                bgProps.width -= borderThickness * 2.0f;
+                bgProps.height -= borderThickness * 2.0f;
+                bgProps.rounding = ImMax(0.0f, bgProps.rounding - borderThickness);
+            }
+
+            // Background
+            DrawCell(drawList, bgProps, indicator->bar.backgroundColor);
+
+            // Fill
+            if (fillRatio > 0.0f)
+            {
+                DrawProperties_t fillProps = bgProps;
+                fillProps.width *= fillRatio;
+                fillProps.roundingCorners = (fillProps.width < (bgProps.width - bgProps.rounding)) ? ImDrawCornerFlags_Left : ImDrawCornerFlags_All;
+                
+                DrawCell(drawList, fillProps, indicator->bar.foregroundColor);
+            }
+
+            // Border
+            if (indicator->bar.borderThickness > 0)
+            {
+                DrawBorder(drawList, barProps, indicator->bar.borderColor, (float)indicator->bar.borderThickness);
+            }
+        }
     }
 
     void DrawTextWithDecorators(ImDrawList* drawList, ImFont* font, float fontSize, ImVec2 pos, ImColor color, bool useShadow, ImColor shadowColor, bool useOutline, ImColor outlineColor, const std::string& text)
@@ -1067,6 +1179,34 @@ namespace UI::Grid {
                 ImVec2 rMax = ImVec2(p1.x + thickness * 0.5f, p1.y + t + currentDashLen);
                 drawList->AddRectFilled(rMin, rMax, color);
             }
+        }
+    }
+
+    void DrawThreshold(ImDrawList* const drawList, const DrawProperties_t& properties, const ThresholdIndicator_t& threshold)
+    {
+        float clampedPct = ImClamp(threshold.percentage, 0.0f, 100.0f);
+        float xPos = std::floor(properties.position.x + (properties.width * (clampedPct / 100.0f)));
+
+        float height = threshold.stretchToFitHeight ? properties.height : (float)threshold.line.length;
+        if (height <= 0.0f) return;
+
+        float yPos = std::floor(properties.position.y + (properties.height - height) * 0.5f);
+        float thickness = ImMax(1.0f, (float)threshold.line.thickness);
+        float xOffset = std::floor(thickness * 0.5f);
+
+        if (threshold.line.style == "Dashed")
+        {
+            DrawDashedLine(drawList, ImVec2(xPos, yPos), ImVec2(xPos, yPos + height), threshold.line.color, thickness, 4.0f, 4.0f);
+        }
+        else if (threshold.line.style == "Dotted")
+        {
+            DrawDashedLine(drawList, ImVec2(xPos, yPos), ImVec2(xPos, yPos + height), threshold.line.color, thickness, thickness, 2.0f);
+        }
+        else
+        {
+            ImVec2 rMin = ImVec2(xPos - xOffset, yPos);
+            ImVec2 rMax = ImVec2(xPos - xOffset + thickness, yPos + height);
+            drawList->AddRectFilled(rMin, rMax, threshold.line.color);
         }
     }
 
@@ -1218,14 +1358,41 @@ namespace UI::Grid {
                 scanIdx++;
             }
 
-            std::stable_sort(validUsers.begin(), validUsers.end(), [clientId](const VitalSignsDataLink::UserData_t& a, const VitalSignsDataLink::UserData_t& b) {
-                auto getPriority = [clientId](const VitalSignsDataLink::UserData_t& user) -> int {
+            std::string sortBy = context.layoutConfig->layout.sortBy;
+            std::stable_sort(validUsers.begin(), validUsers.end(), [clientId, sortBy](const VitalSignsDataLink::UserData_t& a, const VitalSignsDataLink::UserData_t& b) {
+                auto getDefaultPriority = [clientId](const VitalSignsDataLink::UserData_t& user) -> int {
                     if (user.SquadRole == VitalSignsDataLink::ESquadRole::Commander) return 0;
                     if (user.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant) return 1;
                     if (user.UserId == clientId) return 2;
                     return 3;
                 };
-                return getPriority(a) < getPriority(b);
+
+                if (sortBy == "Roles")
+                {
+                    auto getRolePriority = [](const VitalSignsDataLink::UserData_t& user) -> int {
+                        switch (user.PrimaryRole)
+                        {
+                            case VitalSignsDataLink::EPrimaryRole::HealerAlacrity: return 0;
+                            case VitalSignsDataLink::EPrimaryRole::HealerQuickness: return 1;
+                            case VitalSignsDataLink::EPrimaryRole::DamageAlacrity: return 2;
+                            case VitalSignsDataLink::EPrimaryRole::DamageQuickness: return 3;
+                            case VitalSignsDataLink::EPrimaryRole::Flexible: return 4;
+                            case VitalSignsDataLink::EPrimaryRole::Damage: return 5;
+                            case VitalSignsDataLink::EPrimaryRole::None:
+                            default: return 6;
+                        }
+                    };
+                    
+                    int priorityA = getRolePriority(a);
+                    int priorityB = getRolePriority(b);
+                    
+                    if (priorityA != priorityB) 
+                        return priorityA < priorityB;
+                        
+                    return getDefaultPriority(a) < getDefaultPriority(b);
+                }
+
+                return getDefaultPriority(a) < getDefaultPriority(b);
             });
 
             for (size_t i = 0; i < subgroupIndices.size(); i++)
@@ -1382,24 +1549,7 @@ namespace UI::Grid {
             if (showHeader && droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1))
             {
                 std::string headerText = std::to_string(droppedSubgroupId + 1);
-                
-                bool isHidden = false;
-                if (context.hiddenSubgroups)
-                {
-                    isHidden = std::find(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), droppedSubgroupId) != context.hiddenSubgroups->end();
-                }
-
-                if (isHidden)
-                {
-                    /// FIXME: Opacity not working for hidden subgroups
-                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
-                }
                 ImVec2 text_size = activeFont->CalcTextSizeA(effectiveFontSize, FLT_MAX, 0.0f, headerText.c_str());
-
-                bool showCheckbox = Addon::isSquadManagerActive && context.hiddenSubgroups && (droppedSubgroupId != static_cast<VitalSignsDataLink::SubgroupId_t>(-1));
-                float checkboxSize = showCheckbox ? max_text_size.y : 0.0f;
-                float checkboxSpacing = showCheckbox ? 8.0f : 0.0f;
-                ImVec2 totalSize = ImVec2(max_text_size.x + checkboxSpacing + checkboxSize, max_text_size.y);
 
                 ImVec2 header_p_min, header_p_max;
                 float headerWidth = 0.0f, headerHeight = 0.0f;
@@ -1408,7 +1558,7 @@ namespace UI::Grid {
                 {
                     if (shProps.type == "Bracket")
                     {
-                        CalcBracketGeometry(shProps, grid_p_min, grid_p_max, totalSize, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
+                        CalcBracketGeometry(shProps, grid_p_min, grid_p_max, max_text_size, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
                         
                         ImU32 brktCol = shProps.bracket.line.color;
                         float thickness = (float)shProps.bracket.line.thickness;
@@ -1467,7 +1617,7 @@ namespace UI::Grid {
                     }
                     else if (shProps.type == "Rectangle")
                     {
-                        CalcRectangleGeometry(shProps, grid_p_min, grid_p_max, totalSize, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
+                        CalcRectangleGeometry(shProps, grid_p_min, grid_p_max, max_text_size, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
 
                         ImU32 bgCol = shProps.rectangle.color;
                         float rounding = (float)shProps.rectangle.rounding;
@@ -1481,7 +1631,7 @@ namespace UI::Grid {
                 }
                 else if (shProps.position == "Internal")
                 {
-                    CalcDividerGeometry(shProps, grid_p_min, grid_p_max, totalSize, gridLayout.squadDirection, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
+                    CalcDividerGeometry(shProps, grid_p_min, grid_p_max, max_text_size, gridLayout.squadDirection, gridLayout.frameDirection, (float)context.layoutConfig->layout.grid.spacingVertical, (float)context.layoutConfig->layout.grid.spacingHorizontal, header_p_min, header_p_max, headerWidth, headerHeight);
                     
                     if (shProps.type == "Line")
                     {
@@ -1526,7 +1676,7 @@ namespace UI::Grid {
                 }
 
                 DrawProperties_t headerProps = {header_p_min, headerWidth, headerHeight, 0, ImDrawCornerFlags_All};
-                ImVec2 startPosition = CalcItemPosition(headerProps, totalSize, shProps.textPosition.anchor, shProps.textPosition.offset);
+                ImVec2 startPosition = CalcItemPosition(headerProps, max_text_size, shProps.textPosition.anchor, shProps.textPosition.offset);
                 
                 // Enforce centered vertical/horizontal position next to the bracket
                 if (shProps.position == "External" && shProps.type == "Bracket")
@@ -1537,60 +1687,48 @@ namespace UI::Grid {
                     
                     if (shProps.anchor == "Left") {
                         float padding = (float)context.layoutConfig->layout.grid.spacingHorizontal;
-                        startPosition = ImVec2(header_p_max.x - outerArmLength - innerArmLength - totalSize.x - padding, header_p_min.y + (headerHeight - totalSize.y) * 0.5f) + offset;
+                        startPosition = ImVec2(header_p_max.x - outerArmLength - innerArmLength - max_text_size.x - padding, header_p_min.y + (headerHeight - max_text_size.y) * 0.5f) + offset;
                     } else if (shProps.anchor == "Right") {
                         float padding = (float)context.layoutConfig->layout.grid.spacingHorizontal;
-                        startPosition = ImVec2(header_p_min.x + outerArmLength + innerArmLength + padding, header_p_min.y + (headerHeight - totalSize.y) * 0.5f) + offset;
+                        startPosition = ImVec2(header_p_min.x + outerArmLength + innerArmLength + padding, header_p_min.y + (headerHeight - max_text_size.y) * 0.5f) + offset;
                     } else if (shProps.anchor == "Top") {
                         float padding = (float)context.layoutConfig->layout.grid.spacingVertical;
-                        startPosition = ImVec2(header_p_min.x + (headerWidth - totalSize.x) * 0.5f, header_p_max.y - outerArmLength - innerArmLength - totalSize.y - padding) + offset;
+                        startPosition = ImVec2(header_p_min.x + (headerWidth - max_text_size.x) * 0.5f, header_p_max.y - outerArmLength - innerArmLength - max_text_size.y - padding) + offset;
                     } else if (shProps.anchor == "Bottom") {
                         float padding = (float)context.layoutConfig->layout.grid.spacingVertical;
-                        startPosition = ImVec2(header_p_min.x + (headerWidth - totalSize.x) * 0.5f, header_p_min.y + outerArmLength + innerArmLength + padding) + offset;
+                        startPosition = ImVec2(header_p_min.x + (headerWidth - max_text_size.x) * 0.5f, header_p_min.y + outerArmLength + innerArmLength + padding) + offset;
                     }
                 }
                 
-                ImVec2 textPosition;
-                ImVec2 checkboxPosition;
-                
-                if (shProps.anchor == "Left") {
-                    checkboxPosition = ImVec2(startPosition.x, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
-                    textPosition = ImVec2(startPosition.x + (showCheckbox ? checkboxSize + checkboxSpacing : 0.0f) + (max_text_size.x - text_size.x) * 0.5f, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
-                } else {
-                    textPosition = ImVec2(startPosition.x + (max_text_size.x - text_size.x) * 0.5f, startPosition.y + (totalSize.y - text_size.y) * 0.5f);
-                    checkboxPosition = ImVec2(startPosition.x + max_text_size.x + checkboxSpacing, startPosition.y + (totalSize.y - checkboxSize) * 0.5f);
-                }
-
+                ImVec2 textPosition = ImVec2(startPosition.x + (max_text_size.x - text_size.x) * 0.5f, startPosition.y + (max_text_size.y - text_size.y) * 0.5f);
                 DrawTextWithDecorators(drawList, font, effectiveFontSize, textPosition, effectiveColor, effectiveShadow, effectiveShadowColor, effectiveOutline, effectiveOutlineColor, headerText);
-
-                if (showCheckbox)
-                {
-                    context.headerCheckboxes.push_back({checkboxPosition, droppedSubgroupId, checkboxSize});
-                }
-
-                if (isHidden)
-                {
-                    ImGui::PopStyleVar();
-                }
             }
-            else if (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1) && Addon::isSquadManagerActive)
+            else if (droppedSubgroupId == static_cast<VitalSignsDataLink::SubgroupId_t>(-1))
             {
-                ImVec2 cell_p_min = firstCellProps.position;
-                ImVec2 cell_p_max = ImVec2(firstCellProps.position.x + firstCellProps.width, firstCellProps.position.y + firstCellProps.height);
-                ImU32 col = ImColor(255, 255, 255, 255);
-                float thickness = ImMax(1.0f, (float)context.layoutConfig->layout.itemBorder);
-                float dashLen = 4.0f;
-                float gapLen = 4.0f;
-                
-                // Ensure p1 < p2 for DrawDashedLine logic
-                DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_min.y), ImVec2(cell_p_max.x, cell_p_min.y), col, thickness, dashLen, gapLen); // Top
-                DrawDashedLine(drawList, ImVec2(cell_p_max.x, cell_p_min.y), ImVec2(cell_p_max.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Right
-                DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_max.y), ImVec2(cell_p_max.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Bottom
-                DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_min.y), ImVec2(cell_p_min.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Left
+                bool allowDragDrop = Addon::isSquadManagerActive || context.layoutConfig->layout.grid.squadManager.allowDragDropWithoutKeybind;
+                const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+                bool isDraggingUser = (payload != nullptr && payload->IsDataType("VS_USER_ID"));
+                bool showEmptySlot = Addon::isSquadManagerActive || (allowDragDrop && isDraggingUser);
+                if (showEmptySlot)
+                {
+                    ImVec2 cell_p_min = firstCellProps.position;
+                    ImVec2 cell_p_max = ImVec2(firstCellProps.position.x + firstCellProps.width, firstCellProps.position.y + firstCellProps.height);
+                    ImU32 col = ImColor(255, 255, 255, 255);
+                    float thickness = ImMax(1.0f, (float)context.layoutConfig->layout.itemBorder);
+                    float dashLen = 4.0f;
+                    float gapLen = 4.0f;
+                    
+                    // Ensure p1 < p2 for DrawDashedLine logic
+                    DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_min.y), ImVec2(cell_p_max.x, cell_p_min.y), col, thickness, dashLen, gapLen); // Top
+                    DrawDashedLine(drawList, ImVec2(cell_p_max.x, cell_p_min.y), ImVec2(cell_p_max.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Right
+                    DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_max.y), ImVec2(cell_p_max.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Bottom
+                    DrawDashedLine(drawList, ImVec2(cell_p_min.x, cell_p_min.y), ImVec2(cell_p_min.x, cell_p_max.y), col, thickness, dashLen, gapLen); // Left
+                }
             }
 
             // Squad Manager: Drag-and-drop (drop)
-            if (Addon::isSquadManagerActive && ImGui::BeginDragDropTarget())
+            bool allowDragDrop = Addon::isSquadManagerActive || context.layoutConfig->layout.grid.squadManager.allowDragDropWithoutKeybind;
+            if (allowDragDrop && ImGui::BeginDragDropTarget())
             {
                 drawList->AddRectFilled(p_min, p_max, ImColor(255, 255, 255, 64), context.layoutConfig->layout.grid.cellRounding);
 
@@ -1631,18 +1769,6 @@ namespace UI::Grid {
             }
 
             VitalSignsDataLink::UserData_t& userData = context.userData[i];
-
-            bool isHidden = false;
-            if (context.hiddenSubgroups)
-            {
-                isHidden = std::find(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), userData.SubgroupId) != context.hiddenSubgroups->end();
-            }
-
-            if (isHidden)
-            {
-                /// FIXME: Opacity not working for hidden subgroups
-                ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
-            }
 
             ImGui::PushID(userData.AccountName.c_str());
             {
@@ -1700,37 +1826,37 @@ namespace UI::Grid {
 
                     if (clientId != userData.UserId)
                     {
-                        if (ImGui::Button("Whisper")) { VitalsData->whisperUser(userData.UserId); }
-                        if (ImGui::Button("Send Mail")) { VitalsData->sendMail(userData.AccountName); }
+                        if (ImGui::MenuItem("Whisper")) { VitalsData->whisperUser(userData.UserId); }
+                        if (ImGui::MenuItem("Send Mail")) { VitalsData->sendMail(userData.AccountName); }
                         if (userData.IsInInstance)
                         {
-                            if (ImGui::Button("Inspect Cosmetics")) { VitalsData->inspectCosmetics(userData.UserId); }
+                            if (ImGui::MenuItem("Inspect Cosmetics")) { VitalsData->inspectCosmetics(userData.UserId); }
                         }
                         if (clientMap == userData.MapName && !userData.IsInInstance)
                         {
-                            if (ImGui::Button("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
+                            if (ImGui::MenuItem("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
                         }
                         if (userData.IsHomesteadOwner && !userData.IsInInstance)
                         {
-                            if (ImGui::Button("Join in Homestead")) { VitalsData->joinUserHomestead(userData.UserId); }
+                            if (ImGui::MenuItem("Join in Homestead")) { VitalsData->joinUserHomestead(userData.UserId); }
                         }
 
                         ImGui::Separator();
                         if (userData.ContactType != VitalSignsDataLink::EContactType::Friend)
                         {
-                            if (ImGui::Button("Add Friend")) { VitalsData->addFriend(userData.UserId); }
+                            if (ImGui::MenuItem("Add Friend")) { VitalsData->addFriend(userData.UserId); }
                         }
                         else
                         {
-                            if (ImGui::Button("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
+                            if (ImGui::MenuItem("Remove Friend")) { VitalsData->removeFriend(userData.UserId); }
                         }
                         if (userData.ContactType != VitalSignsDataLink::EContactType::Blocked)
                         {
-                            if (ImGui::Button("Block")) { VitalsData->blockUser(userData.UserId); }
+                            if (ImGui::MenuItem("Block")) { VitalsData->blockUser(userData.UserId); }
                         }
                         else
                         {
-                            if (ImGui::Button("Unblock")) { VitalsData->unblockUser(userData.UserId); }
+                            if (ImGui::MenuItem("Unblock")) { VitalsData->unblockUser(userData.UserId); }
                         }
                     }
 
@@ -1744,39 +1870,95 @@ namespace UI::Grid {
                             {
                                 if (userData.IsCommanderUnlocked)
                                 {
-                                    if (ImGui::Button("Appoint Squad Leader")) { VitalsData->setCommander(userData.UserId); }
+                                    if (ImGui::MenuItem("Appoint Squad Leader")) { VitalsData->setCommander(userData.UserId); }
                                 }
                                 if (userData.SquadRole == VitalSignsDataLink::ESquadRole::None)
                                 {
-                                    if (ImGui::Button("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
+                                    if (ImGui::MenuItem("Appoint Lieutenant")) { VitalsData->setLieutenant(userData.UserId, true); }
                                 }
                                 if (userData.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant)
                                 {
-                                    if (ImGui::Button("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
+                                    if (ImGui::MenuItem("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
                                 }
                             }
-                            if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
+                        }
+                        if (ImGui::BeginMenu("Set Primary Role"))
+                        {
+                            if (ImGui::MenuItem("Damage", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Damage)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Damage); }
+                            if (ImGui::MenuItem("Damage (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageAlacrity); }
+                            if (ImGui::MenuItem("Damage (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageQuickness); }
+                            if (ImGui::MenuItem("Healer (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerAlacrity); }
+                            if (ImGui::MenuItem("Healer (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerQuickness); }
+                            if (ImGui::MenuItem("Flexible", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Flexible)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Flexible); }
+                            if (ImGui::MenuItem("None", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::None)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::None); }
+                            ImGui::EndMenu();
+                        }
+                        if (ImGui::BeginMenu("Set Secondary Role"))
+                        {
+                            if (ImGui::MenuItem("Tank", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Tank)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Tank); }
+                            if (ImGui::MenuItem("Kiter", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Kiter)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Kiter); }
+                            if (ImGui::MenuItem("Utility", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Utility)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Utility); }
+                            if (ImGui::MenuItem("None", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::None)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::None); }
+                            ImGui::EndMenu();
+                        }
+                        if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
+                        {
+                            if (ImGui::BeginMenu("Set Marker"))
                             {
-                                if (ImGui::Button("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
+                                if (ImGui::MenuItem("Arrow", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Arrow)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Arrow); }
+                                if (ImGui::MenuItem("Circle", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Circle)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Circle); }
+                                if (ImGui::MenuItem("Heart", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Heart)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Heart); }
+                                if (ImGui::MenuItem("Square", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Square)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Square); }
+                                if (ImGui::MenuItem("Star", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Star)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Star); }
+                                if (ImGui::MenuItem("Spiral", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Spiral)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Spiral); }
+                                if (ImGui::MenuItem("Triangle", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Triangle)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Triangle); }
+                                if (ImGui::MenuItem("X", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::X)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::X); }
+                                ImGui::EndMenu();
                             }
                         }
-                        if (ImGui::Button("Leave Squad")) { VitalsData->leaveGroup(); }
+                        if (clientId != userData.UserId)
+                        {
+                            if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
+                            {
+                                if (ImGui::MenuItem("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
+                            }
+                        }
+                        if (ImGui::MenuItem("Leave Squad")) { VitalsData->leaveGroup(); }
                     }
 
                     if (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_PARTY)
                     {
                         ImGui::Separator();
+                        if (ImGui::BeginMenu("Set Primary Role"))
+                        {
+                            if (ImGui::MenuItem("Damage", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Damage)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Damage); }
+                            if (ImGui::MenuItem("Damage (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageAlacrity); }
+                            if (ImGui::MenuItem("Damage (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageQuickness); }
+                            if (ImGui::MenuItem("Healer (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerAlacrity); }
+                            if (ImGui::MenuItem("Healer (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerQuickness); }
+                            if (ImGui::MenuItem("Flexible", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Flexible)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Flexible); }
+                            if (ImGui::MenuItem("None", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::None)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::None); }
+                            ImGui::EndMenu();
+                        }
+                        if (ImGui::BeginMenu("Set Secondary Role"))
+                        {
+                            if (ImGui::MenuItem("Tank", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Tank)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Tank); }
+                            if (ImGui::MenuItem("Kiter", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Kiter)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Kiter); }
+                            if (ImGui::MenuItem("Utility", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Utility)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Utility); }
+                            if (ImGui::MenuItem("None", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::None)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::None); }
+                            ImGui::EndMenu();
+                        }
                         if (clientId != userData.UserId)
                         {
-                            if (ImGui::Button("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
+                            if (ImGui::MenuItem("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
                         }
-                        if (ImGui::Button("Leave Party")) { VitalsData->leaveGroup(); }
+                        if (ImGui::MenuItem("Leave Party")) { VitalsData->leaveGroup(); }
                     }
 
                     if (clientId != userData.UserId)
                     {
                         ImGui::Separator();
-                        if (ImGui::Button("Report")) { VitalsData->reportUser(userData.UserId); }
+                        if (ImGui::MenuItem("Report")) { VitalsData->reportUser(userData.UserId); }
                     }
 
                     ImGui::EndPopup();
@@ -1784,7 +1966,24 @@ namespace UI::Grid {
 
                 const bool isHovered = IsItemHovered(parentProperties);
                 const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType);
-                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType, userData.GetHealthRatio(), userData.Profession);
+                
+                const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+                const std::string& shroudMode = context.layoutConfig->layout.grid.playerFrames.shroudMode;
+
+                VitalSignsDataLink::E_HEALTH_TYPE effectiveHealthType = userData.HealthType;
+                float effectiveHealthRatio = userData.GetHealthRatio();
+                if (isShrouded)
+                {
+                    if (shroudMode == "None" || shroudMode == "Split View")
+                    {
+                        effectiveHealthType = VitalSignsDataLink::E_HEALTH_ALIVE;
+                    }
+                    else // "Default"
+                    {
+                        effectiveHealthRatio = userData.GetShroudRatio();
+                    }
+                }
+                ImColor healthColour = GetHealthColour(context.colourPresets, context.layoutConfig->colors, effectiveHealthType, effectiveHealthRatio, userData.Profession, userData.PrimaryRole);
                 const ImColor barrierColour = GetBarrierColour(context.colourPresets, context.layoutConfig->colors);
                 const Indicator_t* borderStyle = nullptr;
     
@@ -1859,50 +2058,131 @@ namespace UI::Grid {
                 contentProps.position.y += borderThickness;
                 contentProps.width -= 2.0f * borderThickness;
                 contentProps.height -= 2.0f * borderThickness;
+                contentProps.rounding = ImMax(0.0f, contentProps.rounding - borderThickness);
                 
                 /* Background */
                 DrawCell(drawList, contentProps, backgroundColour);
                 
-                /* Health */
-                float health = userData.GetHealthRatio();
-                float barrier = userData.GetBarrierRatio();
+                /* Health, Shroud & Barrier */
+                if (isShrouded && shroudMode == "Split View")
+                {
+                    /* Split View: Top half is Health, Bottom half is Shroud with Barrier */
+                    float topHeight = std::floor(contentProps.height * 0.5f);
+                    float bottomHeight = contentProps.height - topHeight;
 
-                if (health > 0.001f)
-                {
-                    float healthWidth = contentProps.width * health;
-                    ImDrawCornerFlags roundingCorners = ((contentProps.width - healthWidth) < (float)contentProps.rounding) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
-                    DrawProperties_t properties = contentProps;
-                    properties.width = healthWidth;
-                    properties.roundingCorners = roundingCorners;
-    
-                    DrawCell(drawList, properties, healthColour);
-                }
-                
-                /* Barrier */
-                if (barrier > 0.001f)
-                {
-                    float barrierWidth = contentProps.width * barrier;
-                    DrawProperties_t properties = contentProps;
-                    properties.width = barrierWidth;
-    
-                    if ((barrier + health) > 0.999f)
+                    DrawProperties_t topProps = contentProps;
+                    topProps.height = topHeight;
+
+                    DrawProperties_t bottomProps = contentProps;
+                    bottomProps.position.y += topHeight;
+                    bottomProps.height = bottomHeight;
+
+                    /* Top Half: Health */
+                    float health = userData.GetHealthRatio();
+                    if (health > 0.001f)
                     {
-                        /* Overflow barrier */
-                        properties.position.x += contentProps.width - barrierWidth;
-                        properties.roundingCorners = ImDrawCornerFlags_Right;
-                        DrawCell(drawList, properties, barrierColour);
-                    }
-                    else
-                    {
-                        /* Padding barrier */
-                        float healthWidth = contentProps.width * health;
-                        ImDrawCornerFlags roundingCorners = ((healthWidth + barrierWidth) < (contentProps.width - (float)contentProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_Right;
-                        properties.position.x += healthWidth;
+                        float healthWidth = topProps.width * health;
+                        ImDrawCornerFlags roundingCorners = ((topProps.width - healthWidth) < (float)topProps.rounding) ? ImDrawCornerFlags_Top : ImDrawCornerFlags_TopLeft;
+                        DrawProperties_t properties = topProps;
+                        properties.width = healthWidth;
                         properties.roundingCorners = roundingCorners;
-                        DrawCell(drawList, properties, barrierColour);
+
+                        DrawCell(drawList, properties, healthColour);
+                    }
+
+                    /* Bottom Half: Shroud */
+                    float shroud = userData.GetShroudRatio();
+                    float barrier = userData.GetBarrierRatio();
+                    ImColor shroudColour = GetHealthColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType, shroud, userData.Profession, userData.PrimaryRole);
+
+                    if (shroud > 0.001f)
+                    {
+                        float shroudWidth = bottomProps.width * shroud;
+                        ImDrawCornerFlags roundingCorners = ((bottomProps.width - shroudWidth) < (float)bottomProps.rounding) ? ImDrawCornerFlags_Bot : ImDrawCornerFlags_BotLeft;
+                        DrawProperties_t properties = bottomProps;
+                        properties.width = shroudWidth;
+                        properties.roundingCorners = roundingCorners;
+
+                        DrawCell(drawList, properties, shroudColour);
+                    }
+
+                    /* Bottom Half: Barrier (accompanying Shroud) */
+                    if (barrier > 0.001f)
+                    {
+                        float barrierWidth = bottomProps.width * barrier;
+                        DrawProperties_t properties = bottomProps;
+                        properties.width = barrierWidth;
+
+                        if ((barrier + shroud) > 0.999f)
+                        {
+                            /* Overflow barrier */
+                            properties.position.x += bottomProps.width - barrierWidth;
+                            properties.roundingCorners = ImDrawCornerFlags_BotRight;
+                            DrawCell(drawList, properties, barrierColour);
+                        }
+                        else
+                        {
+                            /* Padding barrier */
+                            float shroudWidth = bottomProps.width * shroud;
+                            ImDrawCornerFlags roundingCorners = ((shroudWidth + barrierWidth) < (bottomProps.width - (float)bottomProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_BotRight;
+                            properties.position.x += shroudWidth;
+                            properties.roundingCorners = roundingCorners;
+                            DrawCell(drawList, properties, barrierColour);
+                        }
+                    }
+                }
+                else
+                {
+                    /* Single Bar View: Default (switches to Shroud if shrouded) or None / Non-shrouded (Health) */
+                    float displayedResource = (isShrouded && (shroudMode != "None")) ? userData.GetShroudRatio() : userData.GetHealthRatio();
+                    float barrier = userData.GetBarrierRatio();
+
+                    if (displayedResource > 0.001f)
+                    {
+                        float resourceWidth = contentProps.width * displayedResource;
+                        ImDrawCornerFlags roundingCorners = ((contentProps.width - resourceWidth) < (float)contentProps.rounding) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left;
+                        DrawProperties_t properties = contentProps;
+                        properties.width = resourceWidth;
+                        properties.roundingCorners = roundingCorners;
+
+                        DrawCell(drawList, properties, healthColour);
+                    }
+
+                    /* Barrier */
+                    if (barrier > 0.001f)
+                    {
+                        float barrierWidth = contentProps.width * barrier;
+                        DrawProperties_t properties = contentProps;
+                        properties.width = barrierWidth;
+
+                        if ((barrier + displayedResource) > 0.999f)
+                        {
+                            /* Overflow barrier */
+                            properties.position.x += contentProps.width - barrierWidth;
+                            properties.roundingCorners = ImDrawCornerFlags_Right;
+                            DrawCell(drawList, properties, barrierColour);
+                        }
+                        else
+                        {
+                            /* Padding barrier */
+                            float resourceWidth = contentProps.width * displayedResource;
+                            ImDrawCornerFlags roundingCorners = ((resourceWidth + barrierWidth) < (contentProps.width - (float)contentProps.rounding)) ? ImDrawCornerFlags_None : ImDrawCornerFlags_Right;
+                            properties.position.x += resourceWidth;
+                            properties.roundingCorners = roundingCorners;
+                            DrawCell(drawList, properties, barrierColour);
+                        }
                     }
                 }
     
+                /* Threshold */
+                for (const auto& pair : drawables)
+                {
+                    if (pair.first->type == "Threshold")
+                    {
+                        DrawThreshold(drawList, contentProps, pair.first->threshold);
+                    }
+                }
+
                 // Inner glows
                 for (auto preset : activePresets)
                 {
@@ -1936,7 +2216,8 @@ namespace UI::Grid {
                 }
 
                 /* Squad Manager: Drag-and-drop (drag) */
-                if (Addon::isSquadManagerActive && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                bool allowDragDrop = Addon::isSquadManagerActive || context.layoutConfig->layout.grid.squadManager.allowDragDropWithoutKeybind;
+                if (allowDragDrop && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
                     ImGui::SetDragDropPayload("VS_USER_ID", &userData.UserId, sizeof(userData.UserId));
                     ImGui::Text("%s", userData.GetDisplayName().c_str());
@@ -1952,18 +2233,16 @@ namespace UI::Grid {
                 }
             }
             ImGui::PopID();
-            
-            if (isHidden)
-            {
-                ImGui::PopStyleVar();
-            }
         }
 
         splitter.Merge(drawList);
         drawList->PopClipRect();
 
         // Squad Manager: Move and re-size
-        if (Addon::isSquadManagerActive)
+        bool allowMove = Addon::isSquadManagerActive || context.layoutConfig->layout.grid.squadManager.allowMoveWithoutKeybind;
+        bool allowResize = Addon::isSquadManagerActive || context.layoutConfig->layout.grid.squadManager.allowResizeWithoutKeybind;
+
+        if (allowMove || allowResize)
         {
             // Compute first cell for move grip
             DrawProperties_t firstCell = CalcDrawProperties(frameDrawProperties.size.x, frameDrawProperties.size.y, frameDrawProperties, ImDrawCornerFlags_All, gridDrawProperties, 0);
@@ -1976,126 +2255,134 @@ namespace UI::Grid {
 
             ImDrawList* fgDrawList = ImGui::GetForegroundDrawList();
 
-            auto drawDashedLine = [&](ImVec2 p1, ImVec2 p2, ImU32 col, float thickness, float dash_length, float gap_length) {
-                float dx = p2.x - p1.x;
-                float dy = p2.y - p1.y;
-                float length = std::sqrt(dx*dx + dy*dy);
-                if (length == 0.0f) return;
-                float nx = dx / length;
-                float ny = dy / length;
-                for (float t = 0.0f; t < length; t += dash_length + gap_length) {
-                    float t_end = ImMin(t + dash_length, length);
-                    fgDrawList->AddLine(ImVec2(p1.x + nx * t, p1.y + ny * t), ImVec2(p1.x + nx * t_end, p1.y + ny * t_end), col, thickness);
-                }
-            };
-
             ImVec2 border_min = ImVec2(ImMin(firstCell.position.x, lastCell.position.x) - 2.0f, ImMin(firstCell.position.y, lastCell.position.y) - 2.0f);
             ImVec2 border_max = ImVec2(ImMax(firstCell.position.x + firstCell.width, lastCell.position.x + lastCell.width) + 2.0f, ImMax(firstCell.position.y + firstCell.height, lastCell.position.y + lastCell.height) + 2.0f);
-            ImU32 dash_col = ImColor(200, 200, 200, 150);
-            drawDashedLine(border_min, ImVec2(border_max.x, border_min.y), dash_col, 1.0f, 4.0f, 4.0f);
-            drawDashedLine(ImVec2(border_max.x, border_min.y), border_max, dash_col, 1.0f, 4.0f, 4.0f);
-            drawDashedLine(border_max, ImVec2(border_min.x, border_max.y), dash_col, 1.0f, 4.0f, 4.0f);
-            drawDashedLine(ImVec2(border_min.x, border_max.y), border_min, dash_col, 1.0f, 4.0f, 4.0f);
 
             // Move Grip
-            float moveGripWidth = 22.0f;
-            float moveGripHeight = 24.0f;
-            ImVec2 moveGripMin;
-            std::string cellDir = context.layoutConfig->layout.grid.frameDirection;
-            if (cellDir == "Top-to-bottom") {
-                // Header is above, place grip to the left of the dotted line's top-left corner
-                moveGripMin = ImVec2(border_min.x - moveGripWidth - 6.0f, border_min.y);
-            } else if (cellDir == "Left-to-right") {
-                // Header is to the left, place grip above the dotted line's top-left corner
-                moveGripMin = ImVec2(border_min.x, border_min.y - moveGripHeight - 6.0f);
-            } else {
-                // Top-left is free, place diagonally
-                moveGripMin = ImVec2(border_min.x - moveGripWidth - 6.0f, border_min.y - moveGripHeight - 6.0f);
-            }
-            
-            ImGui::SetNextWindowPos(moveGripMin);
-            ImGui::SetNextWindowSize(ImVec2(moveGripWidth, moveGripHeight));
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-            ImGui::Begin("##MoveGripWindow", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
-            ImGui::InvisibleButton("##MoveGripBtn", ImVec2(moveGripWidth, moveGripHeight));
-            if (ImGui::IsItemActive())
+            if (allowMove)
             {
-                context.layoutConfig->position.offset.x += ImGui::GetIO().MouseDelta.x;
-                context.layoutConfig->position.offset.y += ImGui::GetIO().MouseDelta.y;
-            }
-            // Draw move grip
-            fgDrawList->AddRectFilled(moveGripMin, ImVec2(moveGripMin.x + moveGripWidth, moveGripMin.y + moveGripHeight), ImColor(100, 100, 100, 200), 2.0f);
-            for (int r = 0; r < 2; ++r) {
-                for (int c = 0; c < 3; ++c) {
-                    fgDrawList->AddCircleFilled(ImVec2(moveGripMin.x + 7.0f + r * 8.0f, moveGripMin.y + 6.0f + c * 6.0f), 2.0f, ImColor(200, 200, 200, 255));
-                }
-            }
-            ImGui::End();
-            ImGui::PopStyleVar();
-
-            // Resize Grip
-            static ImVec2 resize_drag_accum(0.0f, 0.0f);
-            
-            float resizeGripSize = 24.0f;
-            ImVec2 resizeGripMax(border_max.x + 6.0f, border_max.y + 6.0f);
-            ImVec2 resizeGripMin(resizeGripMax.x - resizeGripSize, resizeGripMax.y - resizeGripSize);
-            
-            ImGui::SetNextWindowPos(resizeGripMin);
-            ImGui::SetNextWindowSize(ImVec2(resizeGripSize, resizeGripSize));
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-            ImGui::Begin("##ResizeGripWindow", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
-            ImGui::InvisibleButton("##ResizeGripBtn", ImVec2(resizeGripSize, resizeGripSize));
-            if (ImGui::IsItemActive())
-            {
-                resize_drag_accum.x += ImGui::GetIO().MouseDelta.x;
-                resize_drag_accum.y += ImGui::GetIO().MouseDelta.y;
-
-                float cellTotalWidth = frameDrawProperties.size.x + frameDrawProperties.spacing.x + frameDrawProperties.padding.w;
-                float cellTotalHeight = frameDrawProperties.size.y + frameDrawProperties.spacing.y + frameDrawProperties.padding.x;
-                if (std::abs(resize_drag_accum.x) > cellTotalWidth)
-                {
-                    int drag_units = (int)(resize_drag_accum.x / cellTotalWidth);
-                    context.layoutConfig->layout.grid.maxColumns = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.maxColumns + drag_units));
-                    resize_drag_accum.x -= drag_units * cellTotalWidth;
+                float moveGripWidth = 22.0f;
+                float moveGripHeight = 24.0f;
+                ImVec2 moveGripMin;
+                std::string cellDir = context.layoutConfig->layout.grid.frameDirection;
+                if (cellDir == "Top-to-bottom") {
+                    // Header is above, place grip to the left of the dotted line's top-left corner
+                    moveGripMin = ImVec2(border_min.x - moveGripWidth - 6.0f, border_min.y);
+                } else if (cellDir == "Left-to-right") {
+                    // Header is to the left, place grip above the dotted line's top-left corner
+                    moveGripMin = ImVec2(border_min.x, border_min.y - moveGripHeight - 6.0f);
+                } else {
+                    // Top-left is free, place diagonally
+                    moveGripMin = ImVec2(border_min.x - moveGripWidth - 6.0f, border_min.y - moveGripHeight - 6.0f);
                 }
                 
-                if (std::abs(resize_drag_accum.y) > cellTotalHeight)
+                ImGui::SetNextWindowPos(moveGripMin);
+                ImGui::SetNextWindowSize(ImVec2(moveGripWidth, moveGripHeight));
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+                ImGui::Begin("##MoveGripWindow", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+                ImGui::InvisibleButton("##MoveGripBtn", ImVec2(moveGripWidth, moveGripHeight));
+                if (ImGui::IsItemActive())
                 {
-                    int drag_units = (int)(resize_drag_accum.y / cellTotalHeight);
-                    context.layoutConfig->layout.grid.maxRows = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.maxRows + drag_units));
-                    resize_drag_accum.y -= drag_units * cellTotalHeight;
+                    context.layoutConfig->position.offset.x += ImGui::GetIO().MouseDelta.x;
+                    context.layoutConfig->position.offset.y += ImGui::GetIO().MouseDelta.y;
                 }
+                // Draw move grip
+                fgDrawList->AddRectFilled(moveGripMin, ImVec2(moveGripMin.x + moveGripWidth, moveGripMin.y + moveGripHeight), ImColor(100, 100, 100, 200), 2.0f);
+                for (int r = 0; r < 2; ++r) {
+                    for (int c = 0; c < 3; ++c) {
+                        fgDrawList->AddCircleFilled(ImVec2(moveGripMin.x + 7.0f + r * 8.0f, moveGripMin.y + 6.0f + c * 6.0f), 2.0f, ImColor(200, 200, 200, 255));
+                    }
+                }
+                ImGui::End();
+                ImGui::PopStyleVar();
             }
-            else
+
+            // Resize Grip
+            if (allowResize)
             {
-                resize_drag_accum = ImVec2(0.0f, 0.0f); // reset when not dragging
-            }
-            
-            // Draw resize grip
-            ImU32 resizeCol = ImGui::IsItemHovered() ? ImColor(130, 130, 130, 255) : ImColor(100, 100, 100, 200);
-            auto drawRoundedTriangle = [&](ImVec2 min, ImVec2 max, float r, ImU32 col) {
-                float d = r * 2.41421356f;
-                if (max.x - min.x < 2.0f * d || max.y - min.y < 2.0f * d) {
-                    fgDrawList->AddTriangleFilled(ImVec2(min.x, max.y), max, ImVec2(max.x, min.y), col);
-                    return;
+                static ImVec2 resize_drag_accum(0.0f, 0.0f);
+
+                auto drawDashedLine = [&](ImVec2 p1, ImVec2 p2, ImU32 color, float thickness, float dashLength, float gapLength) {
+                    float dx = p2.x - p1.x;
+                    float dy = p2.y - p1.y;
+                    float length = std::sqrt(dx*dx + dy*dy);
+                    if (length == 0.0f) return;
+                    float nx = dx / length;
+                    float ny = dy / length;
+                    for (float t = 0.0f; t < length; t += dashLength + gapLength) {
+                        float t_end = ImMin(t + dashLength, length);
+                        fgDrawList->AddLine(ImVec2(p1.x + nx * t, p1.y + ny * t), ImVec2(p1.x + nx * t_end, p1.y + ny * t_end), color, thickness);
+                    }
+                };
+
+                // Draw resize border
+                ImU32 dashColor = ImColor(200, 200, 200, 150);
+                drawDashedLine(border_min, ImVec2(border_max.x, border_min.y), dashColor, 1.0f, 4.0f, 4.0f);
+                drawDashedLine(ImVec2(border_max.x, border_min.y), border_max, dashColor, 1.0f, 4.0f, 4.0f);
+                drawDashedLine(border_max, ImVec2(border_min.x, border_max.y), dashColor, 1.0f, 4.0f, 4.0f);
+                drawDashedLine(ImVec2(border_min.x, border_max.y), border_min, dashColor, 1.0f, 4.0f, 4.0f);
+                
+                float resizeGripSize = 24.0f;
+                ImVec2 resizeGripMax(border_max.x + 6.0f, border_max.y + 6.0f);
+                ImVec2 resizeGripMin(resizeGripMax.x - resizeGripSize, resizeGripMax.y - resizeGripSize);
+                
+                ImGui::SetNextWindowPos(resizeGripMin);
+                ImGui::SetNextWindowSize(ImVec2(resizeGripSize, resizeGripSize));
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+                ImGui::Begin("##ResizeGripWindow", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+                ImGui::InvisibleButton("##ResizeGripBtn", ImVec2(resizeGripSize, resizeGripSize));
+                if (ImGui::IsItemActive())
+                {
+                    resize_drag_accum.x += ImGui::GetIO().MouseDelta.x;
+                    resize_drag_accum.y += ImGui::GetIO().MouseDelta.y;
+
+                    float cellTotalWidth = frameDrawProperties.size.x + frameDrawProperties.spacing.x + frameDrawProperties.padding.w;
+                    float cellTotalHeight = frameDrawProperties.size.y + frameDrawProperties.spacing.y + frameDrawProperties.padding.x;
+                    if (std::abs(resize_drag_accum.x) > cellTotalWidth)
+                    {
+                        int drag_units = (int)(resize_drag_accum.x / cellTotalWidth);
+                        context.layoutConfig->layout.grid.maxColumns = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.maxColumns + drag_units));
+                        resize_drag_accum.x -= drag_units * cellTotalWidth;
+                    }
+                    
+                    if (std::abs(resize_drag_accum.y) > cellTotalHeight)
+                    {
+                        int drag_units = (int)(resize_drag_accum.y / cellTotalHeight);
+                        context.layoutConfig->layout.grid.maxRows = ImMax(1, ImMin((int)UI::SQUAD_MEMBER_LIMIT, context.layoutConfig->layout.grid.maxRows + drag_units));
+                        resize_drag_accum.y -= drag_units * cellTotalHeight;
+                    }
                 }
-                fgDrawList->PathClear();
-                fgDrawList->PathArcTo(ImVec2(max.x - r, max.y - r), r, 0.0f, IM_PI / 2.0f, 5);
-                fgDrawList->PathArcTo(ImVec2(min.x + d, max.y - r), r, IM_PI / 2.0f, IM_PI * 1.25f, 5);
-                fgDrawList->PathArcTo(ImVec2(max.x - r, min.y + d), r, IM_PI * 1.25f, IM_PI * 2.0f, 5);
-                fgDrawList->PathFillConvex(col);
-            };
-            drawRoundedTriangle(resizeGripMin, resizeGripMax, 2.0f, resizeCol);
-            
-            ImU32 lineCol = ImGui::IsItemHovered() ? ImColor(255, 255, 255, 255) : ImColor(200, 200, 200, 255);
-            for (int i = 1; i <= 3; ++i) {
-                float offset = i * 4.0f + 3.0f;
-                ImVec2 p1(resizeGripMax.x - 4.0f, resizeGripMax.y - offset);
-                ImVec2 p2(resizeGripMax.x - offset, resizeGripMax.y - 4.0f);
-                fgDrawList->AddLine(p1, p2, lineCol, 1.5f);
+                else
+                {
+                    resize_drag_accum = ImVec2(0.0f, 0.0f); // reset when not dragging
+                }
+                
+                // Draw resize grip
+                ImU32 resizeCol = ImGui::IsItemHovered() ? ImColor(130, 130, 130, 255) : ImColor(100, 100, 100, 200);
+                auto drawRoundedTriangle = [&](ImVec2 min, ImVec2 max, float r, ImU32 col) {
+                    float d = r * 2.41421356f;
+                    if (max.x - min.x < 2.0f * d || max.y - min.y < 2.0f * d) {
+                        fgDrawList->AddTriangleFilled(ImVec2(min.x, max.y), max, ImVec2(max.x, min.y), col);
+                        return;
+                    }
+                    fgDrawList->PathClear();
+                    fgDrawList->PathArcTo(ImVec2(max.x - r, max.y - r), r, 0.0f, IM_PI / 2.0f, 5);
+                    fgDrawList->PathArcTo(ImVec2(min.x + d, max.y - r), r, IM_PI / 2.0f, IM_PI * 1.25f, 5);
+                    fgDrawList->PathArcTo(ImVec2(max.x - r, min.y + d), r, IM_PI * 1.25f, IM_PI * 2.0f, 5);
+                    fgDrawList->PathFillConvex(col);
+                };
+                drawRoundedTriangle(resizeGripMin, resizeGripMax, 2.0f, resizeCol);
+                
+                ImU32 lineCol = ImGui::IsItemHovered() ? ImColor(255, 255, 255, 255) : ImColor(200, 200, 200, 255);
+                for (int i = 1; i <= 3; ++i) {
+                    float offset = i * 4.0f + 3.0f;
+                    ImVec2 p1(resizeGripMax.x - 4.0f, resizeGripMax.y - offset);
+                    ImVec2 p2(resizeGripMax.x - offset, resizeGripMax.y - 4.0f);
+                    fgDrawList->AddLine(p1, p2, lineCol, 1.5f);
+                }
+                ImGui::End();
+                ImGui::PopStyleVar();
             }
-            ImGui::End();
-            ImGui::PopStyleVar();
         }
 
         if (ImGui::IsWindowHovered() && (context.indexHovered == -1))
@@ -2116,55 +2403,6 @@ namespace UI::Grid {
 
         ImGui::PopID(); // Pushed in `BeginGridMenu`
         ImGui::End(); // Begin in `BeginGridMenu`
-        
-        // Squad Manager: Visibility Checkboxes
-        if (Addon::isSquadManagerActive && context.hiddenSubgroups)
-        {
-            ImFont* font = nullptr;
-            if (ConfigText.fontSource != "Nexus font" && ConfigText.fontSource != "Default font")
-            {
-                font = utils::font::GetFont(ConfigText.font, ConfigText.fontSize);
-            }
-            
-            if (font) ImGui::PushFont(font);
-
-            for (const auto& cb : context.headerCheckboxes)
-            {
-                ImGui::SetNextWindowPos(cb.position);
-                float defaultFontSize = ImGui::GetFontSize();
-                float scale = cb.size / defaultFontSize;
-                ImGui::SetNextWindowSize(ImVec2(cb.size * 2.0f, cb.size));
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-                
-                std::string windowName = "##VisibilityGripWindow" + std::to_string(cb.subgroupId);
-                ImGui::Begin(windowName.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
-                
-                ImGui::SetWindowFontScale(scale);
-                
-                bool isVisible = std::find(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), cb.subgroupId) == context.hiddenSubgroups->end();
-                
-                ImGui::PushID(cb.subgroupId);
-                if (ImGui::Checkbox("##Visibility", &isVisible))
-                {
-                    if (isVisible)
-                    {
-                        context.hiddenSubgroups->erase(std::remove(context.hiddenSubgroups->begin(), context.hiddenSubgroups->end(), cb.subgroupId), context.hiddenSubgroups->end());
-                    }
-                    else
-                    {
-                        context.hiddenSubgroups->push_back(cb.subgroupId);
-                    }
-                }
-                ImGui::PopID();
-                
-                ImGui::End();
-                ImGui::PopStyleVar(3);
-            }
-            
-            if (font) ImGui::PopFont();
-        }
     }
 
     bool GridMenuItem(const VitalSignsDataLink::UserData_t& userData)

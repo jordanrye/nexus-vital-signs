@@ -1,6 +1,6 @@
 #include "forms.h"
 
-void form_TextContent(std::string& textType, std::string& textCustom)
+void form_TextDataSource(std::string& textType, std::string& textCustom)
 {
     static const char* textTypeOptions[] = {
         "Character name",
@@ -17,7 +17,7 @@ void form_TextContent(std::string& textType, std::string& textCustom)
     else if (textType == "Health percentage") option = 3;
     else if (textType == "Custom text") option = 4;
 
-    ImGui::Combo("Text##TEXT_CONTENT", &option, textTypeOptions, IM_ARRAYSIZE(textTypeOptions));
+    ImGui::Combo("Source##TEXT_CONTENT", &option, textTypeOptions, IM_ARRAYSIZE(textTypeOptions));
     textType = textTypeOptions[option];
 
     if (textType == "Custom text")

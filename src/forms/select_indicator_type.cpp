@@ -9,7 +9,9 @@ void form_SelectIndicatorType(std::string& indicatorType, bool isDisabled)
         "Border",
         "Colour",
         "Glow",
-        "Text"
+        "Text",
+        "Bar",
+        "Threshold",
     };
 
     int option = 0; // Default to "Icon"
@@ -20,6 +22,8 @@ void form_SelectIndicatorType(std::string& indicatorType, bool isDisabled)
     else if (indicatorType == "Colour") option = 4;
     else if (indicatorType == "Glow") option = 5;
     else if (indicatorType == "Text") option = 6;
+    else if (indicatorType == "Bar") option = 7;
+    else if (indicatorType == "Threshold") option = 8;
 
     if (isDisabled) { ImGui::BeginDisabled(); }
     ImGui::Combo("Type##", &option, indicatorTypeOptions, IM_ARRAYSIZE(indicatorTypeOptions));

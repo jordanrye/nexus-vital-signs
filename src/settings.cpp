@@ -125,6 +125,19 @@ namespace Settings
                     dser_ImColor(colors["heat-map-barrier"], ColourPresets.COLOUR_HEATMAP_BARRIER);
                     dser_ImColor(colors["heat-map-hovered"], ColourPresets.COLOUR_HEATMAP_HOVERED);
 
+                    /* Role Colours */
+                    dser_ImColor(colors["role-background"], ColourPresets.COLOUR_ROLE_BACKGROUND);
+                    dser_ImColor(colors["role-background-unknown"], ColourPresets.COLOUR_ROLE_BACKGROUND_UNKNOWN);
+                    dser_ImColor(colors["role-health-damage"], ColourPresets.COLOUR_ROLE_HEALTH_DAMAGE);
+                    dser_ImColor(colors["role-health-damage-boon"], ColourPresets.COLOUR_ROLE_HEALTH_DAMAGE_BOON);
+                    dser_ImColor(colors["role-health-healer-boon"], ColourPresets.COLOUR_ROLE_HEALTH_HEALER_BOON);
+                    dser_ImColor(colors["role-health-downed"], ColourPresets.COLOUR_ROLE_HEALTH_DOWNED);
+                    dser_ImColor(colors["role-health-defeated"], ColourPresets.COLOUR_ROLE_HEALTH_DEFEATED);
+                    dser_ImColor(colors["role-health-shroud-necromancer"], ColourPresets.COLOUR_ROLE_SHROUD_NECROMANCER);
+                    dser_ImColor(colors["role-health-shroud-specter"], ColourPresets.COLOUR_ROLE_SHROUD_SPECTER);
+                    dser_ImColor(colors["role-barrier"], ColourPresets.COLOUR_ROLE_BARRIER);
+                    dser_ImColor(colors["role-hovered"], ColourPresets.COLOUR_ROLE_HOVERED);
+
                     /** TODO: Move into separate `Border` config. */
                     dser_ImColor(colors["border"], BorderPresets.COLOUR_BORDER);
                 }
@@ -310,6 +323,19 @@ namespace Settings
             colors["heat-map-health-shroud-specter"] = ser_ImColor(ColourPresets.COLOUR_HEATMAP_SHROUD_SPECTER);
             colors["heat-map-barrier"] = ser_ImColor(ColourPresets.COLOUR_HEATMAP_BARRIER);
             colors["heat-map-hovered"] = ser_ImColor(ColourPresets.COLOUR_HEATMAP_HOVERED);
+            
+            /* Role Colours */
+            colors["role-background"] = ser_ImColor(ColourPresets.COLOUR_ROLE_BACKGROUND);
+            colors["role-background-unknown"] = ser_ImColor(ColourPresets.COLOUR_ROLE_BACKGROUND_UNKNOWN);
+            colors["role-health-damage"] = ser_ImColor(ColourPresets.COLOUR_ROLE_HEALTH_DAMAGE);
+            colors["role-health-damage-boon"] = ser_ImColor(ColourPresets.COLOUR_ROLE_HEALTH_DAMAGE_BOON);
+            colors["role-health-healer-boon"] = ser_ImColor(ColourPresets.COLOUR_ROLE_HEALTH_HEALER_BOON);
+            colors["role-health-downed"] = ser_ImColor(ColourPresets.COLOUR_ROLE_HEALTH_DOWNED);
+            colors["role-health-defeated"] = ser_ImColor(ColourPresets.COLOUR_ROLE_HEALTH_DEFEATED);
+            colors["role-health-shroud-necromancer"] = ser_ImColor(ColourPresets.COLOUR_ROLE_SHROUD_NECROMANCER);
+            colors["role-health-shroud-specter"] = ser_ImColor(ColourPresets.COLOUR_ROLE_SHROUD_SPECTER);
+            colors["role-barrier"] = ser_ImColor(ColourPresets.COLOUR_ROLE_BARRIER);
+            colors["role-hovered"] = ser_ImColor(ColourPresets.COLOUR_ROLE_HOVERED);
             
             /** TODO: Move into separate `Border` config. */
             colors["border"] = ser_ImColor(BorderPresets.COLOUR_BORDER);
