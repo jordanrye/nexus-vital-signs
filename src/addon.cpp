@@ -964,6 +964,40 @@ namespace Addon {
                     }
                     ImGui::EndGroupPanel();
                 }
+
+                if (ImGui::CollapsingHeader("Squad Manager"))
+                {
+                    ImGui::BeginGroupPanel("General", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                    {
+                        ImGui::Checkbox("Allow drag-and-drop without keybind##SM_ALLOW_DND", &layout.grid.squadManager.allowDragDropWithoutKeybind);
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(?)");
+                        ImGui::TooltipGeneric(
+                            "Allows dragging and dropping players\n" \
+                            "between subgroups without needing to\n" \
+                            "hold the Squad Manager keybind.");
+
+                        ImGui::Checkbox("Allow moving grid without keybind##SM_ALLOW_MOVE", &layout.grid.squadManager.allowMoveWithoutKeybind);
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(?)");
+                        ImGui::TooltipGeneric(
+                            "Shows the move grip at all times without\n" \
+                            "needing to hold the Squad Manager\n" \
+                            "keybind.");
+
+                        ImGui::Checkbox("Allow resizing grid without keybind##SM_ALLOW_RESIZE", &layout.grid.squadManager.allowResizeWithoutKeybind);
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(?)");
+                        ImGui::TooltipGeneric(
+                            "Shows the resize grip at all times\n" \
+                            "without needing to hold the Squad\n" \
+                            "Manager keybind.");
+
+                        ImGui::Spacing();
+                        ImGui::TextDisabled("Tip: Hold the 'Toggle Squad Manager' keybind to reveal all controls and unhide subgroups.");
+                    }
+                    ImGui::EndGroupPanel();
+                }
             }
         }
     }

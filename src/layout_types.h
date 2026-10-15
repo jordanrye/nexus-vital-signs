@@ -277,6 +277,13 @@ struct SubgroupHeaderProperties_t
     Position_t textPosition;
 };
 
+struct SquadManagerProperties_t
+{
+    bool allowDragDropWithoutKeybind = true;
+    bool allowMoveWithoutKeybind = false;
+    bool allowResizeWithoutKeybind = false;
+};
+
 struct GridProperties_t
 {
     std::string frameDirection = "Left-to-right";
@@ -290,6 +297,7 @@ struct GridProperties_t
     int spacingHorizontal = 4;
     PlayerFrameProperties_t playerFrames;
     SubgroupHeaderProperties_t subgroupHeader;
+    SquadManagerProperties_t squadManager;
 };
 
 struct RadialProperties_t

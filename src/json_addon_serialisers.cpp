@@ -405,6 +405,16 @@ void dser_SubgroupHeaderProperties_t(json& object, SubgroupHeaderProperties_t& p
     }
 }
 
+void dser_SquadManagerProperties_t(json& object, SquadManagerProperties_t& properties)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["allow-drag-drop-without-keybind"], properties.allowDragDropWithoutKeybind);
+        dser_BasicType(object["allow-move-without-keybind"], properties.allowMoveWithoutKeybind);
+        dser_BasicType(object["allow-resize-without-keybind"], properties.allowResizeWithoutKeybind);
+    }
+}
+
 void dser_GridProperties_t(json& object, GridProperties_t& properties)
 {
     if (!object.is_null())
@@ -420,6 +430,7 @@ void dser_GridProperties_t(json& object, GridProperties_t& properties)
         dser_BasicType(object["spacing-vertical"], properties.spacingVertical);
         dser_PlayerFrameProperties_t(object["player-frames"], properties.playerFrames);
         dser_SubgroupHeaderProperties_t(object["subgroup-header"], properties.subgroupHeader);
+        dser_SquadManagerProperties_t(object["squad-manager"], properties.squadManager);
     }
 }
 
@@ -802,6 +813,15 @@ json ser_SubgroupHeaderProperties_t(const SubgroupHeaderProperties_t& properties
     return object;
 }
 
+json ser_SquadManagerProperties_t(const SquadManagerProperties_t& properties)
+{
+    json object = json::object();
+    object["allow-drag-drop-without-keybind"] = properties.allowDragDropWithoutKeybind;
+    object["allow-move-without-keybind"] = properties.allowMoveWithoutKeybind;
+    object["allow-resize-without-keybind"] = properties.allowResizeWithoutKeybind;
+    return object;
+}
+
 json ser_GridProperties_t(const GridProperties_t& properties)
 {
     json object = json::object();
@@ -816,6 +836,7 @@ json ser_GridProperties_t(const GridProperties_t& properties)
     object["spacing-vertical"] = properties.spacingVertical;
     object["player-frames"] = ser_PlayerFrameProperties_t(properties.playerFrames);
     object["subgroup-header"] = ser_SubgroupHeaderProperties_t(properties.subgroupHeader);
+    object["squad-manager"] = ser_SquadManagerProperties_t(properties.squadManager);
     return object;
 }
 

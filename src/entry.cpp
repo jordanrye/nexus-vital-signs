@@ -78,7 +78,7 @@ void AddonLoad(AddonAPI* aApi)
 		APIDefs->InputBinds.RegisterWithString("KB_HEALING_RADIAL", Addon::KeybindHandler, "(null)");
 		APIDefs->Localization.Set("KB_HEALING_RADIAL", "en", "Activate Radial Menu");
 
-		APIDefs->InputBinds.RegisterWithString("KB_VS_TOGGLE_SQUAD_MANAGER", Addon::KeybindHandler, "(null)");
+		APIDefs->InputBinds.RegisterWithString("KB_VS_TOGGLE_SQUAD_MANAGER", Addon::KeybindHandler, "SHIFT");
 		APIDefs->Localization.Set("KB_VS_TOGGLE_SQUAD_MANAGER", "en", "Toggle Squad Manager");
 	}
 
