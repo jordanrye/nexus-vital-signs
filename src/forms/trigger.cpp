@@ -8,10 +8,10 @@ void form_Trigger(Trigger_t& trigger)
         "Conditions",
         "Health",
         "Professions",
-        "Roles",
-        "Primary Roles",
-        "Secondary Roles",
+        "Party/Squad Roles",
+        "Assigned Roles",
         "Squad Markers",
+        "Targeting",
     };
     static const char* triggerBoonsEffectOptions[] {
         "Aegis",
@@ -99,22 +99,22 @@ void form_Trigger(Trigger_t& trigger)
         "Warrior: Paragon",
     };
     static const char* triggerRoleOptions[] {
+        "Self",
         "Commander",
         "Lieutenant",
+        "Vote Kick (Not Voted)",
+        "Vote Kick (Voted)",
+        "Ready Check (Not Ready)",
+        "Ready Check (Ready)",
         "Homestead Owner",
-        "Hovered",
-        "Selected",
-        "Self",
     };
-    static const char* triggerPrimaryRolesOptions[] {
+    static const char* triggerAssignedRolesOptions[] {
         "Damage",
         "Damage (Alacrity)",
         "Damage (Quickness)",
         "Healer (Alacrity)",
         "Healer (Quickness)",
         "Flexible",
-    };
-    static const char* triggerSecondaryRolesOptions[] {
         "Tank",
         "Kiter",
         "Utility",
@@ -128,6 +128,12 @@ void form_Trigger(Trigger_t& trigger)
         "Spiral",
         "Triangle",
         "X",
+    };
+    static const char* triggerTargetingOptions[] {
+        "Hovered",
+        "Selected",
+        "Personal Target",
+        "Party Target",
     };
     static const char* triggerConditionOptions[] {
         "Status: Active",
@@ -147,10 +153,10 @@ void form_Trigger(Trigger_t& trigger)
         else if (trigger.category == "Conditions") triggerCategory = 2;
         else if (trigger.category == "Health") triggerCategory = 3;
         else if (trigger.category == "Professions") triggerCategory = 4;
-        else if (trigger.category == "Roles") triggerCategory = 5;
-        else if (trigger.category == "Primary Roles") triggerCategory = 6;
-        else if (trigger.category == "Secondary Roles") triggerCategory = 7;
-        else if (trigger.category == "Squad Markers") triggerCategory = 8;
+        else if (trigger.category == "Party/Squad Roles") triggerCategory = 5;
+        else if (trigger.category == "Assigned Roles") triggerCategory = 6;
+        else if (trigger.category == "Squad Markers") triggerCategory = 7;
+        else if (trigger.category == "Targeting") triggerCategory = 8;
         ImGui::Combo("Category", &triggerCategory, triggerCategoryOptions, IM_ARRAYSIZE(triggerCategoryOptions));
         trigger.category = triggerCategoryOptions[triggerCategory];
     
@@ -226,7 +232,7 @@ void form_Trigger(Trigger_t& trigger)
             ImGui::Combo("Effect", &triggerEffect, triggerProfessionOptions, IM_ARRAYSIZE(triggerProfessionOptions));
             trigger.effect = triggerProfessionOptions[triggerEffect];
         }
-        else if ("Roles" == trigger.category)
+        else if ("Party/Squad Roles" == trigger.category)
         {
             int triggerEffect = 0;             
             for (int i = 0; i < IM_ARRAYSIZE(triggerRoleOptions); i++)
@@ -240,33 +246,19 @@ void form_Trigger(Trigger_t& trigger)
             ImGui::Combo("Effect", &triggerEffect, triggerRoleOptions, IM_ARRAYSIZE(triggerRoleOptions));
             trigger.effect = triggerRoleOptions[triggerEffect];
         }
-        else if ("Primary Roles" == trigger.category)
+        else if ("Assigned Roles" == trigger.category)
         {
-            int triggerEffect = 0;             
-            for (int i = 0; i < IM_ARRAYSIZE(triggerPrimaryRolesOptions); i++)
+            int triggerEffect = 0;
+            for (int i = 0; i < IM_ARRAYSIZE(triggerAssignedRolesOptions); i++)
             {
-                if (trigger.effect == triggerPrimaryRolesOptions[i])
+                if (trigger.effect == triggerAssignedRolesOptions[i])
                 {
                     triggerEffect = i;
                     break;
                 }
             }
-            ImGui::Combo("Effect", &triggerEffect, triggerPrimaryRolesOptions, IM_ARRAYSIZE(triggerPrimaryRolesOptions));
-            trigger.effect = triggerPrimaryRolesOptions[triggerEffect];
-        }
-        else if ("Secondary Roles" == trigger.category)
-        {
-            int triggerEffect = 0;             
-            for (int i = 0; i < IM_ARRAYSIZE(triggerSecondaryRolesOptions); i++)
-            {
-                if (trigger.effect == triggerSecondaryRolesOptions[i])
-                {
-                    triggerEffect = i;
-                    break;
-                }
-            }
-            ImGui::Combo("Effect", &triggerEffect, triggerSecondaryRolesOptions, IM_ARRAYSIZE(triggerSecondaryRolesOptions));
-            trigger.effect = triggerSecondaryRolesOptions[triggerEffect];
+            ImGui::Combo("Effect", &triggerEffect, triggerAssignedRolesOptions, IM_ARRAYSIZE(triggerAssignedRolesOptions));
+            trigger.effect = triggerAssignedRolesOptions[triggerEffect];
         }
         else if ("Squad Markers" == trigger.category)
         {
@@ -281,6 +273,20 @@ void form_Trigger(Trigger_t& trigger)
             }
             ImGui::Combo("Effect", &triggerEffect, triggerSquadMarkersOptions, IM_ARRAYSIZE(triggerSquadMarkersOptions));
             trigger.effect = triggerSquadMarkersOptions[triggerEffect];
+        }
+        else if ("Targeting" == trigger.category)
+        {
+            int triggerEffect = 0;
+            for (int i = 0; i < IM_ARRAYSIZE(triggerTargetingOptions); i++)
+            {
+                if (trigger.effect == triggerTargetingOptions[i])
+                {
+                    triggerEffect = i;
+                    break;
+                }
+            }
+            ImGui::Combo("Effect", &triggerEffect, triggerTargetingOptions, IM_ARRAYSIZE(triggerTargetingOptions));
+            trigger.effect = triggerTargetingOptions[triggerEffect];
         }
 
         if ("Health" == trigger.category)
@@ -317,10 +323,10 @@ void form_Trigger(Trigger_t& trigger)
         }
         else if (("<Inherit From Parent>" != trigger.category) && 
                  ("Professions" != trigger.category) && 
-                 ("Roles" != trigger.category) && 
-                 ("Primary Roles" != trigger.category) && 
-                 ("Secondary Roles" != trigger.category) && 
-                 ("Squad Markers" != trigger.category))
+                 ("Party/Squad Roles" != trigger.category) &&
+                 ("Assigned Roles" != trigger.category) &&
+                 ("Squad Markers" != trigger.category) &&
+                 ("Targeting" != trigger.category))
         {
             int triggerCondition = 0; // Default to "Status: Active"
             if (trigger.condition == "Status: Active") triggerCondition = 0;

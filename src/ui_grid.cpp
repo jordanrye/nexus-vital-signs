@@ -633,18 +633,36 @@ namespace UI::Grid {
             return true;
         }
 
-        if (trigger.category == "Roles")
+        if (trigger.category == "Party/Squad Roles")
         {
+            if (trigger.effect == "Self" && VitalsData && userData.UserId == VitalsData->getClientId()) return true;
             if (trigger.effect == "Commander" && userData.SquadRole == VitalSignsDataLink::ESquadRole::Commander) return true;
             if (trigger.effect == "Lieutenant" && userData.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant) return true;
+            if (trigger.effect == "Ready Check (Not Ready)" && VitalsData && VitalsData->isReadyCheckActive() && !userData.IsReady) return true;
+            if (trigger.effect == "Ready Check (Ready)" && VitalsData && VitalsData->isReadyCheckActive() && userData.IsReady) return true;
+            if (VitalsData && (trigger.effect == "Vote Kick (Not Voted)" || trigger.effect == "Vote Kick (Voted)"))
+            {
+                /* The user is the votee, and the effect reflects whether the client has voted to kick them */
+                const bool isVoted = (trigger.effect == "Vote Kick (Voted)");
+                for (const auto& kickVote : VitalsData->getKickVotes())
+                {
+                    if (kickVote.VoteeId == userData.UserId) return (kickVote.HasClientVoted == isVoted);
+                }
+            }
             if (trigger.effect == "Homestead Owner" && userData.IsHomesteadOwner) return true;
-            if (trigger.effect == "Self" && VitalsData && userData.UserId == VitalsData->getClientId()) return true;
-            if (trigger.effect == "Hovered" && userData.IsHovered) return true;
-            if (trigger.effect == "Selected" && userData.IsSelected) return true;
             return false;
         }
 
-        if (trigger.category == "Primary Roles")
+        if (trigger.category == "Targeting")
+        {
+            if (trigger.effect == "Hovered" && userData.IsHovered) return true;
+            if (trigger.effect == "Selected" && userData.IsSelected) return true;
+            if (trigger.effect == "Personal Target" && userData.IsPersonalTarget) return true;
+            if (trigger.effect == "Party Target" && userData.IsPartyTarget) return true;
+            return false;
+        }
+
+        if (trigger.category == "Assigned Roles")
         {
             if (trigger.effect == "Damage" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Damage) return true;
             if (trigger.effect == "Damage (Alacrity)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageAlacrity) return true;
@@ -652,13 +670,10 @@ namespace UI::Grid {
             if (trigger.effect == "Healer (Alacrity)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerAlacrity) return true;
             if (trigger.effect == "Healer (Quickness)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerQuickness) return true;
             if (trigger.effect == "Flexible" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Flexible) return true;
-        }
-
-        if (trigger.category == "Secondary Roles")
-        {
             if (trigger.effect == "Tank" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Tank) return true;
             if (trigger.effect == "Kiter" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Kiter) return true;
             if (trigger.effect == "Utility" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Utility) return true;
+            return false;
         }
 
         if (trigger.category == "Squad Markers")
@@ -671,6 +686,7 @@ namespace UI::Grid {
             if (trigger.effect == "Spiral" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Spiral) return true;
             if (trigger.effect == "Triangle" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Triangle) return true;
             if (trigger.effect == "X" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::X) return true;
+            return false;
         }
 
         if (trigger.category == "Health")

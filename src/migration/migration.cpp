@@ -1,5 +1,6 @@
 #include "migration.h"
 #include "migration_v1_to_v2.h"
+#include "migration_v2_to_v3.h"
 #include "../shared.h"
 
 namespace Migration
@@ -52,7 +53,8 @@ namespace Migration
             APIDefs->Log(ELogLevel_INFO, "VitalSigns", message.c_str());
             
             if (version < 2) { MigrateLayoutV1ToV2(config); }
-    
+            if (version < 3) { MigrateLayoutV2ToV3(config); }
+
             config["schemaVersion"] = SCHEMA_VERSION;
 
             isLoaded = true;
