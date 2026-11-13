@@ -44,6 +44,18 @@ namespace Migration
         }
     }
 
+    void MigrateSettingsV2ToV3(json& config)
+    {
+        // "Hide native frames" per group type moved into the "Native Frames" section
+        config["native-hide-party-frames"] = config["party-hide-native"];
+        config["native-hide-raid-frames"] = config["raid-hide-native"];
+        config["native-hide-squad-frames"] = config["squad-hide-native"];
+
+        config.erase("party-hide-native");
+        config.erase("raid-hide-native");
+        config.erase("squad-hide-native");
+    }
+
     void MigrateLayoutV2ToV3(json& config)
     {
         if (config.contains("indicators") && config["indicators"].is_array())

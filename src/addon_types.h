@@ -12,7 +12,6 @@ struct GeneralConfig_t
     /* Party (5 Players) */
     std::string partyLayout;
     std::string partyVisibility = "Always show";
-    bool isHiddenNativeParty = false;
     bool isHiddenSelfParty = false;
     std::vector<int> hiddenSubgroupsParty;
     
@@ -21,7 +20,6 @@ struct GeneralConfig_t
     std::string raidVisibility = "Always show";
     bool isHiddenSubgroupsRaid = false;
     bool isHiddenSelfRaid = false;
-    bool isHiddenNativeRaid = false;
     std::vector<int> hiddenSubgroupsRaid;
 
     /* Squad (50 Players) */
@@ -29,8 +27,18 @@ struct GeneralConfig_t
     std::string squadVisibility = "Always show";
     bool isHiddenSubgroupsSquad = false;
     bool isHiddenSelfSquad = false;
-    bool isHiddenNativeSquad = false;
     std::vector<int> hiddenSubgroupsSquad;
+
+    /* Native Frames */
+    bool isHiddenNativeAll = false;
+    bool isHiddenNativeGroupPanel = false;
+    bool isHiddenNativeGroupFrames = false;
+    bool isHiddenNativePartyFrames = false;
+    bool isHiddenNativeRaidFrames = false;
+    bool isHiddenNativeSquadBroadcast = false;
+    bool isHiddenNativeSquadInfo = false;
+    bool isHiddenNativeSquadFrames = false;
+    bool isHiddenNativeGroupRequests = false;
 
     /* Solo (No Group) */
     std::string soloLayout;

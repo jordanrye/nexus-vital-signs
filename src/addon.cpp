@@ -143,10 +143,24 @@ namespace Addon {
         /* Also shown out of a group, for the client's own invites and requests */
         UI::Widget::RenderGroup(groupType);
 
+        /* A hidden parent also hides its children, whatever their own setting */
+        {
+            const bool isVisibleAll = !ConfigGeneral.isHiddenNativeAll;
+            const bool isVisibleGroupFrames = isVisibleAll && !ConfigGeneral.isHiddenNativeGroupFrames;
+
+            VitalsData->setGroupPanelVisibility(isVisibleAll && !ConfigGeneral.isHiddenNativeGroupPanel);
+            VitalsData->setGroupFrameVisibility(isVisibleGroupFrames);
+            VitalsData->setGroupFramePartyVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativePartyFrames);
+            VitalsData->setGroupFrameRaidVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativeRaidFrames);
+            VitalsData->setGroupFrameSquadVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativeSquadFrames);
+            VitalsData->setGroupFrameBroadcastVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativeSquadBroadcast);
+            VitalsData->setGroupRequestsVisibility(isVisibleAll && !ConfigGeneral.isHiddenNativeGroupRequests);
+            VitalsData->setGroupInfoVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativeSquadInfo);
+        }
+
         switch (groupType)
         {
             case VitalSignsDataLink::EGroupType::Party:
-                VitalsData->setPartyFrameVisibility(!ConfigGeneral.isHiddenNativeParty);
                 if (IsFrameHidden(ConfigGeneral.partyVisibility))
                 {
                     return;
@@ -156,7 +170,6 @@ namespace Addon {
                 activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsParty;
                 break;
             case VitalSignsDataLink::EGroupType::Squad10:
-                VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeRaid);
                 if (IsFrameHidden(ConfigGeneral.raidVisibility))
                 {
                     return;
@@ -167,7 +180,6 @@ namespace Addon {
                 activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsRaid;
                 break;
             case VitalSignsDataLink::EGroupType::Squad50:
-                VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeSquad);
                 if (IsFrameHidden(ConfigGeneral.squadVisibility))
                 {
                     return;
@@ -338,7 +350,6 @@ namespace Addon {
             form_SelectLayout(layoutNames, ConfigGeneral.partyLayout);
             form_Visibility(ConfigGeneral.partyVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfParty);
-            ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeParty);
         }
         ImGui::PopID();
         
@@ -350,7 +361,6 @@ namespace Addon {
             form_Visibility(ConfigGeneral.raidVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfRaid);
             ImGui::Checkbox("Hide other subgroups", &ConfigGeneral.isHiddenSubgroupsRaid);
-            ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeRaid);
         }
         ImGui::PopID();
 
@@ -362,7 +372,44 @@ namespace Addon {
             form_Visibility(ConfigGeneral.squadVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfSquad);
             ImGui::Checkbox("Hide other subgroups", &ConfigGeneral.isHiddenSubgroupsSquad);
-            ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
+        }
+        ImGui::PopID();
+
+        ImGui::PushID("NativeFrames");
+        {
+            ImGui::TextDisabled("Native Frames");
+            ImGui::Separator();
+
+            /* Children of a hidden parent are hidden with it, so their own setting is
+             * disabled. Each level is disabled separately, as nesting dims it twice. */
+            const bool isDisabledAllChildren = ConfigGeneral.isHiddenNativeAll;
+            const bool isDisabledGroupFramesChildren = isDisabledAllChildren || ConfigGeneral.isHiddenNativeGroupFrames;
+
+            ImGui::Checkbox("Hide all", &ConfigGeneral.isHiddenNativeAll);
+            ImGui::Indent();
+            {
+                if (isDisabledAllChildren) { ImGui::BeginDisabled(); }
+                ImGui::Checkbox("Hide group panel", &ConfigGeneral.isHiddenNativeGroupPanel);
+                ImGui::Checkbox("Hide group frames", &ConfigGeneral.isHiddenNativeGroupFrames);
+                if (isDisabledAllChildren) { ImGui::EndDisabled(); }
+
+                ImGui::Indent();
+                {
+                    if (isDisabledGroupFramesChildren) { ImGui::BeginDisabled(); }
+                    ImGui::Checkbox("Hide party frames", &ConfigGeneral.isHiddenNativePartyFrames);
+                    ImGui::Checkbox("Hide raid frames", &ConfigGeneral.isHiddenNativeRaidFrames);
+                    ImGui::Checkbox("Hide squad frames", &ConfigGeneral.isHiddenNativeSquadFrames);
+                    ImGui::Checkbox("Hide squad broadcast", &ConfigGeneral.isHiddenNativeSquadBroadcast);
+                    ImGui::Checkbox("Hide squad info", &ConfigGeneral.isHiddenNativeSquadInfo);
+                    if (isDisabledGroupFramesChildren) { ImGui::EndDisabled(); }
+                }
+                ImGui::Unindent();
+
+                if (isDisabledAllChildren) { ImGui::BeginDisabled(); }
+                ImGui::Checkbox("Hide group requests", &ConfigGeneral.isHiddenNativeGroupRequests);
+                if (isDisabledAllChildren) { ImGui::EndDisabled(); }
+            }
+            ImGui::Unindent();
         }
         ImGui::PopID();
 

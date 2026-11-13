@@ -23,6 +23,8 @@ namespace Migration
             std::string message = "Settings file '" + fileName + "' is using an older schema version. "
                 "Migrating to current schema version.";
             APIDefs->Log(ELogLevel_INFO, "VitalSigns", message.c_str());
+
+            if (version < 3) { MigrateSettingsV2ToV3(config); }
         }
 
         return true;
