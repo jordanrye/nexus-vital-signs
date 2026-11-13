@@ -275,4 +275,16 @@ namespace UI {
         return texture;
     }
 
+    Texture* GetOrCreateTextureFromResource(const char* identifier, unsigned resourceId)
+    {
+        Texture* texture = nullptr;
+
+        if (APIDefs)
+        {
+            texture = APIDefs->Textures.GetOrCreateFromResource(identifier, resourceId, hSelf);
+        }
+
+        return texture;
+    }
+
 } // namespace UI

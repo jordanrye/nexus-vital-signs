@@ -17,6 +17,7 @@ namespace UI {
     ImColor GetBarrierColour(const ColourPresets_t& config, const std::string& palette);
 
     Texture* GetOrCreateTexture(const std::string& textureSource, const std::string& texturePath);
+    Texture* GetOrCreateTextureFromResource(const char* identifier, unsigned resourceId);
 
 } // namespace UI
 

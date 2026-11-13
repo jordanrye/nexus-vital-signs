@@ -19,6 +19,7 @@
 #include "ui_common.h"
 #include "ui_grid.h"
 #include "ui_radial.h"
+#include "ui_widget.h"
 #include "utils_deletion.h"
 
 bool isValidGameState()
@@ -138,6 +139,9 @@ namespace Addon {
         bool hideSelf = false;
         bool hideSubgroups = false;
         std::vector<int>* activeHiddenSubgroups = nullptr;
+
+        /* Also shown out of a group, for the client's own invites and requests */
+        UI::Widget::RenderGroup(groupType);
 
         switch (groupType)
         {

@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\addon.h" />
+    <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\migration\migration.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\Behavior.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.h" />
@@ -124,7 +125,6 @@
     <ClInclude Include="src\data_link\gw2re\Game\Char\Character.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\ChCoreStats.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\ChProfession.h" />
-    <ClInclude Include="src\data_link\gw2re\Game\Char\EChBuffType.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChProfession.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChProfessionState.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChSpecialization.h" />
@@ -173,6 +173,7 @@
     <ClInclude Include="src\ui_common.h" />
     <ClInclude Include="src\ui_grid.h" />
     <ClInclude Include="src\ui_radial.h" />
+    <ClInclude Include="src\ui_widget.h" />
     <ClInclude Include="src\utilities.h" />
     <ClInclude Include="src\utils_deletion.h" />
     <ClInclude Include="src\version.h" />
@@ -254,6 +255,7 @@
     <ClCompile Include="src\ui_common.cpp" />
     <ClCompile Include="src\ui_grid.cpp" />
     <ClCompile Include="src\ui_radial.cpp" />
+    <ClCompile Include="src\ui_widget.cpp" />
     <ClCompile Include="src\utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -261,6 +263,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VitalSigns.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
