@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <vector>
 
-#include "data_link/data_link.h"
 #include "imgui/imgui.h"
 #include "imgui_extensions.h"
 
@@ -692,14 +691,14 @@ namespace UI::Grid {
         if (trigger.category == "Health")
         {
             bool statusMatch = false;
-            if (trigger.effect == "Alive" && userData.HealthType == VitalSignsDataLink::E_HEALTH_ALIVE) statusMatch = true;
-            else if (trigger.effect == "Downed" && userData.HealthType == VitalSignsDataLink::E_HEALTH_DOWNED) statusMatch = true;
-            else if (trigger.effect == "Defeated" && userData.HealthType == VitalSignsDataLink::E_HEALTH_DEFEATED) statusMatch = true;
-            else if (trigger.effect == "Shroud (Necromancer)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER) statusMatch = true;
-            else if (trigger.effect == "Shroud (Specter)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER) statusMatch = true;
-            else if (trigger.effect == "Unknown" && userData.HealthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) statusMatch = true;
+            if (trigger.effect == "Alive" && userData.HealthType == VitalSignsDataLink::EHealthType::Alive) statusMatch = true;
+            else if (trigger.effect == "Downed" && userData.HealthType == VitalSignsDataLink::EHealthType::Downed) statusMatch = true;
+            else if (trigger.effect == "Defeated" && userData.HealthType == VitalSignsDataLink::EHealthType::Defeated) statusMatch = true;
+            else if (trigger.effect == "Shroud (Necromancer)" && userData.HealthType == VitalSignsDataLink::EHealthType::ShroudNecromancer) statusMatch = true;
+            else if (trigger.effect == "Shroud (Specter)" && userData.HealthType == VitalSignsDataLink::EHealthType::ShroudSpecter) statusMatch = true;
+            else if (trigger.effect == "Unknown" && userData.HealthType == VitalSignsDataLink::EHealthType::Unknown) statusMatch = true;
 
-            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::EHealthType::ShroudNecromancer || userData.HealthType == VitalSignsDataLink::EHealthType::ShroudSpecter);
             float ratio = (isShrouded && (trigger.effect == "Shroud (Necromancer)" || trigger.effect == "Shroud (Specter)")) ? userData.GetShroudRatio() : userData.GetHealthRatio();
             float healthRatio = ratio * 100.0f; // Scale to match UI values (0-100)
 
@@ -1841,9 +1840,9 @@ namespace UI::Grid {
 
                     /* User permissions */
                     const bool isNotClient = (clientId != userData.UserId);
-                    const bool isInSquad = (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_10) ||
-                                           (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_50);
-                    const bool isInParty = (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_PARTY);
+                    const bool isInSquad = (VitalsData->getGroupType() == VitalSignsDataLink::EGroupType::Squad10) ||
+                                           (VitalsData->getGroupType() == VitalSignsDataLink::EGroupType::Squad50);
+                    const bool isInParty = (VitalsData->getGroupType() == VitalSignsDataLink::EGroupType::Party);
                     const bool canSetRoles = isInSquad || isInParty;
                     const bool canSetSquadMarker = isInSquad && ((clientRole == VitalSignsDataLink::ESquadRole::Commander) || (clientRole == VitalSignsDataLink::ESquadRole::Lieutenant));
                     const bool canSetTarget = isNotClient && userData.IsInInstance;
@@ -2012,16 +2011,16 @@ namespace UI::Grid {
                 const bool isHovered = IsItemHovered(parentProperties);
                 const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType);
                 
-                const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+                const bool isShrouded = (userData.HealthType == VitalSignsDataLink::EHealthType::ShroudNecromancer || userData.HealthType == VitalSignsDataLink::EHealthType::ShroudSpecter);
                 const std::string& shroudMode = context.layoutConfig->layout.grid.playerFrames.shroudMode;
 
-                VitalSignsDataLink::E_HEALTH_TYPE effectiveHealthType = userData.HealthType;
+                VitalSignsDataLink::EHealthType effectiveHealthType = userData.HealthType;
                 float effectiveHealthRatio = userData.GetHealthRatio();
                 if (isShrouded)
                 {
                     if (shroudMode == "None" || shroudMode == "Split View")
                     {
-                        effectiveHealthType = VitalSignsDataLink::E_HEALTH_ALIVE;
+                        effectiveHealthType = VitalSignsDataLink::EHealthType::Alive;
                     }
                     else // "Default"
                     {

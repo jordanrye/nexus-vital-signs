@@ -109,10 +109,13 @@
     <ClInclude Include="src\data_link\gw2re\Game\MissionContext.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\EPlayerFlags.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannel.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelIdentity.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelInvite.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelMember.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelVote.h" />
     <ClInclude Include="src\data_link\data_link.h" />
+    <ClInclude Include="src\data_link\data_link_hooks.h" />
+    <ClInclude Include="src\data_link\data_link_types.h" />
     <ClInclude Include="src\basic_types.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlContact.h" />
     <ClInclude Include="src\forms\forms.h" />
@@ -126,7 +129,9 @@
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChProfessionState.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChSpecialization.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Game\EventApi.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Player\EMentorEligibility.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\Player.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Player\PlTrainingMgr.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\Specialization\SpecDef.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\Specialization\SpecMgr.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlContext.h" />
@@ -135,6 +140,7 @@
     <ClInclude Include="src\data_link\gw2re\Game\Squad\SquadContext.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Text\Types.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Types.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Unlock\UnlockManager.h" />
     <ClInclude Include="src\data_link\gw2re\memtools\memtools.h" />
     <ClInclude Include="src\data_link\gw2re\Util\FuncDefs.h" />
     <ClInclude Include="src\data_link\gw2re\Util\Hook.h" />
@@ -187,6 +193,15 @@
     <ClCompile Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChCliOrder.cpp" />
     <ClCompile Include="src\data_link\data_link.cpp" />
+    <ClCompile Include="src\data_link\data_link_channel.cpp" />
+    <ClCompile Include="src\data_link\data_link_channel_requests.cpp" />
+    <ClCompile Include="src\data_link\data_link_channel_votes.cpp" />
+    <ClCompile Include="src\data_link\data_link_frames.cpp" />
+    <ClCompile Include="src\data_link\data_link_ready_check.cpp" />
+    <ClCompile Include="src\data_link\data_link_social.cpp" />
+    <ClCompile Include="src\data_link\data_link_stubs.cpp" />
+    <ClCompile Include="src\data_link\data_link_targeting.cpp" />
+    <ClCompile Include="src\data_link\data_link_users.cpp" />
     <ClCompile Include="src\entry.cpp" />
     <ClCompile Include="src\forms\bar.cpp" />
     <ClCompile Include="src\forms\select_layout.cpp" />
@@ -219,6 +234,7 @@
     <ClCompile Include="src\data_link\gw2re\Game\Portal\PlUser.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\PropContext.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Types.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Unlock\UnlockManager.cpp" />
     <ClCompile Include="src\data_link\gw2re\Util\Validation.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />

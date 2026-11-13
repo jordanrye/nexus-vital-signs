@@ -2,7 +2,6 @@
 #define VS_UI_RADIAL_H
 
 #include "data_link/data_link.h"
-#include "imgui/imgui.h"
 
 #include "layout_types.h"
 #include "ui_common.h"

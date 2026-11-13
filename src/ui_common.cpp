@@ -10,28 +10,28 @@
 
 namespace UI {
 
-    ImColor GetBackgroundColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType)
+    ImColor GetBackgroundColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::EHealthType healthType)
     {
         if (palette == "Default")
         {
-            return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_BACKGROUND_UNKNOWN : config.COLOUR_BACKGROUND;
+            return (healthType == VitalSignsDataLink::EHealthType::Unknown) ? config.COLOUR_BACKGROUND_UNKNOWN : config.COLOUR_BACKGROUND;
         }
         else if (palette == "Profession")
         {
-            return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_PROF_BACKGROUND_UNKNOWN : config.COLOUR_PROF_BACKGROUND;
+            return (healthType == VitalSignsDataLink::EHealthType::Unknown) ? config.COLOUR_PROF_BACKGROUND_UNKNOWN : config.COLOUR_PROF_BACKGROUND;
         }
         else if (palette == "Heat Map")
         {
-            return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_HEATMAP_BACKGROUND_UNKNOWN : config.COLOUR_HEATMAP_BACKGROUND;
+            return (healthType == VitalSignsDataLink::EHealthType::Unknown) ? config.COLOUR_HEATMAP_BACKGROUND_UNKNOWN : config.COLOUR_HEATMAP_BACKGROUND;
         }
         else if (palette == "Role")
         {
-            return (healthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) ? config.COLOUR_ROLE_BACKGROUND_UNKNOWN : config.COLOUR_ROLE_BACKGROUND;
+            return (healthType == VitalSignsDataLink::EHealthType::Unknown) ? config.COLOUR_ROLE_BACKGROUND_UNKNOWN : config.COLOUR_ROLE_BACKGROUND;
         }
         return ImColor();
     }
 
-    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::E_HEALTH_TYPE healthType, float health, VitalSignsDataLink::EProfession profession, VitalSignsDataLink::EPrimaryRole primaryRole)
+    ImColor GetHealthColour(const ColourPresets_t& config, const std::string& palette, VitalSignsDataLink::EHealthType healthType, float health, VitalSignsDataLink::EProfession profession, VitalSignsDataLink::EPrimaryRole primaryRole)
     {
         ImColor colour{};
 
@@ -39,19 +39,19 @@ namespace UI {
         {
             switch (healthType)
             {
-                case VitalSignsDataLink::E_HEALTH_ALIVE:
+                case VitalSignsDataLink::EHealthType::Alive:
                     colour = config.COLOUR_HEALTH;
                     break;
-                case VitalSignsDataLink::E_HEALTH_DOWNED:
+                case VitalSignsDataLink::EHealthType::Downed:
                     colour = config.COLOUR_HEALTH_DOWNED;
                     break;
-                case VitalSignsDataLink::E_HEALTH_DEFEATED:
+                case VitalSignsDataLink::EHealthType::Defeated:
                     colour = config.COLOUR_HEALTH_DEFEATED;
                     break;
-                case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
+                case VitalSignsDataLink::EHealthType::ShroudNecromancer:
                     colour = config.COLOUR_SHROUD_NECROMANCER;
                     break;
-                case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
+                case VitalSignsDataLink::EHealthType::ShroudSpecter:
                     colour = config.COLOUR_SHROUD_SPECTER;
                     break;
             }
@@ -93,16 +93,16 @@ namespace UI {
 
             switch (healthType)
             {
-                case VitalSignsDataLink::E_HEALTH_DOWNED:
+                case VitalSignsDataLink::EHealthType::Downed:
                     colour = config.COLOUR_PROF_HEALTH_DOWNED;
                     break;
-                case VitalSignsDataLink::E_HEALTH_DEFEATED:
+                case VitalSignsDataLink::EHealthType::Defeated:
                     colour = config.COLOUR_PROF_HEALTH_DEFEATED;
                     break;
-                case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
+                case VitalSignsDataLink::EHealthType::ShroudNecromancer:
                     colour = config.COLOUR_PROF_SHROUD_NECROMANCER;
                     break;
-                case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
+                case VitalSignsDataLink::EHealthType::ShroudSpecter:
                     colour = config.COLOUR_PROF_SHROUD_SPECTER;
                     break;
             }
@@ -111,19 +111,19 @@ namespace UI {
         {
             switch (healthType)
             {
-                case VitalSignsDataLink::E_HEALTH_DOWNED:
+                case VitalSignsDataLink::EHealthType::Downed:
                     colour = config.COLOUR_HEATMAP_HEALTH_DOWNED;
                     break;
-                case VitalSignsDataLink::E_HEALTH_DEFEATED:
+                case VitalSignsDataLink::EHealthType::Defeated:
                     colour = config.COLOUR_HEATMAP_HEALTH_DEFEATED;
                     break;
-                case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
+                case VitalSignsDataLink::EHealthType::ShroudNecromancer:
                     colour = config.COLOUR_HEATMAP_SHROUD_NECROMANCER;
                     break;
-                case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
+                case VitalSignsDataLink::EHealthType::ShroudSpecter:
                     colour = config.COLOUR_HEATMAP_SHROUD_SPECTER;
                     break;
-                case VitalSignsDataLink::E_HEALTH_ALIVE:
+                case VitalSignsDataLink::EHealthType::Alive:
                 default:
                 {
                     ImVec4 c1, c2;
@@ -166,19 +166,19 @@ namespace UI {
         {
             switch (healthType)
             {
-                case VitalSignsDataLink::E_HEALTH_DOWNED:
+                case VitalSignsDataLink::EHealthType::Downed:
                     colour = config.COLOUR_ROLE_HEALTH_DOWNED;
                     break;
-                case VitalSignsDataLink::E_HEALTH_DEFEATED:
+                case VitalSignsDataLink::EHealthType::Defeated:
                     colour = config.COLOUR_ROLE_HEALTH_DEFEATED;
                     break;
-                case VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER:
+                case VitalSignsDataLink::EHealthType::ShroudNecromancer:
                     colour = config.COLOUR_ROLE_SHROUD_NECROMANCER;
                     break;
-                case VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER:
+                case VitalSignsDataLink::EHealthType::ShroudSpecter:
                     colour = config.COLOUR_ROLE_SHROUD_SPECTER;
                     break;
-                case VitalSignsDataLink::E_HEALTH_ALIVE:
+                case VitalSignsDataLink::EHealthType::Alive:
                 default:
                 {
                     switch (primaryRole)

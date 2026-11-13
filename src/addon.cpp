@@ -132,7 +132,7 @@ namespace Addon {
             return;
         }
 
-        const VitalSignsDataLink::E_GROUP_TYPE groupType = VitalsData->getGroupType();
+        const VitalSignsDataLink::EGroupType groupType = VitalsData->getGroupType();
         std::string activeLayoutName = ConfigGeneral.soloLayout;
         LayoutConfig_t* activeLayout = nullptr;
         bool hideSelf = false;
@@ -141,7 +141,7 @@ namespace Addon {
 
         switch (groupType)
         {
-            case VitalSignsDataLink::E_GROUP_PARTY:
+            case VitalSignsDataLink::EGroupType::Party:
                 VitalsData->setPartyFrameVisibility(!ConfigGeneral.isHiddenNativeParty);
                 if (IsFrameHidden(ConfigGeneral.partyVisibility))
                 {
@@ -151,7 +151,7 @@ namespace Addon {
                 hideSelf = ConfigGeneral.isHiddenSelfParty;
                 activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsParty;
                 break;
-            case VitalSignsDataLink::E_GROUP_SQUAD_10:
+            case VitalSignsDataLink::EGroupType::Squad10:
                 VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeRaid);
                 if (IsFrameHidden(ConfigGeneral.raidVisibility))
                 {
@@ -162,7 +162,7 @@ namespace Addon {
                 hideSubgroups = ConfigGeneral.isHiddenSubgroupsRaid;
                 activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsRaid;
                 break;
-            case VitalSignsDataLink::E_GROUP_SQUAD_50:
+            case VitalSignsDataLink::EGroupType::Squad50:
                 VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeSquad);
                 if (IsFrameHidden(ConfigGeneral.squadVisibility))
                 {
@@ -173,7 +173,7 @@ namespace Addon {
                 hideSubgroups = ConfigGeneral.isHiddenSubgroupsSquad;
                 activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsSquad;
                 break;
-            case VitalSignsDataLink::E_GROUP_NONE:
+            case VitalSignsDataLink::EGroupType::None:
             default:
                 activeLayoutName = ConfigGeneral.soloLayout;
                 activeHiddenSubgroups = nullptr;
@@ -458,7 +458,7 @@ namespace Addon {
                         VitalSignsDataLink::EProfession profession, 
                         VitalSignsDataLink::ESpecialisation specialisation, 
                         float health, 
-                        VitalSignsDataLink::E_HEALTH_TYPE healthType, 
+                        VitalSignsDataLink::EHealthType healthType, 
                         float barrier) 
                     {
                         VitalSignsDataLink::UserData_t user;
@@ -479,21 +479,21 @@ namespace Addon {
                         previewCount++;
                     };
 
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::Commander, "Preview.0001", "Preview 1", "", true, VitalSignsDataLink::EProfession::Elementalist, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::Lieutenant, "Preview.0002", "Preview 2", "", true, VitalSignsDataLink::EProfession::Engineer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.5f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0003", "Preview 3", "My Nickname 3", true, VitalSignsDataLink::EProfession::Guardian, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0004", "Preview 4", "My Nickname 4", true, VitalSignsDataLink::EProfession::Mesmer, VitalSignsDataLink::ESpecialisation::None, 0.25f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0005", "Preview 5", "", true, VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.5f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0006", "Preview 6", "", true, VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0007", "Preview 7", "", true, VitalSignsDataLink::EProfession::Ranger, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0008", "Preview 8", "", true, VitalSignsDataLink::EProfession::Revenant, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0009", "Preview 9", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0010", "Preview 10", "", false, VitalSignsDataLink::EProfession::Warrior, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0011", "Preview 11", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0012", "Preview 12", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0013", "Preview 13", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::E_HEALTH_DOWNED, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0014", "Preview 14", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.25f, VitalSignsDataLink::E_HEALTH_DEFEATED, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0015", "Preview 15", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::Commander, "Preview.0001", "Preview 1", "", true, VitalSignsDataLink::EProfession::Elementalist, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::EHealthType::Alive, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::Lieutenant, "Preview.0002", "Preview 2", "", true, VitalSignsDataLink::EProfession::Engineer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::EHealthType::Alive, 0.5f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0003", "Preview 3", "My Nickname 3", true, VitalSignsDataLink::EProfession::Guardian, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0004", "Preview 4", "My Nickname 4", true, VitalSignsDataLink::EProfession::Mesmer, VitalSignsDataLink::ESpecialisation::None, 0.25f, VitalSignsDataLink::EHealthType::Alive, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0005", "Preview 5", "", true, VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::EHealthType::Alive, 0.5f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0006", "Preview 6", "", true, VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::EHealthType::ShroudNecromancer, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0007", "Preview 7", "", true, VitalSignsDataLink::EProfession::Ranger, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::EHealthType::Alive, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0008", "Preview 8", "", true, VitalSignsDataLink::EProfession::Revenant, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::EHealthType::Alive, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0009", "Preview 9", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0010", "Preview 10", "", false, VitalSignsDataLink::EProfession::Warrior, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0011", "Preview 11", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0012", "Preview 12", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::EHealthType::ShroudSpecter, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0013", "Preview 13", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::EHealthType::Downed, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0014", "Preview 14", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.25f, VitalSignsDataLink::EHealthType::Defeated, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0015", "Preview 15", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
                     UI::Grid::EndGridMenu();
                 }
 
