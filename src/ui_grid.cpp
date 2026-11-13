@@ -1858,7 +1858,10 @@ namespace UI::Grid {
                         }
                         if (clientMap == userData.MapName && !userData.IsInInstance)
                         {
-                            if (ImGui::MenuItem("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
+                            const std::string mapName = (!userData.MapName.empty() ? userData.MapName : "Instance");
+                            const std::string joinLabel = "Join in " + mapName + "###JoinInInstance";
+
+                            if (ImGui::MenuItem(joinLabel.c_str())) { VitalsData->joinUserInstance(userData.UserId); }
                         }
                         if (userData.IsHomesteadOwner && !userData.IsInInstance)
                         {
