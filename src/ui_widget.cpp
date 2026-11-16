@@ -116,11 +116,11 @@ namespace UI::Widget {
         return isPressed;
     }
 
-    /* Group widget, laid out after the native party/squad bar. Quick actions sit
-     * next to the group icon, and the icon opens the settings popup. Actions
-     * that are not valid for the group state or the client's permissions are
-     * hidden, never disabled. */
-    void RenderGroup(const VitalSignsDataLink::EGroupType groupType)
+    /* Group widget, laid out after the native party/squad bar. Quick actions
+     * sit next to the group icon, and the icon opens the settings popup. 
+     * Actions that are not valid for the group state or the client's 
+     * permissions are hidden, never disabled. */
+    void RenderGroupPanel(const VitalSignsDataLink::EGroupType groupType)
     {
         const char* POPUP_GROUP_SETTINGS = "GroupSettings##VitalSignsGroupWidget";
         const char* JOIN_BEHAVIOR_LABELS[] = { "Yes", "Yes, after approval", "No" };
@@ -419,6 +419,159 @@ namespace UI::Widget {
                 }
 
                 ImGui::EndPopup();
+            }
+        }
+        ImGui::End();
+    }
+
+    /* Group requests widget. The channel's requests are invites the group has
+     * sent and players asking to join it. The client's requests are invites
+     * the client has received and groups the client has asked to join. */
+    void RenderGroupRequests()
+    {
+        const std::vector<VitalSignsDataLink::UserId_t> channelInvites = VitalsData->getChannelInvites();
+        const std::vector<VitalSignsDataLink::UserId_t> channelJoinRequests = VitalsData->getChannelJoinRequests();
+        const std::vector<VitalSignsDataLink::ClientPendingChannel_t> clientInvites = VitalsData->getClientInvites();
+        const std::vector<VitalSignsDataLink::ClientPendingChannel_t> clientJoinRequests = VitalsData->getClientJoinRequests();
+
+        if (channelInvites.empty() && channelJoinRequests.empty() && clientInvites.empty() && clientJoinRequests.empty())
+        {
+            return;
+        }
+
+        /* Anyone in a party or a commanderless squad, otherwise the commander and lieutenants */
+        const bool canManagePending = VitalsData->canManagePendingMembers();
+
+        /* Key each line on its section and user or channel, as the vectors are rebuilt every frame */
+        bool hasLine = false;
+        auto beginLine = [&hasLine](const char* section, const void* key, const size_t keySize, const std::string& name, const char* description)
+        {
+            const char* keyBytes = static_cast<const char*>(key);
+            ImGui::PushID(section);
+            ImGui::PushID(keyBytes, keyBytes + keySize);
+
+            /* The table has no vertical cell padding, so lines are spaced by an empty row instead */
+            if (hasLine)
+            {
+                ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetStyle().ItemSpacing.y);
+            }
+
+            hasLine = true;
+
+            ImGui::TableNextRow();
+
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("%s", name.c_str());
+
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextDisabled("%s", description);
+
+            ImGui::TableNextColumn();
+        };
+
+        auto endLine = []()
+        {
+            ImGui::PopID();
+            ImGui::PopID();
+        };
+
+        /* Names the party or squad a client invite or join request is for */
+        auto getGroupName = [](const VitalSignsDataLink::ClientPendingChannel_t& group) -> std::string
+        {
+            if (group.LeaderName.empty())
+            {
+                return group.IsSquad ? "Squad" : "Party";
+            }
+
+            return group.LeaderName;
+        };
+
+        if (ImGui::Begin("Group Requests##VitalSignsGroupRequestsWidget", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse))
+        {
+            /* Columns: name, description, actions. Without vertical cell padding,
+             * a line is as tall as a button, the same height as the group widget.
+             * The table reads the padding once, in `BeginTable`. */
+            ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(ImGui::GetStyle().CellPadding.x, 0.0f));
+            const bool isTableVisible = ImGui::BeginTable("##GroupRequests", 3, ImGuiTableFlags_SizingFixedFit);
+            ImGui::PopStyleVar();
+
+            if (isTableVisible)
+            {
+                /* Channel invites, cancelled by the group */
+                for (const VitalSignsDataLink::UserId_t& inviteeId : channelInvites)
+                {
+                    beginLine("ChannelInvite", &inviteeId, sizeof(inviteeId), VitalsData->getUserData(inviteeId).GetDisplayName(), "Pending Invitation");
+
+                    if (canManagePending)
+                    {
+                        if (GroupIconButton("##CancelInvite", EGroupIcon::NotReady, "Cancel Invite"))
+                        {
+                            VitalsData->cancelInvite(inviteeId);
+                        }
+                    }
+
+                    endLine();
+                }
+
+                /* Channel join requests, accepted or declined by the group */
+                for (const VitalSignsDataLink::UserId_t& requesterId : channelJoinRequests)
+                {
+                    beginLine("ChannelJoinRequest", &requesterId, sizeof(requesterId), VitalsData->getUserData(requesterId).GetDisplayName(), "Pending Request");
+
+                    if (canManagePending)
+                    {
+                        if (GroupIconButton("##AcceptJoinRequest", EGroupIcon::Ready, "Accept Join Request"))
+                        {
+                            VitalsData->acceptJoinRequest(requesterId);
+                        }
+
+                        ImGui::SameLine();
+
+                        if (GroupIconButton("##DeclineJoinRequest", EGroupIcon::NotReady, "Decline Join Request"))
+                        {
+                            VitalsData->declineJoinRequest(requesterId);
+                        }
+                    }
+
+                    endLine();
+                }
+
+                /* Client invites, accepted or declined by the client */
+                for (const VitalSignsDataLink::ClientPendingChannel_t& invite : clientInvites)
+                {
+                    beginLine("ClientInvite", &invite.Channel, sizeof(invite.Channel), getGroupName(invite), invite.IsSquad ? "Squad Join Request" : "Party Join Request");
+
+                    if (GroupIconButton("##AcceptInvite", EGroupIcon::Ready, "Accept Invite"))
+                    {
+                        VitalsData->acceptInvite(invite.Channel);
+                    }
+
+                    ImGui::SameLine();
+
+                    if (GroupIconButton("##DeclineInvite", EGroupIcon::NotReady, "Decline Invite"))
+                    {
+                        VitalsData->declineInvite(invite.Channel);
+                    }
+
+                    endLine();
+                }
+
+                /* Client join requests, cancelled by the client */
+                for (const VitalSignsDataLink::ClientPendingChannel_t& request : clientJoinRequests)
+                {
+                    beginLine("ClientJoinRequest", &request.Channel, sizeof(request.Channel), getGroupName(request), request.IsSquad ? "Squad Join Request" : "Party Join Request");
+
+                    if (GroupIconButton("##CancelJoinRequest", EGroupIcon::NotReady, "Cancel Join Request"))
+                    {
+                        VitalsData->cancelJoinRequest(request.Channel);
+                    }
+
+                    endLine();
+                }
+
+                ImGui::EndTable();
             }
         }
         ImGui::End();

@@ -4,7 +4,7 @@
 
 namespace UI::Widget {
 
-    /* Group widget, laid out after the native party/squad bar */
-    void RenderGroup(const VitalSignsDataLink::EGroupType groupType);
+    void RenderGroupPanel(const VitalSignsDataLink::EGroupType groupType);
+    void RenderGroupRequests();
 
 } // namespace UI::Widget
