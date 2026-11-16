@@ -209,7 +209,7 @@ namespace Settings
                 else 
                 {
                     std::string warningMessage = filePath.filename().string() + " is not a valid layout file.";
-                    APIDefs->Log(ELogLevel_WARNING, "VitalSigns", warningMessage.c_str());
+                    APIDefs->Log(ELogLevel_INFO, "VitalSigns", warningMessage.c_str());
                 }
             }
         }
@@ -252,9 +252,8 @@ namespace Settings
             }
             catch (json::parse_error& ex)
             {
-                std::string warningMessage = aFilePath.filename().string() + " could not be parsed.";
-                APIDefs->Log(ELogLevel_WARNING, "VitalSigns", warningMessage.c_str());
-                APIDefs->Log(ELogLevel_WARNING, "VitalSigns", ex.what());
+                std::string warningMessage = aFilePath.filename().string() + " could not be parsed (" + ex.what() + ").";
+                APIDefs->Log(ELogLevel_INFO, "VitalSigns", warningMessage.c_str());
             }
         }
         Mutex.unlock();
