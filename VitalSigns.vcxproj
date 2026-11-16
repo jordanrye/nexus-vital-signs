@@ -17,6 +17,8 @@
     <RootNamespace>VitalSigns</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>VitalSigns</ProjectName>
+    <!-- Always run MSBuild so CopyDllToBuildDir refreshes build\ after a configuration switch. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -45,14 +47,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>$(SolutionDir)build\.int\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\obj\</IntDir>
     <TargetExt>.dll</TargetExt>
     <TargetName>VitalSigns</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>$(SolutionDir)build\.int\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\obj\</IntDir>
     <TargetExt>.dll</TargetExt>
     <TargetName>VitalSigns</TargetName>
   </PropertyGroup>
@@ -270,4 +272,8 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <!-- Each configuration builds into build\$(Configuration)\; copy the active DLL up to build\. -->
+  <Target Name="CopyDllToBuildDir" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)build\" SkipUnchangedFiles="true" />
+  </Target>
 </Project>
