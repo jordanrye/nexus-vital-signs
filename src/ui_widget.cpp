@@ -424,17 +424,19 @@ namespace UI::Widget {
         ImGui::End();
     }
 
-    /* Group requests widget. The channel's requests are invites the group has
-     * sent and players asking to join it. The client's requests are invites
-     * the client has received and groups the client has asked to join. */
+    /* Group requests widget. Kick votes are open votes to remove a group member.
+     * The channel's requests are invites the group has sent and players asking
+     * to join it. The client's requests are invites the client has received and
+     * groups the client has asked to join. */
     void RenderGroupRequests()
     {
+        const std::vector<VitalSignsDataLink::KickVote_t> kickVotes = VitalsData->getKickVotes();
         const std::vector<VitalSignsDataLink::UserId_t> channelInvites = VitalsData->getChannelInvites();
         const std::vector<VitalSignsDataLink::UserId_t> channelJoinRequests = VitalsData->getChannelJoinRequests();
         const std::vector<VitalSignsDataLink::ClientPendingChannel_t> clientInvites = VitalsData->getClientInvites();
         const std::vector<VitalSignsDataLink::ClientPendingChannel_t> clientJoinRequests = VitalsData->getClientJoinRequests();
 
-        if (channelInvites.empty() && channelJoinRequests.empty() && clientInvites.empty() && clientJoinRequests.empty())
+        if (kickVotes.empty() && channelInvites.empty() && channelJoinRequests.empty() && clientInvites.empty() && clientJoinRequests.empty())
         {
             return;
         }
@@ -499,6 +501,29 @@ namespace UI::Widget {
 
             if (isTableVisible)
             {
+                /* Kick votes, one line per votee. The client seconds the vote or withdraws their own. */
+                for (const VitalSignsDataLink::KickVote_t& kickVote : kickVotes)
+                {
+                    beginLine("KickVote", &kickVote.VoteeId, sizeof(kickVote.VoteeId), VitalsData->getUserData(kickVote.VoteeId).GetDisplayName(), "Vote to Kick");
+
+                    if (kickVote.HasClientVoted)
+                    {
+                        if (GroupIconButton("##CancelKickVote", EGroupIcon::NotReady, "Cancel Vote to Kick"))
+                        {
+                            VitalsData->cancelKickVote(kickVote.VoteeId);
+                        }
+                    }
+                    else
+                    {
+                        if (GroupIconButton("##AgreeKickVote", EGroupIcon::Ready, "Vote to Kick"))
+                        {
+                            VitalsData->agreeKickVote(kickVote.VoteeId);
+                        }
+                    }
+
+                    endLine();
+                }
+
                 /* Channel invites, cancelled by the group */
                 for (const VitalSignsDataLink::UserId_t& inviteeId : channelInvites)
                 {
