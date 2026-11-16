@@ -134,7 +134,7 @@ namespace Addon {
         }
 
         const VitalSignsDataLink::EGroupType groupType = VitalsData->getGroupType();
-        std::string activeLayoutName = ConfigGeneral.soloLayout;
+        std::string activeLayoutName;
         LayoutConfig_t* activeLayout = nullptr;
         bool hideSelf = false;
         bool hideSubgroups = false;
@@ -199,9 +199,7 @@ namespace Addon {
                 break;
             case VitalSignsDataLink::EGroupType::None:
             default:
-                activeLayoutName = ConfigGeneral.soloLayout;
-                activeHiddenSubgroups = nullptr;
-                break;
+                return; // No player frames out of a group
         }
 
         if (isPlayerFramesHidden)

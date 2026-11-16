@@ -13,21 +13,21 @@ struct GeneralConfig_t
     std::string partyLayout;
     std::string partyVisibility = "Always show";
     bool isHiddenSelfParty = false;
-    std::vector<int> hiddenSubgroupsParty;
+    std::vector<int> hiddenSubgroupsParty; /** FIXME: To be reimplemented. Session only, not saved. */
     
     /* Raid (10 Players) */
     std::string raidLayout;
     std::string raidVisibility = "Always show";
     bool isHiddenSubgroupsRaid = false;
     bool isHiddenSelfRaid = false;
-    std::vector<int> hiddenSubgroupsRaid;
+    std::vector<int> hiddenSubgroupsRaid; /** FIXME: To be reimplemented. Session only, not saved. */
 
     /* Squad (50 Players) */
     std::string squadLayout;
     std::string squadVisibility = "Always show";
     bool isHiddenSubgroupsSquad = false;
     bool isHiddenSelfSquad = false;
-    std::vector<int> hiddenSubgroupsSquad;
+    std::vector<int> hiddenSubgroupsSquad; /** FIXME: To be reimplemented. Session only, not saved. */
 
     /* Widgets */
     bool isEnabledGroupPanelWidget = true;
@@ -43,9 +43,6 @@ struct GeneralConfig_t
     bool isHiddenNativeSquadInfo = false;
     bool isHiddenNativeSquadFrames = false;
     bool isHiddenNativeGroupRequests = false;
-
-    /* Solo (No Group) */
-    std::string soloLayout;
 
     /* Editor Settings */
     bool autoSaveEnabled = false;
