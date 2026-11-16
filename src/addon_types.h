@@ -29,6 +29,10 @@ struct GeneralConfig_t
     bool isHiddenSelfSquad = false;
     std::vector<int> hiddenSubgroupsSquad;
 
+    /* Widgets */
+    bool isEnabledGroupPanelWidget = true;
+    bool isEnabledGroupRequestsWidget = true;
+
     /* Native Frames */
     bool isHiddenNativeAll = false;
     bool isHiddenNativeGroupPanel = false;

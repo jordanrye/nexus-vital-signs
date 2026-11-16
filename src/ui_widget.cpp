@@ -504,7 +504,7 @@ namespace UI::Widget {
                 /* Kick votes, one line per votee. The client seconds the vote or withdraws their own. */
                 for (const VitalSignsDataLink::KickVote_t& kickVote : kickVotes)
                 {
-                    beginLine("KickVote", &kickVote.VoteeId, sizeof(kickVote.VoteeId), VitalsData->getUserData(kickVote.VoteeId).GetDisplayName(), "Vote to Kick");
+                    beginLine("KickVote", &kickVote.VoteeId, sizeof(kickVote.VoteeId), VitalsData->getUserData(kickVote.VoteeId).GetDisplayName(), "Pending Vote Kick");
 
                     if (kickVote.HasClientVoted)
                     {

@@ -141,8 +141,15 @@ namespace Addon {
         std::vector<int>* activeHiddenSubgroups = nullptr;
 
         /* Also shown out of a group, for the client's own invites and requests */
-        UI::Widget::RenderGroupPanel(groupType);
-        UI::Widget::RenderGroupRequests();
+        if (ConfigGeneral.isEnabledGroupPanelWidget)
+        {
+            UI::Widget::RenderGroupPanel(groupType);
+        }
+
+        if (ConfigGeneral.isEnabledGroupRequestsWidget)
+        {
+            UI::Widget::RenderGroupRequests();
+        }
 
         /* A hidden parent also hides its children, whatever their own setting */
         {
@@ -373,6 +380,16 @@ namespace Addon {
             form_Visibility(ConfigGeneral.squadVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfSquad);
             ImGui::Checkbox("Hide other subgroups", &ConfigGeneral.isHiddenSubgroupsSquad);
+        }
+        ImGui::PopID();
+
+        ImGui::PushID("Widgets");
+        {
+            ImGui::TextDisabled("Widgets");
+            ImGui::Separator();
+
+            ImGui::Checkbox("Group Panel", &ConfigGeneral.isEnabledGroupPanelWidget);
+            ImGui::Checkbox("Group Requests", &ConfigGeneral.isEnabledGroupRequestsWidget);
         }
         ImGui::PopID();
 
