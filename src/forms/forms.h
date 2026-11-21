@@ -31,6 +31,9 @@ void form_SelectIndicatorType(std::string& indicatorType, bool isDisabled = fals
 void form_SelectLayoutType(std::string& layoutType, bool isDisabled = false);
 void form_SelectLayout(const std::vector<std::string>& layouts, std::string& selectedLayout);
 void form_Size(Size_t& size);
+void form_StyleColorsPreset(StylePreset_t& style);
+void form_StyleFontPreset(StylePreset_t& style);
+void form_StyleSizesPreset(StylePreset_t& style);
 void form_TextDataSource(std::string& textType, std::string& textCustom);
 void form_TextLimit(std::string& limitType, float& limitValue);
 void form_Texture(std::string& textureSource, std::string& texturePath);

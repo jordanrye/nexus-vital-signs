@@ -287,4 +287,97 @@ namespace UI {
         return texture;
     }
 
+    StyleScope::StyleScope(const StylePreset_t& style)
+    {
+        if (style.colorsSource == "Custom colors")
+        {
+            PushColor(ImGuiCol_Text, style.text);
+            PushColor(ImGuiCol_TextDisabled, style.textDisabled);
+            PushColor(ImGuiCol_WindowBg, style.windowBackground);
+            PushColor(ImGuiCol_PopupBg, style.windowBackground);
+            PushColor(ImGuiCol_Border, style.border);
+            PushColor(ImGuiCol_Separator, style.separator);
+            PushColor(ImGuiCol_FrameBg, style.frameBackground);
+            PushColor(ImGuiCol_FrameBgHovered, style.frameBackgroundHovered);
+            PushColor(ImGuiCol_FrameBgActive, style.frameBackgroundActive);
+            PushColor(ImGuiCol_Button, style.button);
+            PushColor(ImGuiCol_ButtonHovered, style.buttonHovered);
+            PushColor(ImGuiCol_ButtonActive, style.buttonActive);
+            PushColor(ImGuiCol_CheckMark, style.checkMark);
+            PushColor(ImGuiCol_Header, style.selectable);
+            PushColor(ImGuiCol_HeaderHovered, style.selectableHovered);
+            PushColor(ImGuiCol_HeaderActive, style.selectableActive);
+        }
+
+        if (style.sizesSource == "Custom sizes")
+        {
+            PushVar(ImGuiStyleVar_WindowPadding, style.windowPadding);
+            PushVar(ImGuiStyleVar_WindowRounding, style.windowRounding);
+            PushVar(ImGuiStyleVar_PopupRounding, style.windowRounding);
+            PushVar(ImGuiStyleVar_WindowBorderSize, style.windowBorderSize);
+            PushVar(ImGuiStyleVar_PopupBorderSize, style.windowBorderSize);
+            PushVar(ImGuiStyleVar_FramePadding, style.framePadding);
+            PushVar(ImGuiStyleVar_FrameRounding, style.frameRounding);
+            PushVar(ImGuiStyleVar_ItemSpacing, style.itemSpacing);
+        }
+
+        const ImFont* defaultFont = ImGui::GetIO().FontDefault ? ImGui::GetIO().FontDefault : ImGui::GetFont();
+        std::string fontFilePath = ""; // Nexus font
+        m_fontSize = defaultFont->FontSize; // Nexus font size
+
+        if (style.fontSource == "Custom font")
+        {
+            fontFilePath = style.font;
+            if (style.fontSize > 0.0f) m_fontSize = style.fontSize;
+        }
+
+        /* Null for the Nexus font, or while a custom font is loading */
+        ImFont* font = utils::font::GetFont(fontFilePath, m_fontSize);
+
+        if (font)
+        {
+            ImGui::PushFont(font);
+            m_isFontPushed = true;
+        }
+    }
+
+    StyleScope::~StyleScope()
+    {
+        if (m_isFontPushed)
+        {
+            ImGui::PopFont();
+        }
+
+        ImGui::PopStyleVar(m_varCount);
+        ImGui::PopStyleColor(m_colorCount);
+    }
+
+    void StyleScope::ApplyFontScale() const
+    {
+        const float fontBaseSize = ImGui::GetFont()->FontSize;
+
+        if (fontBaseSize > 0.0f)
+        {
+            ImGui::SetWindowFontScale(m_fontSize / fontBaseSize);
+        }
+    }
+
+    void StyleScope::PushColor(const ImGuiCol index, const ImColor& color)
+    {
+        ImGui::PushStyleColor(index, color.Value);
+        m_colorCount++;
+    }
+
+    void StyleScope::PushVar(const ImGuiStyleVar index, const float value)
+    {
+        ImGui::PushStyleVar(index, value);
+        m_varCount++;
+    }
+
+    void StyleScope::PushVar(const ImGuiStyleVar index, const ImVec2& value)
+    {
+        ImGui::PushStyleVar(index, value);
+        m_varCount++;
+    }
+
 } // namespace UI

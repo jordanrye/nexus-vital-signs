@@ -151,6 +151,13 @@ namespace Settings
                     dser_FrameStatePreset_t(fs["commander"], FrameStatePresets.commander);
                 }
 
+                if (!settings["styles"].is_null())
+                {
+                    auto& styles = settings["styles"];
+                    dser_StylePreset_t(styles["group-panel"], StylePresets.groupPanel);
+                    dser_StylePreset_t(styles["group-requests"], StylePresets.groupRequests);
+                }
+
                 if (!settings["text"].is_null())
                 {
                     dser_TextStyle_t(settings["text"], ConfigText);
@@ -349,6 +356,10 @@ namespace Settings
         settings["frame-states"]["selected"] = ser_FrameStatePreset_t(FrameStatePresets.selected);
         settings["frame-states"]["self"] = ser_FrameStatePreset_t(FrameStatePresets.self);
         settings["frame-states"]["commander"] = ser_FrameStatePreset_t(FrameStatePresets.commander);
+
+        settings["styles"] = json::object();
+        settings["styles"]["group-panel"] = ser_StylePreset_t(StylePresets.groupPanel);
+        settings["styles"]["group-requests"] = ser_StylePreset_t(StylePresets.groupRequests);
 
         return settings;
     }

@@ -1843,6 +1843,33 @@ namespace Addon {
             }
             ImGui::PopID();
         });
+
+        TreeNodeUID widgetsBranchId = g_PresetConfig.GenerateUID();
+        g_PresetConfig.AppendNode(TreeNodeUID::NONE, widgetsBranchId, "Styles", "", TreeNodeType::BRANCH);
+
+        /* Every widget has the same style options */
+        auto AddStylePresetItem = [&](const std::string& name, StylePreset_t& style) {
+            AddPresetItem(widgetsBranchId, "Style", name, [name, &style]() {
+                ImGui::PushID(("Style/" + name).c_str());
+                {
+                    ImGui::TextDisabled("Font");
+                    ImGui::Separator();
+                    form_StyleFontPreset(style);
+                    
+                    ImGui::TextDisabled("Colors");
+                    ImGui::Separator();
+                    form_StyleColorsPreset(style);
+                    
+                    ImGui::TextDisabled("Sizes");
+                    ImGui::Separator();
+                    form_StyleSizesPreset(style);
+                }
+                ImGui::PopID();
+            });
+        };
+
+        AddStylePresetItem("Group Panel", StylePresets.groupPanel);
+        AddStylePresetItem("Group Requests", StylePresets.groupRequests);
     }
 
 } // namespace Addon

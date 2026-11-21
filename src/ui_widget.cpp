@@ -13,6 +13,9 @@
 
 namespace UI::Widget {
 
+    static const int BROADCAST_TEXT_BOX_LENGTH = 32;
+    static const int PANEL_TEXT_BOX_LENGTH = 24;
+
     enum class EGroupIcon
     {
         Solo,
@@ -24,7 +27,8 @@ namespace UI::Widget {
         ReadyCheck,
         Ready,
         NotReady,
-        SquadMessage
+        SquadMessage,
+        RightArrow
     };
 
     static Texture* GetGroupIconTexture(const EGroupIcon icon, const bool isHovered)
@@ -67,6 +71,10 @@ namespace UI::Widget {
                 return isHovered
                     ? UI::GetOrCreateTextureFromResource("TEX_VS_GROUP_ICON_SQUAD_MESSAGE_HOVERED", IDB_GROUP_ICON_SQUAD_MESSAGE_HOVERED)
                     : UI::GetOrCreateTextureFromResource("TEX_VS_GROUP_ICON_SQUAD_MESSAGE_NORMAL", IDB_GROUP_ICON_SQUAD_MESSAGE_NORMAL);
+            case EGroupIcon::RightArrow:
+                return isHovered
+                    ? UI::GetOrCreateTextureFromResource("TEX_VS_GROUP_ICON_RIGHT_ARROW_HOVERED", IDB_GROUP_ICON_RIGHT_ARROW_HOVERED)
+                    : UI::GetOrCreateTextureFromResource("TEX_VS_GROUP_ICON_RIGHT_ARROW_NORMAL", IDB_GROUP_ICON_RIGHT_ARROW_NORMAL);
             default:
                 return isHovered
                     ? UI::GetOrCreateTextureFromResource("TEX_VS_GROUP_ICON_SOLO_HOVERED", IDB_GROUP_ICON_SOLO_HOVERED)
@@ -116,6 +124,18 @@ namespace UI::Widget {
         return isPressed;
     }
 
+    static float GetInputWidth(const int strLen)
+    {
+        const std::string sample(static_cast<size_t>(strLen), '0');
+        return ImGui::CalcTextSize(sample.c_str()).x + (ImGui::GetStyle().FramePadding.x * 2.0f);
+    }
+
+    static float GetComboWidth(const int strLen)
+    {
+        float arrowButtonWidth = ImGui::GetFrameHeight(); /* button is square */
+        return GetInputWidth(strLen) + arrowButtonWidth;
+    }
+
     /* Group widget, laid out after the native party/squad bar. Quick actions
      * sit next to the group icon, and the icon opens the settings popup. 
      * Actions that are not valid for the group state or the client's 
@@ -144,13 +164,48 @@ namespace UI::Widget {
         const uint32_t squadMemberCount = VitalsData->getSquadMemberCount();
         const VitalSignsDataLink::SquadSettings_t squadSettings = VitalsData->getSquadSettings();
 
-        /* Invite text box with a `+` button, ENTER or `+` sends the invite */
-        auto inviteBox = []()
+        /* Invite text box (arrow button or `ENTER` key to send the invite).
+         * ImGui's text box can't make room for icons in its own frame, so the
+         * the frame is drawn behind a frameless text box and the two icons. */
+        auto inviteBox = [](const EGroupIcon groupIcon, const char* hint, const char* tooltip)
         {
-            ImGui::SetNextItemWidth(160.0f);
-            bool isSubmitted = ImGui::InputTextWithHint("##InviteName", "Player name", inviteName, sizeof(inviteName), ImGuiInputTextFlags_EnterReturnsTrue);
-            ImGui::SameLine(0.0f, 2.0f);
-            isSubmitted |= ImGui::Button("+##Invite");
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+            drawList->ChannelsSplit(2);
+            drawList->ChannelsSetCurrent(1);
+
+            ImGui::BeginGroup();
+
+            /* Group icon, clicking it focuses the text box */
+            Texture* groupTexture = GetGroupIconTexture(groupIcon, false);
+            ImGui::Dummy(GetGroupIconSize(groupTexture));
+            if (groupTexture)
+            {
+                drawList->AddImage(groupTexture->Resource, ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            }
+            if (ImGui::IsItemClicked())
+            {
+                ImGui::SetKeyboardFocusHere(0);
+            }
+
+            /* Text box without its own frame */
+            ImGui::SameLine(0.0f, 0.0f);
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(0, 0, 0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+            ImGui::SetNextItemWidth(GetInputWidth(PANEL_TEXT_BOX_LENGTH));
+            bool isSubmitted = ImGui::InputTextWithHint("##InviteName", hint, inviteName, sizeof(inviteName), ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::PopStyleVar();
+            ImGui::PopStyleColor();
+
+            /* Arrow icon */
+            ImGui::SameLine(0.0f, 0.0f);
+            isSubmitted |= GroupIconButton("##Invite", EGroupIcon::RightArrow, tooltip);
+
+            ImGui::EndGroup();
+
+            /* Shared frame behind all three */
+            drawList->ChannelsSetCurrent(0);
+            ImGui::RenderFrame(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_FrameBg), true, ImGui::GetStyle().FrameRounding);
+            drawList->ChannelsMerge();
 
             if (isSubmitted && (inviteName[0] != '\0'))
             {
@@ -171,8 +226,12 @@ namespace UI::Widget {
             hasPopupSection = true;
         };
 
+        const StyleScope styleScope(StylePresets.groupPanel);
+
         if (ImGui::Begin("Group##VitalSignsGroupWidget", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse))
         {
+            styleScope.ApplyFontScale();
+
             /* Group icon */
             const EGroupIcon groupIcon = isRaidSquad ? EGroupIcon::Raid : (isSquad ? EGroupIcon::Squad : (isParty ? EGroupIcon::Party : EGroupIcon::Solo));
             if (GroupIconButton("##GroupIcon", groupIcon, nullptr))
@@ -183,9 +242,6 @@ namespace UI::Widget {
             /* Quick actions, right of the icon. The icons are as tall as a button, so they line up. */
             if (isSquad)
             {
-                /* Divider between the group icon and the quick actions, as tall as the icon */
-                ImGui::SameLine();
-                ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
                 ImGui::SameLine();
 
                 ImGui::AlignTextToFramePadding();
@@ -233,7 +289,7 @@ namespace UI::Widget {
                 if (isCommander)
                 {
                     ImGui::SameLine();
-                    ImGui::SetNextItemWidth(220.0f);
+                    ImGui::SetNextItemWidth(GetInputWidth(BROADCAST_TEXT_BOX_LENGTH));
 
                     if (ImGui::InputTextWithHint("##Broadcast", "Broadcast to Squad", broadcastText, sizeof(broadcastText), ImGuiInputTextFlags_EnterReturnsTrue) &&
                         (broadcastText[0] != '\0'))
@@ -247,11 +303,9 @@ namespace UI::Widget {
             /* Settings popup, closes when clicking elsewhere */
             if (ImGui::BeginPopup(POPUP_GROUP_SETTINGS))
             {
-                /* (a) Group type, always has Leave in a group, can be empty when solo */
-                if (isParty || isSquad || isOpenWorld || canMentor)
-                {
-                    beginPopupSection();
-                }
+                styleScope.ApplyFontScale();
+
+                beginPopupSection();
 
                 /* The section's buttons share one row */
                 bool hasGroupTypeButton = false;
@@ -302,6 +356,12 @@ namespace UI::Widget {
                             ImGui::CloseCurrentPopup();
                         }
                     }
+
+                    if (!isParty)
+                    {
+                        beginGroupTypeButton();
+                        inviteBox(EGroupIcon::Party, "Player name", "Send Party Request");
+                    }
                 }
                 else if (isCommander)
                 {
@@ -349,11 +409,12 @@ namespace UI::Widget {
                     }
                 }
 
-                /* (b) Group invite */
-                if (!isSquad || isCommander || isLieutenant || squadSettings.IsAllowInvites)
+                if (isParty || (isSquad && (isCommander || isLieutenant || squadSettings.IsAllowInvites)))
                 {
                     beginPopupSection();
-                    inviteBox();
+                    auto hint = (isRaidSquad ? "Invite to Raid Squad" : (isSquad ? "Invite to Squad" : "Invite to Party"));
+                    auto tooltip = (isSquad ? "Send Squad Invite" : "Send Party Invite");
+                    inviteBox(groupIcon, hint, tooltip);
                 }
 
                 /* (c) Group settings */
@@ -380,12 +441,24 @@ namespace UI::Widget {
                     }
 
                     ImGui::Text("Allow uninvited players to join?");
-                    int joinBehavior = static_cast<int>(squadSettings.JoinBehavior);
-                    ImGui::SetNextItemWidth(200.0f);
+                    /* Built from `BeginCombo`, so the dropdown's font can be scaled like the popup's */
+                    const int joinBehavior = static_cast<int>(squadSettings.JoinBehavior);
+                    const bool isJoinBehaviorValid = (joinBehavior >= 0) && (joinBehavior < IM_ARRAYSIZE(JOIN_BEHAVIOR_LABELS));
+                    ImGui::SetNextItemWidth(GetComboWidth(PANEL_TEXT_BOX_LENGTH));
 
-                    if (ImGui::Combo("##JoinBehavior", &joinBehavior, JOIN_BEHAVIOR_LABELS, IM_ARRAYSIZE(JOIN_BEHAVIOR_LABELS)))
+                    if (ImGui::BeginCombo("##JoinBehavior", isJoinBehaviorValid ? JOIN_BEHAVIOR_LABELS[joinBehavior] : ""))
                     {
-                        VitalsData->setSquadJoinBehavior(static_cast<VitalSignsDataLink::ESquadJoinBehavior>(joinBehavior));
+                        styleScope.ApplyFontScale();
+
+                        for (int option = 0; option < IM_ARRAYSIZE(JOIN_BEHAVIOR_LABELS); option++)
+                        {
+                            if (ImGui::Selectable(JOIN_BEHAVIOR_LABELS[option], option == joinBehavior))
+                            {
+                                VitalsData->setSquadJoinBehavior(static_cast<VitalSignsDataLink::ESquadJoinBehavior>(option));
+                            }
+                        }
+
+                        ImGui::EndCombo();
                     }
 
                     /* Commander tag, shown by id until the tag textures are available */
@@ -399,10 +472,12 @@ namespace UI::Widget {
                         const std::string currentLabel = "Tag " + std::to_string(currentTag);
 
                         ImGui::Text("Commander tag");
-                        ImGui::SetNextItemWidth(200.0f);
+                        ImGui::SetNextItemWidth(GetComboWidth(PANEL_TEXT_BOX_LENGTH));
 
                         if (ImGui::BeginCombo("##CommanderTag", currentLabel.c_str()))
                         {
+                            styleScope.ApplyFontScale();
+
                             for (const VitalSignsDataLink::CommanderTag_t& tag : commanderTags)
                             {
                                 const std::string label = "Tag " + std::to_string(tag.Id);
@@ -490,8 +565,12 @@ namespace UI::Widget {
             return group.LeaderName;
         };
 
+        const StyleScope styleScope(StylePresets.groupRequests);
+
         if (ImGui::Begin("Group Requests##VitalSignsGroupRequestsWidget", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse))
         {
+            styleScope.ApplyFontScale();
+
             /* Columns: name, description, actions. Without vertical cell padding,
              * a line is as tall as a button, the same height as the group widget.
              * The table reads the padding once, in `BeginTable`. */

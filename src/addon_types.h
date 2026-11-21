@@ -193,4 +193,45 @@ struct FrameStatePresets_t
     }
 };
 
+struct StylePreset_t
+{
+    /* Font, an empty file path keeps the Nexus font at the custom size */
+    std::string fontSource = "Nexus font";
+    std::string font;
+    float fontSize = 0.0f;
+
+    /* Colors */
+    std::string colorsSource = "Nexus colors";
+    ImColor text;
+    ImColor textDisabled;
+    ImColor windowBackground;
+    ImColor border;
+    ImColor separator;
+    ImColor frameBackground;
+    ImColor frameBackgroundHovered;
+    ImColor frameBackgroundActive;
+    ImColor button;
+    ImColor buttonHovered;
+    ImColor buttonActive;
+    ImColor checkMark;
+    ImColor selectable;
+    ImColor selectableHovered;
+    ImColor selectableActive;
+
+    /* Sizes */
+    std::string sizesSource = "Nexus sizes";
+    ImVec2 windowPadding = ImVec2(0.0f, 0.0f);
+    float windowRounding = 0.0f;
+    float windowBorderSize = 0.0f;
+    ImVec2 framePadding = ImVec2(0.0f, 0.0f);
+    float frameRounding = 0.0f;
+    ImVec2 itemSpacing = ImVec2(0.0f, 0.0f);
+};
+
+struct StylePresets_t
+{
+    StylePreset_t groupPanel;
+    StylePreset_t groupRequests;
+};
+
 #endif /* SHARED_TYPES_H */

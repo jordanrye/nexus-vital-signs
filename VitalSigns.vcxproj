@@ -217,6 +217,7 @@
     <ClCompile Include="src\forms\position.cpp" />
     <ClCompile Include="src\forms\select_layout_type.cpp" />
     <ClCompile Include="src\forms\size.cpp" />
+    <ClCompile Include="src\forms\style_preset.cpp" />
     <ClCompile Include="src\forms\texture.cpp" />
     <ClCompile Include="src\forms\text_data_source.cpp" />
     <ClCompile Include="src\forms\text_limit.cpp" />
