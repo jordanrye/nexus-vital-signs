@@ -8,9 +8,11 @@
 
 using json = nlohmann::json;
 
+void dser_ImVec2(const json& object, ImVec2& vec);
 void dser_ImVec4(const json& object, ImVec4& vec);
 void dser_ImColor(const json& object, ImColor& color);
 
+json ser_ImVec2(const ImVec2& vec);
 json ser_ImVec4(const ImVec4& vec);
 json ser_ImColor(const ImColor& color);
 

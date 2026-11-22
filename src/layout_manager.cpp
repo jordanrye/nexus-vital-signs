@@ -570,14 +570,14 @@ static LayoutConfig_t GetDefaultGridLayout()
     squadRolesIndicatorCommander.id = g_LayoutEditor.GenerateUID();
     squadRolesIndicatorCommander.source = "URL";
     squadRolesIndicatorCommander.path = "https://wiki.guildwars2.com/images/b/b2/Squad_UI_commander.png";
-    squadRolesIndicatorCommander.trigger.category = "Roles";
+    squadRolesIndicatorCommander.trigger.category = "Party/Squad Roles";
     squadRolesIndicatorCommander.trigger.effect = "Commander";
     squadRolesIndicator.iconList.list.push_back(squadRolesIndicatorCommander);
     Icon_t squadRolesIndicatorLieutenant{};
     squadRolesIndicatorLieutenant.id = g_LayoutEditor.GenerateUID();
     squadRolesIndicatorLieutenant.source = "URL";
     squadRolesIndicatorLieutenant.path = "https://wiki.guildwars2.com/images/4/4c/Squad_UI_lieutenant.png";
-    squadRolesIndicatorLieutenant.trigger.category = "Roles";
+    squadRolesIndicatorLieutenant.trigger.category = "Party/Squad Roles";
     squadRolesIndicatorLieutenant.trigger.effect = "Lieutenant";
     squadRolesIndicator.iconList.list.push_back(squadRolesIndicatorLieutenant);
     layout.indicators.push_back(squadRolesIndicator);

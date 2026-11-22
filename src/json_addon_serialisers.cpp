@@ -38,26 +38,31 @@ void dser_GeneralConfig_t(json& object, GeneralConfig_t& config)
     {
         dser_BasicType(object["party-layout"], config.partyLayout);
         dser_BasicType(object["party-visibility"], config.partyVisibility);
-        dser_BasicType(object["party-hide-native"], config.isHiddenNativeParty);
         dser_BasicType(object["party-hide-self"], config.isHiddenSelfParty);
-        dser_BasicType(object["party-hide-subgroups-list"], config.hiddenSubgroupsParty);
         
         dser_BasicType(object["raid-layout"], config.raidLayout);
         dser_BasicType(object["raid-visibility"], config.raidVisibility);
         dser_BasicType(object["raid-hide-subgroups"], config.isHiddenSubgroupsRaid);
         dser_BasicType(object["raid-hide-self"], config.isHiddenSelfRaid);
-        dser_BasicType(object["raid-hide-native"], config.isHiddenNativeRaid);
-        dser_BasicType(object["raid-hide-subgroups-list"], config.hiddenSubgroupsRaid);
         
         dser_BasicType(object["squad-layout"], config.squadLayout);
         dser_BasicType(object["squad-visibility"], config.squadVisibility);
         dser_BasicType(object["squad-hide-subgroups"], config.isHiddenSubgroupsSquad);
         dser_BasicType(object["squad-hide-self"], config.isHiddenSelfSquad);
-        dser_BasicType(object["squad-hide-native"], config.isHiddenNativeSquad);
-        dser_BasicType(object["squad-hide-subgroups-list"], config.hiddenSubgroupsSquad);
 
-        dser_BasicType(object["solo-layout"], config.soloLayout);
-        
+        dser_BasicType(object["widget-group-panel-enabled"], config.isEnabledGroupPanelWidget);
+        dser_BasicType(object["widget-group-requests-enabled"], config.isEnabledGroupRequestsWidget);
+
+        dser_BasicType(object["native-hide-all"], config.isHiddenNativeAll);
+        dser_BasicType(object["native-hide-group-panel"], config.isHiddenNativeGroupPanel);
+        dser_BasicType(object["native-hide-group-frames"], config.isHiddenNativeGroupFrames);
+        dser_BasicType(object["native-hide-party-frames"], config.isHiddenNativePartyFrames);
+        dser_BasicType(object["native-hide-squad-broadcast"], config.isHiddenNativeSquadBroadcast);
+        dser_BasicType(object["native-hide-raid-frames"], config.isHiddenNativeRaidFrames);
+        dser_BasicType(object["native-hide-squad-frames"], config.isHiddenNativeSquadFrames);
+        dser_BasicType(object["native-hide-group-requests"], config.isHiddenNativeGroupRequests);
+        dser_BasicType(object["native-hide-squad-info"], config.isHiddenNativeSquadInfo);
+
         dser_BasicType(object["auto-save-enabled"], config.autoSaveEnabled);
         dser_BasicType(object["menu-width"], config.menuWidth);
     }
@@ -374,6 +379,41 @@ void dser_FrameStatePreset_t(json& object, FrameStatePreset_t& preset)
     }
 }
 
+void dser_StylePreset_t(json& object, StylePreset_t& style)
+{
+    if (!object.is_null())
+    {
+        dser_BasicType(object["font-type"], style.fontSource);
+        dser_BasicType(object["font"], style.font);
+        dser_BasicType(object["font-size"], style.fontSize);
+
+        dser_BasicType(object["colors-type"], style.colorsSource);
+        dser_ImColor(object["text-color"], style.text);
+        dser_ImColor(object["text-disabled-color"], style.textDisabled);
+        dser_ImColor(object["window-background-color"], style.windowBackground);
+        dser_ImColor(object["border-color"], style.border);
+        dser_ImColor(object["separator-color"], style.separator);
+        dser_ImColor(object["frame-background-color"], style.frameBackground);
+        dser_ImColor(object["frame-background-hovered-color"], style.frameBackgroundHovered);
+        dser_ImColor(object["frame-background-active-color"], style.frameBackgroundActive);
+        dser_ImColor(object["button-color"], style.button);
+        dser_ImColor(object["button-hovered-color"], style.buttonHovered);
+        dser_ImColor(object["button-active-color"], style.buttonActive);
+        dser_ImColor(object["check-mark-color"], style.checkMark);
+        dser_ImColor(object["selectable-color"], style.selectable);
+        dser_ImColor(object["selectable-hovered-color"], style.selectableHovered);
+        dser_ImColor(object["selectable-active-color"], style.selectableActive);
+
+        dser_BasicType(object["sizes-type"], style.sizesSource);
+        dser_ImVec2(object["window-padding"], style.windowPadding);
+        dser_BasicType(object["window-rounding"], style.windowRounding);
+        dser_BasicType(object["window-border-size"], style.windowBorderSize);
+        dser_ImVec2(object["frame-padding"], style.framePadding);
+        dser_BasicType(object["frame-rounding"], style.frameRounding);
+        dser_ImVec2(object["item-spacing"], style.itemSpacing);
+    }
+}
+
 void dser_PlayerFrameProperties_t(json& object, PlayerFrameProperties_t& properties)
 {
     if (!object.is_null())
@@ -487,22 +527,31 @@ json ser_GeneralConfig_t(const GeneralConfig_t& config)
     json object = json::object();
     object["party-layout"] = config.partyLayout;
     object["party-visibility"] = config.partyVisibility;
-    object["party-hide-native"] = config.isHiddenNativeParty;
     object["party-hide-self"] = config.isHiddenSelfParty;
-    object["party-hide-subgroups-list"] = config.hiddenSubgroupsParty;
+    
     object["raid-layout"] = config.raidLayout;
     object["raid-visibility"] = config.raidVisibility;
     object["raid-hide-subgroups"] = config.isHiddenSubgroupsRaid;
     object["raid-hide-self"] = config.isHiddenSelfRaid;
-    object["raid-hide-native"] = config.isHiddenNativeRaid;
-    object["raid-hide-subgroups-list"] = config.hiddenSubgroupsRaid;
+
     object["squad-layout"] = config.squadLayout;
     object["squad-visibility"] = config.squadVisibility;
     object["squad-hide-subgroups"] = config.isHiddenSubgroupsSquad;
     object["squad-hide-self"] = config.isHiddenSelfSquad;
-    object["squad-hide-native"] = config.isHiddenNativeSquad;
-    object["squad-hide-subgroups-list"] = config.hiddenSubgroupsSquad;
-    object["solo-layout"] = config.soloLayout;
+
+    object["widget-group-panel-enabled"] = config.isEnabledGroupPanelWidget;
+    object["widget-group-requests-enabled"] = config.isEnabledGroupRequestsWidget;
+    
+    object["native-hide-all"] = config.isHiddenNativeAll;
+    object["native-hide-group-panel"] = config.isHiddenNativeGroupPanel;
+    object["native-hide-group-frames"] = config.isHiddenNativeGroupFrames;
+    object["native-hide-party-frames"] = config.isHiddenNativePartyFrames;
+    object["native-hide-squad-broadcast"] = config.isHiddenNativeSquadBroadcast;
+    object["native-hide-raid-frames"] = config.isHiddenNativeRaidFrames;
+    object["native-hide-squad-frames"] = config.isHiddenNativeSquadFrames;
+    object["native-hide-group-requests"] = config.isHiddenNativeGroupRequests;
+    object["native-hide-squad-info"] = config.isHiddenNativeSquadInfo;
+    
     object["auto-save-enabled"] = config.autoSaveEnabled;
     object["menu-width"] = config.menuWidth;
     return object;
@@ -780,6 +829,40 @@ json ser_FrameStatePreset_t(const FrameStatePreset_t& preset)
     object["overlay-color"] = ser_ImColor(preset.overlayColor);
     object["glow-enabled"] = preset.glowEnabled;
     object["glow"] = ser_GlowIndicator_t(preset.glow);
+    return object;
+}
+
+json ser_StylePreset_t(const StylePreset_t& style)
+{
+    json object = json::object();
+    object["font-type"] = style.fontSource;
+    object["font"] = style.font;
+    object["font-size"] = style.fontSize;
+
+    object["colors-type"] = style.colorsSource;
+    object["text-color"] = ser_ImColor(style.text);
+    object["text-disabled-color"] = ser_ImColor(style.textDisabled);
+    object["window-background-color"] = ser_ImColor(style.windowBackground);
+    object["border-color"] = ser_ImColor(style.border);
+    object["separator-color"] = ser_ImColor(style.separator);
+    object["frame-background-color"] = ser_ImColor(style.frameBackground);
+    object["frame-background-hovered-color"] = ser_ImColor(style.frameBackgroundHovered);
+    object["frame-background-active-color"] = ser_ImColor(style.frameBackgroundActive);
+    object["button-color"] = ser_ImColor(style.button);
+    object["button-hovered-color"] = ser_ImColor(style.buttonHovered);
+    object["button-active-color"] = ser_ImColor(style.buttonActive);
+    object["check-mark-color"] = ser_ImColor(style.checkMark);
+    object["selectable-color"] = ser_ImColor(style.selectable);
+    object["selectable-hovered-color"] = ser_ImColor(style.selectableHovered);
+    object["selectable-active-color"] = ser_ImColor(style.selectableActive);
+
+    object["sizes-type"] = style.sizesSource;
+    object["window-padding"] = ser_ImVec2(style.windowPadding);
+    object["window-rounding"] = style.windowRounding;
+    object["window-border-size"] = style.windowBorderSize;
+    object["frame-padding"] = ser_ImVec2(style.framePadding);
+    object["frame-rounding"] = style.frameRounding;
+    object["item-spacing"] = ser_ImVec2(style.itemSpacing);
     return object;
 }
 

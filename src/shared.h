@@ -32,6 +32,7 @@ extern LayoutManager g_LayoutManager;
 extern ColourPresets_t ColourPresets;
 extern BorderPresets_t BorderPresets;
 extern FrameStatePresets_t FrameStatePresets;
+extern StylePresets_t StylePresets;
 
 extern TextStyle_t ConfigText;
 extern IconText_t ConfigIconDuration;

@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <vector>
 
-#include "data_link/data_link.h"
 #include "imgui/imgui.h"
 #include "imgui_extensions.h"
 
@@ -633,18 +632,36 @@ namespace UI::Grid {
             return true;
         }
 
-        if (trigger.category == "Roles")
+        if (trigger.category == "Party/Squad Roles")
         {
+            if (trigger.effect == "Self" && VitalsData && userData.UserId == VitalsData->getClientId()) return true;
             if (trigger.effect == "Commander" && userData.SquadRole == VitalSignsDataLink::ESquadRole::Commander) return true;
             if (trigger.effect == "Lieutenant" && userData.SquadRole == VitalSignsDataLink::ESquadRole::Lieutenant) return true;
+            if (trigger.effect == "Ready Check (Not Ready)" && VitalsData && VitalsData->isReadyCheckActive() && !userData.IsReady) return true;
+            if (trigger.effect == "Ready Check (Ready)" && VitalsData && VitalsData->isReadyCheckActive() && userData.IsReady) return true;
+            if (VitalsData && (trigger.effect == "Vote Kick (Not Voted)" || trigger.effect == "Vote Kick (Voted)"))
+            {
+                /* The user is the votee, and the effect reflects whether the client has voted to kick them */
+                const bool isVoted = (trigger.effect == "Vote Kick (Voted)");
+                for (const auto& kickVote : VitalsData->getKickVotes())
+                {
+                    if (kickVote.VoteeId == userData.UserId) return (kickVote.HasClientVoted == isVoted);
+                }
+            }
             if (trigger.effect == "Homestead Owner" && userData.IsHomesteadOwner) return true;
-            if (trigger.effect == "Self" && VitalsData && userData.UserId == VitalsData->getClientId()) return true;
-            if (trigger.effect == "Hovered" && userData.IsHovered) return true;
-            if (trigger.effect == "Selected" && userData.IsSelected) return true;
             return false;
         }
 
-        if (trigger.category == "Primary Roles")
+        if (trigger.category == "Targeting")
+        {
+            if (trigger.effect == "Hovered" && userData.IsHovered) return true;
+            if (trigger.effect == "Selected" && userData.IsSelected) return true;
+            if (trigger.effect == "Personal Target" && userData.IsPersonalTarget) return true;
+            if (trigger.effect == "Party Target" && userData.IsPartyTarget) return true;
+            return false;
+        }
+
+        if (trigger.category == "Assigned Roles")
         {
             if (trigger.effect == "Damage" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Damage) return true;
             if (trigger.effect == "Damage (Alacrity)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageAlacrity) return true;
@@ -652,13 +669,10 @@ namespace UI::Grid {
             if (trigger.effect == "Healer (Alacrity)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerAlacrity) return true;
             if (trigger.effect == "Healer (Quickness)" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerQuickness) return true;
             if (trigger.effect == "Flexible" && userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Flexible) return true;
-        }
-
-        if (trigger.category == "Secondary Roles")
-        {
             if (trigger.effect == "Tank" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Tank) return true;
             if (trigger.effect == "Kiter" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Kiter) return true;
             if (trigger.effect == "Utility" && userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Utility) return true;
+            return false;
         }
 
         if (trigger.category == "Squad Markers")
@@ -671,19 +685,20 @@ namespace UI::Grid {
             if (trigger.effect == "Spiral" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Spiral) return true;
             if (trigger.effect == "Triangle" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Triangle) return true;
             if (trigger.effect == "X" && userData.SquadMarker == VitalSignsDataLink::ESquadMarker::X) return true;
+            return false;
         }
 
         if (trigger.category == "Health")
         {
             bool statusMatch = false;
-            if (trigger.effect == "Alive" && userData.HealthType == VitalSignsDataLink::E_HEALTH_ALIVE) statusMatch = true;
-            else if (trigger.effect == "Downed" && userData.HealthType == VitalSignsDataLink::E_HEALTH_DOWNED) statusMatch = true;
-            else if (trigger.effect == "Defeated" && userData.HealthType == VitalSignsDataLink::E_HEALTH_DEFEATED) statusMatch = true;
-            else if (trigger.effect == "Shroud (Necromancer)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER) statusMatch = true;
-            else if (trigger.effect == "Shroud (Specter)" && userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER) statusMatch = true;
-            else if (trigger.effect == "Unknown" && userData.HealthType == VitalSignsDataLink::E_HEALTH_UNKNOWN) statusMatch = true;
+            if (trigger.effect == "Alive" && userData.HealthType == VitalSignsDataLink::EHealthType::Alive) statusMatch = true;
+            else if (trigger.effect == "Downed" && userData.HealthType == VitalSignsDataLink::EHealthType::Downed) statusMatch = true;
+            else if (trigger.effect == "Defeated" && userData.HealthType == VitalSignsDataLink::EHealthType::Defeated) statusMatch = true;
+            else if (trigger.effect == "Shroud (Necromancer)" && userData.HealthType == VitalSignsDataLink::EHealthType::ShroudNecromancer) statusMatch = true;
+            else if (trigger.effect == "Shroud (Specter)" && userData.HealthType == VitalSignsDataLink::EHealthType::ShroudSpecter) statusMatch = true;
+            else if (trigger.effect == "Unknown" && userData.HealthType == VitalSignsDataLink::EHealthType::Unknown) statusMatch = true;
 
-            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::EHealthType::ShroudNecromancer || userData.HealthType == VitalSignsDataLink::EHealthType::ShroudSpecter);
             float ratio = (isShrouded && (trigger.effect == "Shroud (Necromancer)" || trigger.effect == "Shroud (Specter)")) ? userData.GetShroudRatio() : userData.GetHealthRatio();
             float healthRatio = ratio * 100.0f; // Scale to match UI values (0-100)
 
@@ -1820,11 +1835,20 @@ namespace UI::Grid {
                 /* Right-click context menu */
                 if (ImGui::BeginPopupContextItem())
                 {
-                    // const auto clientId = VitalsData->getClientId();
                     const auto clientRole = VitalsData->getUserData(clientId).SquadRole;
                     const auto clientMap = VitalsData->getUserData(clientId).MapName;
 
-                    if (clientId != userData.UserId)
+                    /* User permissions */
+                    const bool isNotClient = (clientId != userData.UserId);
+                    const bool isInSquad = (VitalsData->getGroupType() == VitalSignsDataLink::EGroupType::Squad10) ||
+                                           (VitalsData->getGroupType() == VitalSignsDataLink::EGroupType::Squad50);
+                    const bool isInParty = (VitalsData->getGroupType() == VitalSignsDataLink::EGroupType::Party);
+                    const bool canSetRoles = isInSquad || isInParty;
+                    const bool canSetSquadMarker = isInSquad && ((clientRole == VitalSignsDataLink::ESquadRole::Commander) || (clientRole == VitalSignsDataLink::ESquadRole::Lieutenant));
+                    const bool canSetTarget = isNotClient && userData.IsInInstance;
+
+                    /* Social features */
+                    if (isNotClient)
                     {
                         if (ImGui::MenuItem("Whisper")) { VitalsData->whisperUser(userData.UserId); }
                         if (ImGui::MenuItem("Send Mail")) { VitalsData->sendMail(userData.AccountName); }
@@ -1834,7 +1858,10 @@ namespace UI::Grid {
                         }
                         if (clientMap == userData.MapName && !userData.IsInInstance)
                         {
-                            if (ImGui::MenuItem("Join in Instance")) { VitalsData->joinUserInstance(userData.UserId); }
+                            const std::string mapName = (!userData.MapName.empty() ? userData.MapName : "Instance");
+                            const std::string joinLabel = "Join in " + mapName + "###JoinInInstance";
+
+                            if (ImGui::MenuItem(joinLabel.c_str())) { VitalsData->joinUserInstance(userData.UserId); }
                         }
                         if (userData.IsHomesteadOwner && !userData.IsInInstance)
                         {
@@ -1860,11 +1887,64 @@ namespace UI::Grid {
                         }
                     }
 
-                    if ((VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_10) ||
-                        (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_SQUAD_50))
+                    /* Roles and markers */
+                    if (canSetRoles || canSetSquadMarker || canSetTarget)
                     {
                         ImGui::Separator();
-                        if (clientId != userData.UserId)
+                        if (canSetRoles)
+                        {
+                            if (ImGui::BeginMenu("Set Primary Role"))
+                            {
+                                if (ImGui::MenuItem("Damage", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Damage)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Damage); }
+                                if (ImGui::MenuItem("Damage (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageAlacrity); }
+                                if (ImGui::MenuItem("Damage (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageQuickness); }
+                                if (ImGui::MenuItem("Healer (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerAlacrity); }
+                                if (ImGui::MenuItem("Healer (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerQuickness); }
+                                if (ImGui::MenuItem("Flexible", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Flexible)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Flexible); }
+                                if (ImGui::MenuItem("None", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::None)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::None); }
+                                ImGui::EndMenu();
+                            }
+                            if (ImGui::BeginMenu("Set Secondary Role"))
+                            {
+                                if (ImGui::MenuItem("Tank", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Tank)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Tank); }
+                                if (ImGui::MenuItem("Kiter", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Kiter)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Kiter); }
+                                if (ImGui::MenuItem("Utility", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Utility)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Utility); }
+                                if (ImGui::MenuItem("None", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::None)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::None); }
+                                ImGui::EndMenu();
+                            }
+                        }
+                        if (canSetSquadMarker)
+                        {
+                            if (ImGui::BeginMenu("Set Squad Marker"))
+                            {
+                                if (ImGui::MenuItem("Arrow", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Arrow)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Arrow); }
+                                if (ImGui::MenuItem("Circle", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Circle)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Circle); }
+                                if (ImGui::MenuItem("Heart", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Heart)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Heart); }
+                                if (ImGui::MenuItem("Square", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Square)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Square); }
+                                if (ImGui::MenuItem("Star", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Star)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Star); }
+                                if (ImGui::MenuItem("Spiral", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Spiral)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Spiral); }
+                                if (ImGui::MenuItem("Triangle", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Triangle)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Triangle); }
+                                if (ImGui::MenuItem("X", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::X)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::X); }
+                                ImGui::EndMenu();
+                            }
+                        }
+                        if (canSetTarget)
+                        {
+                            if (ImGui::BeginMenu("Set Target"))
+                            {
+                                /* Selecting the current personal target clears it; the game cannot clear a party target */
+                                if (ImGui::MenuItem("Personal Target", nullptr, userData.IsPersonalTarget)) { VitalsData->setPersonalTarget(userData.UserId, !userData.IsPersonalTarget); }
+                                if (ImGui::MenuItem("Party Target", nullptr, userData.IsPartyTarget, !userData.IsPartyTarget)) { VitalsData->setPartyTarget(userData.UserId); }
+                                ImGui::EndMenu();
+                            }
+                        }
+                    }
+
+                    /* Squad management */
+                    if (isInSquad)
+                    {
+                        ImGui::Separator();
+                        if (isNotClient)
                         {
                             if (clientRole == VitalSignsDataLink::ESquadRole::Commander)
                             {
@@ -1881,81 +1961,48 @@ namespace UI::Grid {
                                     if (ImGui::MenuItem("Demote Lieutenant")) { VitalsData->setLieutenant(userData.UserId, false); }
                                 }
                             }
-                        }
-                        if (ImGui::BeginMenu("Set Primary Role"))
-                        {
-                            if (ImGui::MenuItem("Damage", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Damage)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Damage); }
-                            if (ImGui::MenuItem("Damage (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageAlacrity); }
-                            if (ImGui::MenuItem("Damage (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageQuickness); }
-                            if (ImGui::MenuItem("Healer (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerAlacrity); }
-                            if (ImGui::MenuItem("Healer (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerQuickness); }
-                            if (ImGui::MenuItem("Flexible", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Flexible)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Flexible); }
-                            if (ImGui::MenuItem("None", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::None)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::None); }
-                            ImGui::EndMenu();
-                        }
-                        if (ImGui::BeginMenu("Set Secondary Role"))
-                        {
-                            if (ImGui::MenuItem("Tank", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Tank)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Tank); }
-                            if (ImGui::MenuItem("Kiter", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Kiter)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Kiter); }
-                            if (ImGui::MenuItem("Utility", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Utility)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Utility); }
-                            if (ImGui::MenuItem("None", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::None)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::None); }
-                            ImGui::EndMenu();
-                        }
-                        if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
-                        {
-                            if (ImGui::BeginMenu("Set Marker"))
+                            if (!VitalsData->hasSquadCommander())
                             {
-                                if (ImGui::MenuItem("Arrow", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Arrow)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Arrow); }
-                                if (ImGui::MenuItem("Circle", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Circle)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Circle); }
-                                if (ImGui::MenuItem("Heart", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Heart)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Heart); }
-                                if (ImGui::MenuItem("Square", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Square)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Square); }
-                                if (ImGui::MenuItem("Star", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Star)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Star); }
-                                if (ImGui::MenuItem("Spiral", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Spiral)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Spiral); }
-                                if (ImGui::MenuItem("Triangle", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::Triangle)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::Triangle); }
-                                if (ImGui::MenuItem("X", nullptr, userData.SquadMarker == VitalSignsDataLink::ESquadMarker::X)) { VitalsData->setMarker(userData.Agent, VitalSignsDataLink::ESquadMarker::X); }
-                                ImGui::EndMenu();
+                                /* Without a commander kicks are decided by vote */
+                                if (VitalsData->canCancelKickVote(userData.UserId))
+                                {
+                                    if (ImGui::MenuItem("Cancel Vote to Kick from Squad")) { VitalsData->cancelKickVote(userData.UserId); }
+                                }
+                                else
+                                {
+                                    if (ImGui::MenuItem("Vote to Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
+                                }
                             }
-                        }
-                        if (clientId != userData.UserId)
-                        {
-                            if (clientRole == VitalSignsDataLink::ESquadRole::Commander || clientRole == VitalSignsDataLink::ESquadRole::Lieutenant)
+                            else if ((clientRole == VitalSignsDataLink::ESquadRole::Commander) ||
+                                     ((clientRole == VitalSignsDataLink::ESquadRole::Lieutenant) && (userData.SquadRole == VitalSignsDataLink::ESquadRole::None)))
                             {
+                                /* Lieutenants cannot kick the commander or other lieutenants */
                                 if (ImGui::MenuItem("Kick from Squad")) { VitalsData->kickUser(userData.UserId); }
                             }
                         }
                         if (ImGui::MenuItem("Leave Squad")) { VitalsData->leaveGroup(); }
                     }
 
-                    if (VitalsData->getGroupType() == VitalSignsDataLink::E_GROUP_PARTY)
+                    /* Party management */
+                    if (isInParty)
                     {
                         ImGui::Separator();
-                        if (ImGui::BeginMenu("Set Primary Role"))
+                        if (isNotClient)
                         {
-                            if (ImGui::MenuItem("Damage", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Damage)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Damage); }
-                            if (ImGui::MenuItem("Damage (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageAlacrity); }
-                            if (ImGui::MenuItem("Damage (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::DamageQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::DamageQuickness); }
-                            if (ImGui::MenuItem("Healer (Alacrity)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerAlacrity)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerAlacrity); }
-                            if (ImGui::MenuItem("Healer (Quickness)", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::HealerQuickness)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::HealerQuickness); }
-                            if (ImGui::MenuItem("Flexible", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::Flexible)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::Flexible); }
-                            if (ImGui::MenuItem("None", nullptr, userData.PrimaryRole == VitalSignsDataLink::EPrimaryRole::None)) { VitalsData->setPrimaryRole(userData.UserId, VitalSignsDataLink::EPrimaryRole::None); }
-                            ImGui::EndMenu();
-                        }
-                        if (ImGui::BeginMenu("Set Secondary Role"))
-                        {
-                            if (ImGui::MenuItem("Tank", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Tank)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Tank); }
-                            if (ImGui::MenuItem("Kiter", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Kiter)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Kiter); }
-                            if (ImGui::MenuItem("Utility", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::Utility)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::Utility); }
-                            if (ImGui::MenuItem("None", nullptr, userData.SecondaryRole == VitalSignsDataLink::ESecondaryRole::None)) { VitalsData->setSecondaryRole(userData.UserId, VitalSignsDataLink::ESecondaryRole::None); }
-                            ImGui::EndMenu();
-                        }
-                        if (clientId != userData.UserId)
-                        {
-                            if (ImGui::MenuItem("Kick from Party")) { VitalsData->kickUser(userData.UserId); }
+                            if (VitalsData->canCancelKickVote(userData.UserId))
+                            {
+                                if (ImGui::MenuItem("Cancel Vote to Kick from Party")) { VitalsData->cancelKickVote(userData.UserId); }
+                            }
+                            else
+                            {
+                                if (ImGui::MenuItem("Vote to Kick from Party")) { VitalsData->kickUser(userData.UserId); }
+                            }
                         }
                         if (ImGui::MenuItem("Leave Party")) { VitalsData->leaveGroup(); }
                     }
 
-                    if (clientId != userData.UserId)
+                    /* Report */
+                    if (isNotClient)
                     {
                         ImGui::Separator();
                         if (ImGui::MenuItem("Report")) { VitalsData->reportUser(userData.UserId); }
@@ -1967,16 +2014,16 @@ namespace UI::Grid {
                 const bool isHovered = IsItemHovered(parentProperties);
                 const ImColor backgroundColour = GetBackgroundColour(context.colourPresets, context.layoutConfig->colors, userData.HealthType);
                 
-                const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+                const bool isShrouded = (userData.HealthType == VitalSignsDataLink::EHealthType::ShroudNecromancer || userData.HealthType == VitalSignsDataLink::EHealthType::ShroudSpecter);
                 const std::string& shroudMode = context.layoutConfig->layout.grid.playerFrames.shroudMode;
 
-                VitalSignsDataLink::E_HEALTH_TYPE effectiveHealthType = userData.HealthType;
+                VitalSignsDataLink::EHealthType effectiveHealthType = userData.HealthType;
                 float effectiveHealthRatio = userData.GetHealthRatio();
                 if (isShrouded)
                 {
                     if (shroudMode == "None" || shroudMode == "Split View")
                     {
-                        effectiveHealthType = VitalSignsDataLink::E_HEALTH_ALIVE;
+                        effectiveHealthType = VitalSignsDataLink::EHealthType::Alive;
                     }
                     else // "Default"
                     {

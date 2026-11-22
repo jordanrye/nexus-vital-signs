@@ -17,6 +17,8 @@
     <RootNamespace>VitalSigns</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>VitalSigns</ProjectName>
+    <!-- Always run MSBuild so CopyDllToBuildDir refreshes build\ after a configuration switch. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -45,14 +47,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>$(SolutionDir)build\.int\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\obj\</IntDir>
     <TargetExt>.dll</TargetExt>
     <TargetName>VitalSigns</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>$(SolutionDir)build\.int\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\obj\</IntDir>
     <TargetExt>.dll</TargetExt>
     <TargetName>VitalSigns</TargetName>
   </PropertyGroup>
@@ -90,6 +92,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\addon.h" />
+    <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\migration\migration.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\Behavior.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.h" />
@@ -109,8 +112,13 @@
     <ClInclude Include="src\data_link\gw2re\Game\MissionContext.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\EPlayerFlags.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannel.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelIdentity.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelInvite.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelMember.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannelVote.h" />
     <ClInclude Include="src\data_link\data_link.h" />
+    <ClInclude Include="src\data_link\data_link_hooks.h" />
+    <ClInclude Include="src\data_link\data_link_types.h" />
     <ClInclude Include="src\basic_types.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlContact.h" />
     <ClInclude Include="src\forms\forms.h" />
@@ -119,12 +127,13 @@
     <ClInclude Include="src\data_link\gw2re\Game\Char\Character.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\ChCoreStats.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\ChProfession.h" />
-    <ClInclude Include="src\data_link\gw2re\Game\Char\EChBuffType.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChProfession.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChProfessionState.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Char\EChSpecialization.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Game\EventApi.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Player\EMentorEligibility.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\Player.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Player\PlTrainingMgr.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\Specialization\SpecDef.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\Specialization\SpecMgr.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlContext.h" />
@@ -133,6 +142,7 @@
     <ClInclude Include="src\data_link\gw2re\Game\Squad\SquadContext.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Text\Types.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Types.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Unlock\UnlockManager.h" />
     <ClInclude Include="src\data_link\gw2re\memtools\memtools.h" />
     <ClInclude Include="src\data_link\gw2re\Util\FuncDefs.h" />
     <ClInclude Include="src\data_link\gw2re\Util\Hook.h" />
@@ -153,6 +163,7 @@
     <ClInclude Include="src\json_serialisers.h" />
     <ClInclude Include="src\imgui_tree_view.h" />
     <ClInclude Include="src\migration\migration_v1_to_v2.h" />
+    <ClInclude Include="src\migration\migration_v2_to_v3.h" />
     <ClInclude Include="src\mumble\Mumble.h" />
     <ClInclude Include="src\nexus\Nexus.h" />
     <ClInclude Include="src\nlohmann\json.hpp" />
@@ -164,6 +175,7 @@
     <ClInclude Include="src\ui_common.h" />
     <ClInclude Include="src\ui_grid.h" />
     <ClInclude Include="src\ui_radial.h" />
+    <ClInclude Include="src\ui_widget.h" />
     <ClInclude Include="src\utilities.h" />
     <ClInclude Include="src\utils_deletion.h" />
     <ClInclude Include="src\version.h" />
@@ -184,6 +196,15 @@
     <ClCompile Include="src\data_link\gw2re\Game\Behavior\BehaviorOrder.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChCliOrder.cpp" />
     <ClCompile Include="src\data_link\data_link.cpp" />
+    <ClCompile Include="src\data_link\data_link_channel.cpp" />
+    <ClCompile Include="src\data_link\data_link_channel_requests.cpp" />
+    <ClCompile Include="src\data_link\data_link_channel_votes.cpp" />
+    <ClCompile Include="src\data_link\data_link_frames.cpp" />
+    <ClCompile Include="src\data_link\data_link_ready_check.cpp" />
+    <ClCompile Include="src\data_link\data_link_social.cpp" />
+    <ClCompile Include="src\data_link\data_link_stubs.cpp" />
+    <ClCompile Include="src\data_link\data_link_targeting.cpp" />
+    <ClCompile Include="src\data_link\data_link_users.cpp" />
     <ClCompile Include="src\entry.cpp" />
     <ClCompile Include="src\forms\bar.cpp" />
     <ClCompile Include="src\forms\select_layout.cpp" />
@@ -196,6 +217,7 @@
     <ClCompile Include="src\forms\position.cpp" />
     <ClCompile Include="src\forms\select_layout_type.cpp" />
     <ClCompile Include="src\forms\size.cpp" />
+    <ClCompile Include="src\forms\style_preset.cpp" />
     <ClCompile Include="src\forms\texture.cpp" />
     <ClCompile Include="src\forms\text_data_source.cpp" />
     <ClCompile Include="src\forms\text_limit.cpp" />
@@ -203,6 +225,7 @@
     <ClCompile Include="src\forms\trigger.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Agent\Agent.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\AgentSelection\AsContext.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Char\ChCliContext.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\Character.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChCoreStats.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Char\ChProfession.cpp" />
@@ -215,6 +238,7 @@
     <ClCompile Include="src\data_link\gw2re\Game\Portal\PlUser.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\PropContext.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Types.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Unlock\UnlockManager.cpp" />
     <ClCompile Include="src\data_link\gw2re\Util\Validation.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
@@ -228,11 +252,13 @@
     <ClCompile Include="src\imgui_tree_view.cpp" />
     <ClCompile Include="src\layout_manager.cpp" />
     <ClCompile Include="src\migration\migration_v1_to_v2.cpp" />
+    <ClCompile Include="src\migration\migration_v2_to_v3.cpp" />
     <ClCompile Include="src\settings.cpp" />
     <ClCompile Include="src\shared.cpp" />
     <ClCompile Include="src\ui_common.cpp" />
     <ClCompile Include="src\ui_grid.cpp" />
     <ClCompile Include="src\ui_radial.cpp" />
+    <ClCompile Include="src\ui_widget.cpp" />
     <ClCompile Include="src\utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -241,7 +267,14 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VitalSigns.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <!-- Each configuration builds into build\$(Configuration)\; copy the active DLL up to build\. -->
+  <Target Name="CopyDllToBuildDir" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)build\" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

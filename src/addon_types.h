@@ -12,28 +12,37 @@ struct GeneralConfig_t
     /* Party (5 Players) */
     std::string partyLayout;
     std::string partyVisibility = "Always show";
-    bool isHiddenNativeParty = false;
     bool isHiddenSelfParty = false;
-    std::vector<int> hiddenSubgroupsParty;
+    std::vector<int> hiddenSubgroupsParty; /** FIXME: To be reimplemented. Session only, not saved. */
     
     /* Raid (10 Players) */
     std::string raidLayout;
     std::string raidVisibility = "Always show";
     bool isHiddenSubgroupsRaid = false;
     bool isHiddenSelfRaid = false;
-    bool isHiddenNativeRaid = false;
-    std::vector<int> hiddenSubgroupsRaid;
+    std::vector<int> hiddenSubgroupsRaid; /** FIXME: To be reimplemented. Session only, not saved. */
 
     /* Squad (50 Players) */
     std::string squadLayout;
     std::string squadVisibility = "Always show";
     bool isHiddenSubgroupsSquad = false;
     bool isHiddenSelfSquad = false;
-    bool isHiddenNativeSquad = false;
-    std::vector<int> hiddenSubgroupsSquad;
+    std::vector<int> hiddenSubgroupsSquad; /** FIXME: To be reimplemented. Session only, not saved. */
 
-    /* Solo (No Group) */
-    std::string soloLayout;
+    /* Widgets */
+    bool isEnabledGroupPanelWidget = true;
+    bool isEnabledGroupRequestsWidget = true;
+
+    /* Native Frames */
+    bool isHiddenNativeAll = false;
+    bool isHiddenNativeGroupPanel = false;
+    bool isHiddenNativeGroupFrames = false;
+    bool isHiddenNativePartyFrames = false;
+    bool isHiddenNativeRaidFrames = false;
+    bool isHiddenNativeSquadBroadcast = false;
+    bool isHiddenNativeSquadInfo = false;
+    bool isHiddenNativeSquadFrames = false;
+    bool isHiddenNativeGroupRequests = false;
 
     /* Editor Settings */
     bool autoSaveEnabled = false;
@@ -182,6 +191,47 @@ struct FrameStatePresets_t
         commander.border.color = ImColor(255, 255, 255, 255);
         commander.border.thickness = 1;
     }
+};
+
+struct StylePreset_t
+{
+    /* Font, an empty file path keeps the Nexus font at the custom size */
+    std::string fontSource = "Nexus font";
+    std::string font;
+    float fontSize = 0.0f;
+
+    /* Colors */
+    std::string colorsSource = "Nexus colors";
+    ImColor text;
+    ImColor textDisabled;
+    ImColor windowBackground;
+    ImColor border;
+    ImColor separator;
+    ImColor frameBackground;
+    ImColor frameBackgroundHovered;
+    ImColor frameBackgroundActive;
+    ImColor button;
+    ImColor buttonHovered;
+    ImColor buttonActive;
+    ImColor checkMark;
+    ImColor selectable;
+    ImColor selectableHovered;
+    ImColor selectableActive;
+
+    /* Sizes */
+    std::string sizesSource = "Nexus sizes";
+    ImVec2 windowPadding = ImVec2(0.0f, 0.0f);
+    float windowRounding = 0.0f;
+    float windowBorderSize = 0.0f;
+    ImVec2 framePadding = ImVec2(0.0f, 0.0f);
+    float frameRounding = 0.0f;
+    ImVec2 itemSpacing = ImVec2(0.0f, 0.0f);
+};
+
+struct StylePresets_t
+{
+    StylePreset_t groupPanel;
+    StylePreset_t groupRequests;
 };
 
 #endif /* SHARED_TYPES_H */

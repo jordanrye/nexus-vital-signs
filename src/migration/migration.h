@@ -9,7 +9,7 @@ using json = nlohmann::json;
 
 namespace Migration
 {
-    constexpr int SCHEMA_VERSION = 2;
+    constexpr int SCHEMA_VERSION = 3;
 
     bool MigrateSettingsConfig(json& config, const std::string& fileName);
     bool MigrateLayoutConfig(json& config, const std::string& fileName);

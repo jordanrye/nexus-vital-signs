@@ -1,5 +1,6 @@
 #include "ui_radial.h"
 
+#include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "imgui_extensions.h"
 
@@ -30,7 +31,7 @@ namespace UI::Radial {
         VitalSignsDataLink::EProfession profession[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::EPrimaryRole primaryRole[SQUAD_MEMBER_LIMIT];
         float health[SQUAD_MEMBER_LIMIT];
-        VitalSignsDataLink::E_HEALTH_TYPE healthType[SQUAD_MEMBER_LIMIT];
+        VitalSignsDataLink::EHealthType healthType[SQUAD_MEMBER_LIMIT];
         float barrier[SQUAD_MEMBER_LIMIT];
         VitalSignsDataLink::Effects_t effects[SQUAD_MEMBER_LIMIT];
     } context;
@@ -368,7 +369,7 @@ namespace UI::Radial {
 
         if (context.index < context.layoutConfig.radial.sectorCountMax)
         {
-            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER || userData.HealthType == VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER);
+            const bool isShrouded = (userData.HealthType == VitalSignsDataLink::EHealthType::ShroudNecromancer || userData.HealthType == VitalSignsDataLink::EHealthType::ShroudSpecter);
             
             context.charName[context.index] = userData.GetDisplayName();
             context.profession[context.index] = userData.Profession;

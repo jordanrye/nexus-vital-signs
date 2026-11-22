@@ -19,6 +19,7 @@
 #include "ui_common.h"
 #include "ui_grid.h"
 #include "ui_radial.h"
+#include "ui_widget.h"
 #include "utils_deletion.h"
 
 bool isValidGameState()
@@ -132,17 +133,42 @@ namespace Addon {
             return;
         }
 
-        const VitalSignsDataLink::E_GROUP_TYPE groupType = VitalsData->getGroupType();
-        std::string activeLayoutName = ConfigGeneral.soloLayout;
+        const VitalSignsDataLink::EGroupType groupType = VitalsData->getGroupType();
+        std::string activeLayoutName;
         LayoutConfig_t* activeLayout = nullptr;
         bool hideSelf = false;
         bool hideSubgroups = false;
         std::vector<int>* activeHiddenSubgroups = nullptr;
 
+        /* Also shown out of a group, for the client's own invites and requests */
+        if (ConfigGeneral.isEnabledGroupPanelWidget)
+        {
+            UI::Widget::RenderGroupPanel(groupType);
+        }
+
+        if (ConfigGeneral.isEnabledGroupRequestsWidget)
+        {
+            UI::Widget::RenderGroupRequests();
+        }
+
+        /* A hidden parent also hides its children, whatever their own setting */
+        {
+            const bool isVisibleAll = !ConfigGeneral.isHiddenNativeAll;
+            const bool isVisibleGroupFrames = isVisibleAll && !ConfigGeneral.isHiddenNativeGroupFrames;
+
+            VitalsData->setGroupPanelVisibility(isVisibleAll && !ConfigGeneral.isHiddenNativeGroupPanel);
+            VitalsData->setGroupFrameVisibility(isVisibleGroupFrames);
+            VitalsData->setGroupFramePartyVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativePartyFrames);
+            VitalsData->setGroupFrameRaidVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativeRaidFrames);
+            VitalsData->setGroupFrameSquadVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativeSquadFrames);
+            VitalsData->setGroupFrameBroadcastVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativeSquadBroadcast);
+            VitalsData->setGroupRequestsVisibility(isVisibleAll && !ConfigGeneral.isHiddenNativeGroupRequests);
+            VitalsData->setGroupInfoVisibility(isVisibleGroupFrames && !ConfigGeneral.isHiddenNativeSquadInfo);
+        }
+
         switch (groupType)
         {
-            case VitalSignsDataLink::E_GROUP_PARTY:
-                VitalsData->setPartyFrameVisibility(!ConfigGeneral.isHiddenNativeParty);
+            case VitalSignsDataLink::EGroupType::Party:
                 if (IsFrameHidden(ConfigGeneral.partyVisibility))
                 {
                     return;
@@ -151,8 +177,7 @@ namespace Addon {
                 hideSelf = ConfigGeneral.isHiddenSelfParty;
                 activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsParty;
                 break;
-            case VitalSignsDataLink::E_GROUP_SQUAD_10:
-                VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeRaid);
+            case VitalSignsDataLink::EGroupType::Squad10:
                 if (IsFrameHidden(ConfigGeneral.raidVisibility))
                 {
                     return;
@@ -162,8 +187,7 @@ namespace Addon {
                 hideSubgroups = ConfigGeneral.isHiddenSubgroupsRaid;
                 activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsRaid;
                 break;
-            case VitalSignsDataLink::E_GROUP_SQUAD_50:
-                VitalsData->setSquadFrameVisibility(!ConfigGeneral.isHiddenNativeSquad);
+            case VitalSignsDataLink::EGroupType::Squad50:
                 if (IsFrameHidden(ConfigGeneral.squadVisibility))
                 {
                     return;
@@ -173,11 +197,9 @@ namespace Addon {
                 hideSubgroups = ConfigGeneral.isHiddenSubgroupsSquad;
                 activeHiddenSubgroups = &ConfigGeneral.hiddenSubgroupsSquad;
                 break;
-            case VitalSignsDataLink::E_GROUP_NONE:
+            case VitalSignsDataLink::EGroupType::None:
             default:
-                activeLayoutName = ConfigGeneral.soloLayout;
-                activeHiddenSubgroups = nullptr;
-                break;
+                return; // No player frames out of a group
         }
 
         if (isPlayerFramesHidden)
@@ -334,7 +356,6 @@ namespace Addon {
             form_SelectLayout(layoutNames, ConfigGeneral.partyLayout);
             form_Visibility(ConfigGeneral.partyVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfParty);
-            ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeParty);
         }
         ImGui::PopID();
         
@@ -346,7 +367,6 @@ namespace Addon {
             form_Visibility(ConfigGeneral.raidVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfRaid);
             ImGui::Checkbox("Hide other subgroups", &ConfigGeneral.isHiddenSubgroupsRaid);
-            ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeRaid);
         }
         ImGui::PopID();
 
@@ -358,7 +378,54 @@ namespace Addon {
             form_Visibility(ConfigGeneral.squadVisibility);
             ImGui::Checkbox("Hide self", &ConfigGeneral.isHiddenSelfSquad);
             ImGui::Checkbox("Hide other subgroups", &ConfigGeneral.isHiddenSubgroupsSquad);
-            ImGui::Checkbox("Hide native frames", &ConfigGeneral.isHiddenNativeSquad);
+        }
+        ImGui::PopID();
+
+        ImGui::PushID("Widgets");
+        {
+            ImGui::TextDisabled("Widgets");
+            ImGui::Separator();
+
+            ImGui::Checkbox("Group Panel", &ConfigGeneral.isEnabledGroupPanelWidget);
+            ImGui::Checkbox("Group Requests", &ConfigGeneral.isEnabledGroupRequestsWidget);
+        }
+        ImGui::PopID();
+
+        ImGui::PushID("NativeFrames");
+        {
+            ImGui::TextDisabled("Native Frames");
+            ImGui::Separator();
+
+            /* Children of a hidden parent are hidden with it, so their own setting is
+             * disabled. Each level is disabled separately, as nesting dims it twice. */
+            const bool isDisabledAllChildren = ConfigGeneral.isHiddenNativeAll;
+            const bool isDisabledGroupFramesChildren = isDisabledAllChildren || ConfigGeneral.isHiddenNativeGroupFrames;
+
+            ImGui::Checkbox("Hide all", &ConfigGeneral.isHiddenNativeAll);
+            ImGui::Indent();
+            {
+                if (isDisabledAllChildren) { ImGui::BeginDisabled(); }
+                ImGui::Checkbox("Hide group panel", &ConfigGeneral.isHiddenNativeGroupPanel);
+                ImGui::Checkbox("Hide group frames", &ConfigGeneral.isHiddenNativeGroupFrames);
+                if (isDisabledAllChildren) { ImGui::EndDisabled(); }
+
+                ImGui::Indent();
+                {
+                    if (isDisabledGroupFramesChildren) { ImGui::BeginDisabled(); }
+                    ImGui::Checkbox("Hide party frames", &ConfigGeneral.isHiddenNativePartyFrames);
+                    ImGui::Checkbox("Hide raid frames", &ConfigGeneral.isHiddenNativeRaidFrames);
+                    ImGui::Checkbox("Hide squad frames", &ConfigGeneral.isHiddenNativeSquadFrames);
+                    ImGui::Checkbox("Hide squad broadcast", &ConfigGeneral.isHiddenNativeSquadBroadcast);
+                    ImGui::Checkbox("Hide squad info", &ConfigGeneral.isHiddenNativeSquadInfo);
+                    if (isDisabledGroupFramesChildren) { ImGui::EndDisabled(); }
+                }
+                ImGui::Unindent();
+
+                if (isDisabledAllChildren) { ImGui::BeginDisabled(); }
+                ImGui::Checkbox("Hide group requests", &ConfigGeneral.isHiddenNativeGroupRequests);
+                if (isDisabledAllChildren) { ImGui::EndDisabled(); }
+            }
+            ImGui::Unindent();
         }
         ImGui::PopID();
 
@@ -458,7 +525,7 @@ namespace Addon {
                         VitalSignsDataLink::EProfession profession, 
                         VitalSignsDataLink::ESpecialisation specialisation, 
                         float health, 
-                        VitalSignsDataLink::E_HEALTH_TYPE healthType, 
+                        VitalSignsDataLink::EHealthType healthType, 
                         float barrier) 
                     {
                         VitalSignsDataLink::UserData_t user;
@@ -479,21 +546,21 @@ namespace Addon {
                         previewCount++;
                     };
 
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::Commander, "Preview.0001", "Preview 1", "", true, VitalSignsDataLink::EProfession::Elementalist, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::Lieutenant, "Preview.0002", "Preview 2", "", true, VitalSignsDataLink::EProfession::Engineer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.5f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0003", "Preview 3", "My Nickname 3", true, VitalSignsDataLink::EProfession::Guardian, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0004", "Preview 4", "My Nickname 4", true, VitalSignsDataLink::EProfession::Mesmer, VitalSignsDataLink::ESpecialisation::None, 0.25f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0005", "Preview 5", "", true, VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.5f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0006", "Preview 6", "", true, VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_SHROUD_NECROMANCER, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0007", "Preview 7", "", true, VitalSignsDataLink::EProfession::Ranger, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0008", "Preview 8", "", true, VitalSignsDataLink::EProfession::Revenant, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0009", "Preview 9", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0010", "Preview 10", "", false, VitalSignsDataLink::EProfession::Warrior, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0011", "Preview 11", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0012", "Preview 12", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::E_HEALTH_SHROUD_SPECTER, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0013", "Preview 13", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::E_HEALTH_DOWNED, 0.25f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0014", "Preview 14", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.25f, VitalSignsDataLink::E_HEALTH_DEFEATED, 0.0f);
-                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0015", "Preview 15", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::E_HEALTH_ALIVE, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::Commander, "Preview.0001", "Preview 1", "", true, VitalSignsDataLink::EProfession::Elementalist, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::EHealthType::Alive, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::Lieutenant, "Preview.0002", "Preview 2", "", true, VitalSignsDataLink::EProfession::Engineer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::EHealthType::Alive, 0.5f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0003", "Preview 3", "My Nickname 3", true, VitalSignsDataLink::EProfession::Guardian, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0004", "Preview 4", "My Nickname 4", true, VitalSignsDataLink::EProfession::Mesmer, VitalSignsDataLink::ESpecialisation::None, 0.25f, VitalSignsDataLink::EHealthType::Alive, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0005", "Preview 5", "", true, VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 1.0f, VitalSignsDataLink::EHealthType::Alive, 0.5f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0006", "Preview 6", "", true, VitalSignsDataLink::EProfession::Necromancer, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::EHealthType::ShroudNecromancer, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0007", "Preview 7", "", true, VitalSignsDataLink::EProfession::Ranger, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::EHealthType::Alive, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0008", "Preview 8", "", true, VitalSignsDataLink::EProfession::Revenant, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::EHealthType::Alive, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0009", "Preview 9", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::None, 0.5f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0010", "Preview 10", "", false, VitalSignsDataLink::EProfession::Warrior, VitalSignsDataLink::ESpecialisation::None, 0.75f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0011", "Preview 11", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0012", "Preview 12", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::EHealthType::ShroudSpecter, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0013", "Preview 13", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.5f, VitalSignsDataLink::EHealthType::Downed, 0.25f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0014", "Preview 14", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.25f, VitalSignsDataLink::EHealthType::Defeated, 0.0f);
+                    AddPreviewItem(VitalSignsDataLink::ESquadRole::None, "Preview.0015", "Preview 15", "", true, VitalSignsDataLink::EProfession::Thief, VitalSignsDataLink::ESpecialisation::ThiefSpecter, 0.75f, VitalSignsDataLink::EHealthType::Alive, 0.25f);
                     UI::Grid::EndGridMenu();
                 }
 
@@ -1776,6 +1843,33 @@ namespace Addon {
             }
             ImGui::PopID();
         });
+
+        TreeNodeUID widgetsBranchId = g_PresetConfig.GenerateUID();
+        g_PresetConfig.AppendNode(TreeNodeUID::NONE, widgetsBranchId, "Styles", "", TreeNodeType::BRANCH);
+
+        /* Every widget has the same style options */
+        auto AddStylePresetItem = [&](const std::string& name, StylePreset_t& style) {
+            AddPresetItem(widgetsBranchId, "Style", name, [name, &style]() {
+                ImGui::PushID(("Style/" + name).c_str());
+                {
+                    ImGui::TextDisabled("Font");
+                    ImGui::Separator();
+                    form_StyleFontPreset(style);
+                    
+                    ImGui::TextDisabled("Colors");
+                    ImGui::Separator();
+                    form_StyleColorsPreset(style);
+                    
+                    ImGui::TextDisabled("Sizes");
+                    ImGui::Separator();
+                    form_StyleSizesPreset(style);
+                }
+                ImGui::PopID();
+            });
+        };
+
+        AddStylePresetItem("Group Panel", StylePresets.groupPanel);
+        AddStylePresetItem("Group Requests", StylePresets.groupRequests);
     }
 
 } // namespace Addon
