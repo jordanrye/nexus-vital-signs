@@ -1,6 +1,7 @@
 #include "ui_widget.h"
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 #include <vector>
 
@@ -124,6 +125,78 @@ namespace UI::Widget {
         return isPressed;
     }
 
+    static const int COMMANDER_TAG_GRID_ROWS = 2;    /* commander, catmander */
+    static const int COMMANDER_TAG_GRID_COLUMNS = 9; /* colours */
+
+    struct CommanderTagIcon_t
+    {
+        VitalSignsDataLink::ECommanderTag Tag;
+        const char* TextureId;
+        unsigned ResourceId;
+        const char* Tooltip;
+    };
+
+    /* The tag grid's layout: a row per shape, a column per colour */
+    static const CommanderTagIcon_t COMMANDER_TAG_GRID[COMMANDER_TAG_GRID_ROWS][COMMANDER_TAG_GRID_COLUMNS] =
+    {
+        {
+            { VitalSignsDataLink::ECommanderTag::CommanderRed,     "TEX_VS_COMMANDER_TAG_RED",     IDB_COMMANDER_TAG_RED,     "Red" },
+            { VitalSignsDataLink::ECommanderTag::CommanderOrange,  "TEX_VS_COMMANDER_TAG_ORANGE",  IDB_COMMANDER_TAG_ORANGE,  "Orange" },
+            { VitalSignsDataLink::ECommanderTag::CommanderYellow,  "TEX_VS_COMMANDER_TAG_YELLOW",  IDB_COMMANDER_TAG_YELLOW,  "Yellow" },
+            { VitalSignsDataLink::ECommanderTag::CommanderGreen,   "TEX_VS_COMMANDER_TAG_GREEN",   IDB_COMMANDER_TAG_GREEN,   "Green" },
+            { VitalSignsDataLink::ECommanderTag::CommanderCyan,    "TEX_VS_COMMANDER_TAG_CYAN",    IDB_COMMANDER_TAG_CYAN,    "Cyan" },
+            { VitalSignsDataLink::ECommanderTag::CommanderBlue,    "TEX_VS_COMMANDER_TAG_BLUE",    IDB_COMMANDER_TAG_BLUE,    "Blue" },
+            { VitalSignsDataLink::ECommanderTag::CommanderPurple,  "TEX_VS_COMMANDER_TAG_PURPLE",  IDB_COMMANDER_TAG_PURPLE,  "Purple" },
+            { VitalSignsDataLink::ECommanderTag::CommanderMagenta, "TEX_VS_COMMANDER_TAG_MAGENTA", IDB_COMMANDER_TAG_MAGENTA, "Magenta" },
+            { VitalSignsDataLink::ECommanderTag::CommanderWhite,   "TEX_VS_COMMANDER_TAG_WHITE",   IDB_COMMANDER_TAG_WHITE,   "White" },
+        },
+        {
+            { VitalSignsDataLink::ECommanderTag::CatmanderRed,     "TEX_VS_CATMANDER_TAG_RED",     IDB_CATMANDER_TAG_RED,     "Red" },
+            { VitalSignsDataLink::ECommanderTag::CatmanderOrange,  "TEX_VS_CATMANDER_TAG_ORANGE",  IDB_CATMANDER_TAG_ORANGE,  "Orange" },
+            { VitalSignsDataLink::ECommanderTag::CatmanderYellow,  "TEX_VS_CATMANDER_TAG_YELLOW",  IDB_CATMANDER_TAG_YELLOW,  "Yellow" },
+            { VitalSignsDataLink::ECommanderTag::CatmanderGreen,   "TEX_VS_CATMANDER_TAG_GREEN",   IDB_CATMANDER_TAG_GREEN,   "Green" },
+            { VitalSignsDataLink::ECommanderTag::CatmanderCyan,    "TEX_VS_CATMANDER_TAG_CYAN",    IDB_CATMANDER_TAG_CYAN,    "Cyan" },
+            { VitalSignsDataLink::ECommanderTag::CatmanderBlue,    "TEX_VS_CATMANDER_TAG_BLUE",    IDB_CATMANDER_TAG_BLUE,    "Blue" },
+            { VitalSignsDataLink::ECommanderTag::CatmanderPurple,  "TEX_VS_CATMANDER_TAG_PURPLE",  IDB_CATMANDER_TAG_PURPLE,  "Purple" },
+            { VitalSignsDataLink::ECommanderTag::CatmanderMagenta, "TEX_VS_CATMANDER_TAG_MAGENTA", IDB_CATMANDER_TAG_MAGENTA, "Magenta" },
+            { VitalSignsDataLink::ECommanderTag::CatmanderWhite,   "TEX_VS_CATMANDER_TAG_WHITE",   IDB_CATMANDER_TAG_WHITE,   "White" },
+        },
+    };
+
+    /* `nullptr` for `None` */
+    static const CommanderTagIcon_t* FindCommanderTagIcon(const VitalSignsDataLink::ECommanderTag tag)
+    {
+        for (const auto& row : COMMANDER_TAG_GRID)
+        {
+            for (const CommanderTagIcon_t& icon : row)
+            {
+                if (icon.Tag == tag)
+                {
+                    return &icon;
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
+    /* Draws the texture centred in a square, scaled to fit while keeping its
+     * aspect ratio. The two tag shapes have different heights, so the grid
+     * stays aligned. Nothing is drawn until the texture has loaded. */
+    static void DrawTextureInSquare(ImDrawList* drawList, const Texture* texture, const ImVec2& min, const float side)
+    {
+        if (!texture || (texture->Width == 0U) || (texture->Height == 0U))
+        {
+            return;
+        }
+
+        const float scale = side / static_cast<float>((std::max)(texture->Width, texture->Height));
+        const ImVec2 size(IM_FLOOR(texture->Width * scale), IM_FLOOR(texture->Height * scale));
+        const ImVec2 imageMin(IM_FLOOR(min.x + ((side - size.x) * 0.5f)), IM_FLOOR(min.y + ((side - size.y) * 0.5f)));
+
+        drawList->AddImage(texture->Resource, imageMin, ImVec2(imageMin.x + size.x, imageMin.y + size.y));
+    }
+
     static float GetInputWidth(const int strLen)
     {
         const std::string sample(static_cast<size_t>(strLen), '0');
@@ -143,7 +216,7 @@ namespace UI::Widget {
     void RenderGroupPanel(const VitalSignsDataLink::EGroupType groupType)
     {
         const char* POPUP_GROUP_SETTINGS = "GroupSettings##VitalSignsGroupWidget";
-        const char* JOIN_BEHAVIOR_LABELS[] = { "Yes", "Yes, after approval", "No" };
+        const char* JOIN_BEHAVIOR_LABELS[] = { "Yes, anyone can join.", "Yes, with approval.", "No." };
         const uint32_t RAID_SQUAD_CAPACITY = 10U;
 
         /* Not persisted between sessions */
@@ -332,7 +405,7 @@ namespace UI::Widget {
 
                             if (GroupIconButton("##CreateSquad", EGroupIcon::Squad, isParty ? "Convert to Squad" : "Create Squad"))
                             {
-                                VitalsData->createSquad(0U, false);
+                                VitalsData->createSquad(false);
                                 ImGui::CloseCurrentPopup();
                             }
                         }
@@ -341,7 +414,7 @@ namespace UI::Widget {
 
                         if (GroupIconButton("##CreateRaidSquad", EGroupIcon::Raid, isParty ? "Convert to Raid Squad" : "Create Raid Squad"))
                         {
-                            VitalsData->createSquad(0U, true);
+                            VitalsData->createSquad(true);
                             ImGui::CloseCurrentPopup();
                         }
                     }
@@ -461,30 +534,91 @@ namespace UI::Widget {
                         ImGui::EndCombo();
                     }
 
-                    /* Commander tag, shown by id until the tag textures are available */
-                    std::vector<VitalSignsDataLink::CommanderTag_t> commanderTags = VitalsData->getCommanderTags();
-                    commanderTags.erase(std::remove_if(commanderTags.begin(), commanderTags.end(),
-                        [](const VitalSignsDataLink::CommanderTag_t& tag) { return !tag.IsUnlocked; }), commanderTags.end());
+                    /* Commander tag, picked from a grid of the unlocked tags */
+                    const std::vector<VitalSignsDataLink::ECommanderTag> unlockedTags = VitalsData->getUnlockedCommanderTags();
 
-                    if (isCommanderUnlocked && !commanderTags.empty())
+                    if (isCommanderUnlocked && !unlockedTags.empty())
                     {
-                        const uint32_t currentTag = VitalsData->getCommanderTag();
-                        const std::string currentLabel = "Tag " + std::to_string(currentTag);
+                        const VitalSignsDataLink::ECommanderTag currentTag = VitalsData->getCommanderTag();
+                        const CommanderTagIcon_t* currentIcon = FindCommanderTagIcon(currentTag);
+
+                        auto isTagUnlocked = [&unlockedTags](const VitalSignsDataLink::ECommanderTag tag)
+                        {
+                            return std::find(unlockedTags.begin(), unlockedTags.end(), tag) != unlockedTags.end();
+                        };
 
                         ImGui::Text("Commander tag");
-                        ImGui::SetNextItemWidth(GetComboWidth(PANEL_TEXT_BOX_LENGTH));
 
-                        if (ImGui::BeginCombo("##CommanderTag", currentLabel.c_str()))
+                        const float previewSide = ImGui::GetTextLineHeight();
+                        const float arrowWidth = ImGui::GetFrameHeight(); /* button is square */
+                        ImGuiWindow* panelWindow = ImGui::GetCurrentWindow();
+
+                        ImGui::SetNextItemWidth(previewSide + (ImGui::GetStyle().FramePadding.x * 2.0f) + arrowWidth);
+                        const bool isComboOpen = ImGui::BeginCombo("##CommanderTag", "");
+
+                        if (currentIcon)
+                        {
+                            const ImRect comboRect = panelWindow->DC.LastItemRect;
+                            const ImVec2 previewMin(
+                                IM_FLOOR(comboRect.Min.x + ((comboRect.GetWidth() - arrowWidth - previewSide) * 0.5f)),
+                                IM_FLOOR(comboRect.Min.y + ((comboRect.GetHeight() - previewSide) * 0.5f)));
+
+                            DrawTextureInSquare(panelWindow->DrawList, UI::GetOrCreateTextureFromResource(currentIcon->TextureId, currentIcon->ResourceId), previewMin, previewSide);
+                        }
+
+                        if (isComboOpen)
                         {
                             styleScope.ApplyFontScale();
 
-                            for (const VitalSignsDataLink::CommanderTag_t& tag : commanderTags)
-                            {
-                                const std::string label = "Tag " + std::to_string(tag.Id);
+                            /* Sized after the font scale, so the grid scales with the popup */
+                            const float cellSide = ImGui::GetFrameHeight();
 
-                                if (ImGui::Selectable(label.c_str(), tag.Id == currentTag))
+                            for (const auto& row : COMMANDER_TAG_GRID)
+                            {
+                                /* A shape with no unlocked tags takes no space */
+                                if (std::none_of(std::begin(row), std::end(row),
+                                    [&isTagUnlocked](const CommanderTagIcon_t& icon) { return isTagUnlocked(icon.Tag); }))
                                 {
-                                    VitalsData->setCommanderTag(tag.Id);
+                                    continue;
+                                }
+
+                                for (int column = 0; column < COMMANDER_TAG_GRID_COLUMNS; column++)
+                                {
+                                    const CommanderTagIcon_t& icon = row[column];
+
+                                    if (column > 0)
+                                    {
+                                        ImGui::SameLine();
+                                    }
+
+                                    /* Locked tags are hidden, their cell kept so the columns line up */
+                                    if (!isTagUnlocked(icon.Tag))
+                                    {
+                                        ImGui::Dummy(ImVec2(cellSide, cellSide));
+                                        continue;
+                                    }
+
+                                    ImGui::PushID(icon.TextureId);
+
+                                    if (ImGui::Selectable("##Tag", icon.Tag == currentTag, ImGuiSelectableFlags_None, ImVec2(cellSide, cellSide)))
+                                    {
+                                        VitalsData->setCommanderTag(icon.Tag);
+                                    }
+
+                                    /* The selectable's rect is padded by half the item spacing on each
+                                     * side, so the icon is centred in it rather than at its corner. */
+                                    const ImVec2 cellMin(
+                                        IM_FLOOR(ImGui::GetItemRectMin().x + ((ImGui::GetItemRectSize().x - cellSide) * 0.5f)),
+                                        IM_FLOOR(ImGui::GetItemRectMin().y + ((ImGui::GetItemRectSize().y - cellSide) * 0.5f)));
+
+                                    DrawTextureInSquare(ImGui::GetWindowDrawList(), UI::GetOrCreateTextureFromResource(icon.TextureId, icon.ResourceId), cellMin, cellSide);
+
+                                    if (ImGui::IsItemHovered())
+                                    {
+                                        ImGui::SetTooltip("%s", icon.Tooltip);
+                                    }
+
+                                    ImGui::PopID();
                                 }
                             }
 

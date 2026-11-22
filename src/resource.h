@@ -23,5 +23,23 @@
 #define IDB_GROUP_ICON_SQUAD_MESSAGE_HOVERED    122
 #define IDB_GROUP_ICON_RIGHT_ARROW_NORMAL       123
 #define IDB_GROUP_ICON_RIGHT_ARROW_HOVERED      124
+#define IDB_COMMANDER_TAG_BLUE                  125
+#define IDB_COMMANDER_TAG_CYAN                  126
+#define IDB_COMMANDER_TAG_GREEN                 127
+#define IDB_COMMANDER_TAG_MAGENTA               128
+#define IDB_COMMANDER_TAG_ORANGE                129
+#define IDB_COMMANDER_TAG_PURPLE                130
+#define IDB_COMMANDER_TAG_RED                   131
+#define IDB_COMMANDER_TAG_WHITE                 132
+#define IDB_COMMANDER_TAG_YELLOW                133
+#define IDB_CATMANDER_TAG_BLUE                  134
+#define IDB_CATMANDER_TAG_CYAN                  135
+#define IDB_CATMANDER_TAG_GREEN                 136
+#define IDB_CATMANDER_TAG_MAGENTA               137
+#define IDB_CATMANDER_TAG_ORANGE                138
+#define IDB_CATMANDER_TAG_PURPLE                139
+#define IDB_CATMANDER_TAG_RED                   140
+#define IDB_CATMANDER_TAG_WHITE                 141
+#define IDB_CATMANDER_TAG_YELLOW                142
 
 #endif /* RESOURCE_H */
