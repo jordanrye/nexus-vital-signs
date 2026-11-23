@@ -125,76 +125,52 @@ namespace UI::Widget {
         return isPressed;
     }
 
-    static const int COMMANDER_TAG_GRID_ROWS = 2;    /* commander, catmander */
-    static const int COMMANDER_TAG_GRID_COLUMNS = 9; /* colours */
-
-    struct CommanderTagIcon_t
-    {
-        VitalSignsDataLink::ECommanderTag Tag;
-        const char* TextureId;
-        unsigned ResourceId;
-        const char* Tooltip;
-    };
-
-    /* The tag grid's layout: a row per shape, a column per colour */
-    static const CommanderTagIcon_t COMMANDER_TAG_GRID[COMMANDER_TAG_GRID_ROWS][COMMANDER_TAG_GRID_COLUMNS] =
-    {
-        {
-            { VitalSignsDataLink::ECommanderTag::CommanderRed,     "TEX_VS_COMMANDER_TAG_RED",     IDB_COMMANDER_TAG_RED,     "Red" },
-            { VitalSignsDataLink::ECommanderTag::CommanderOrange,  "TEX_VS_COMMANDER_TAG_ORANGE",  IDB_COMMANDER_TAG_ORANGE,  "Orange" },
-            { VitalSignsDataLink::ECommanderTag::CommanderYellow,  "TEX_VS_COMMANDER_TAG_YELLOW",  IDB_COMMANDER_TAG_YELLOW,  "Yellow" },
-            { VitalSignsDataLink::ECommanderTag::CommanderGreen,   "TEX_VS_COMMANDER_TAG_GREEN",   IDB_COMMANDER_TAG_GREEN,   "Green" },
-            { VitalSignsDataLink::ECommanderTag::CommanderCyan,    "TEX_VS_COMMANDER_TAG_CYAN",    IDB_COMMANDER_TAG_CYAN,    "Cyan" },
-            { VitalSignsDataLink::ECommanderTag::CommanderBlue,    "TEX_VS_COMMANDER_TAG_BLUE",    IDB_COMMANDER_TAG_BLUE,    "Blue" },
-            { VitalSignsDataLink::ECommanderTag::CommanderPurple,  "TEX_VS_COMMANDER_TAG_PURPLE",  IDB_COMMANDER_TAG_PURPLE,  "Purple" },
-            { VitalSignsDataLink::ECommanderTag::CommanderMagenta, "TEX_VS_COMMANDER_TAG_MAGENTA", IDB_COMMANDER_TAG_MAGENTA, "Magenta" },
-            { VitalSignsDataLink::ECommanderTag::CommanderWhite,   "TEX_VS_COMMANDER_TAG_WHITE",   IDB_COMMANDER_TAG_WHITE,   "White" },
-        },
-        {
-            { VitalSignsDataLink::ECommanderTag::CatmanderRed,     "TEX_VS_CATMANDER_TAG_RED",     IDB_CATMANDER_TAG_RED,     "Red" },
-            { VitalSignsDataLink::ECommanderTag::CatmanderOrange,  "TEX_VS_CATMANDER_TAG_ORANGE",  IDB_CATMANDER_TAG_ORANGE,  "Orange" },
-            { VitalSignsDataLink::ECommanderTag::CatmanderYellow,  "TEX_VS_CATMANDER_TAG_YELLOW",  IDB_CATMANDER_TAG_YELLOW,  "Yellow" },
-            { VitalSignsDataLink::ECommanderTag::CatmanderGreen,   "TEX_VS_CATMANDER_TAG_GREEN",   IDB_CATMANDER_TAG_GREEN,   "Green" },
-            { VitalSignsDataLink::ECommanderTag::CatmanderCyan,    "TEX_VS_CATMANDER_TAG_CYAN",    IDB_CATMANDER_TAG_CYAN,    "Cyan" },
-            { VitalSignsDataLink::ECommanderTag::CatmanderBlue,    "TEX_VS_CATMANDER_TAG_BLUE",    IDB_CATMANDER_TAG_BLUE,    "Blue" },
-            { VitalSignsDataLink::ECommanderTag::CatmanderPurple,  "TEX_VS_CATMANDER_TAG_PURPLE",  IDB_CATMANDER_TAG_PURPLE,  "Purple" },
-            { VitalSignsDataLink::ECommanderTag::CatmanderMagenta, "TEX_VS_CATMANDER_TAG_MAGENTA", IDB_CATMANDER_TAG_MAGENTA, "Magenta" },
-            { VitalSignsDataLink::ECommanderTag::CatmanderWhite,   "TEX_VS_CATMANDER_TAG_WHITE",   IDB_CATMANDER_TAG_WHITE,   "White" },
-        },
-    };
-
-    /* `nullptr` for `None` */
-    static const CommanderTagIcon_t* FindCommanderTagIcon(const VitalSignsDataLink::ECommanderTag tag)
-    {
-        for (const auto& row : COMMANDER_TAG_GRID)
-        {
-            for (const CommanderTagIcon_t& icon : row)
-            {
-                if (icon.Tag == tag)
-                {
-                    return &icon;
-                }
-            }
-        }
-
-        return nullptr;
-    }
-
     /* Draws the texture centred in a square, scaled to fit while keeping its
-     * aspect ratio. The two tag shapes have different heights, so the grid
-     * stays aligned. Nothing is drawn until the texture has loaded. */
-    static void DrawTextureInSquare(ImDrawList* drawList, const Texture* texture, const ImVec2& min, const float side)
+     * aspect ratio. Only the part between the UVs is drawn, and sets the aspect
+     * ratio. The two tag shapes have different heights, so the grid stays
+     * aligned. Nothing is drawn until the texture has loaded. */
+    static void DrawTextureInSquare(ImDrawList* drawList, const Texture* texture, const ImVec2& min, const float side,
+                                    const ImVec2& uvMin = ImVec2(0.0f, 0.0f), const ImVec2& uvMax = ImVec2(1.0f, 1.0f))
     {
-        if (!texture || (texture->Width == 0U) || (texture->Height == 0U))
+        if (!texture || !texture->Resource || (texture->Width == 0U) || (texture->Height == 0U))
         {
             return;
         }
 
-        const float scale = side / static_cast<float>((std::max)(texture->Width, texture->Height));
-        const ImVec2 size(IM_FLOOR(texture->Width * scale), IM_FLOOR(texture->Height * scale));
+        const float width = texture->Width * (uvMax.x - uvMin.x);
+        const float height = texture->Height * (uvMax.y - uvMin.y);
+
+        if ((width <= 0.0f) || (height <= 0.0f))
+        {
+            return;
+        }
+
+        const float scale = side / (std::max)(width, height);
+        const ImVec2 size(IM_FLOOR(width * scale), IM_FLOOR(height * scale));
         const ImVec2 imageMin(IM_FLOOR(min.x + ((side - size.x) * 0.5f)), IM_FLOOR(min.y + ((side - size.y) * 0.5f)));
 
-        drawList->AddImage(texture->Resource, imageMin, ImVec2(imageMin.x + size.x, imageMin.y + size.y));
+        drawList->AddImage(texture->Resource, imageMin, ImVec2(imageMin.x + size.x, imageMin.y + size.y), uvMin, uvMax);
+    }
+
+    /* Draws the game's icon for the tag, or a placeholder while it is loading or
+     * if the game's textures could not be found */
+    static void DrawCommanderTag(ImDrawList* drawList, const VitalSignsDataLink::ECommanderTag tag, const ImVec2& min, const float side)
+    {
+        const Texture texture = VitalsData->getCommanderTagTexture(tag);
+
+        /* The visible part of the game's 128x128 tag textures, measured from their alpha */
+        const bool isCatmander = (tag >= static_cast<VitalSignsDataLink::ECommanderTag>(9));
+        const ImVec2 uvMin = isCatmander ? ImVec2(30.0f / 128.0f, 25.0f / 128.0f) : ImVec2(29.0f / 128.0f, 27.0f / 128.0f);
+        const ImVec2 uvMax = isCatmander ? ImVec2(98.0f / 128.0f, 101.0f / 128.0f) : ImVec2(99.0f / 128.0f, 101.0f / 128.0f);
+
+        if (nullptr != texture.Resource)
+        {
+            DrawTextureInSquare(drawList, &texture, min, side, uvMin, uvMax);
+        }
+        else
+        {
+            DrawTextureInSquare(drawList, UI::GetOrCreateTextureFromResource("TEX_VS_GROUP_ICON_READY_CHECK_NORMAL", IDB_GROUP_ICON_READY_CHECK_NORMAL), min, side);
+        }
     }
 
     static float GetInputWidth(const int strLen)
@@ -534,18 +510,12 @@ namespace UI::Widget {
                         ImGui::EndCombo();
                     }
 
-                    /* Commander tag, picked from a grid of the unlocked tags */
+                    /* Commander tag, picked from the unlocked tags */
                     const std::vector<VitalSignsDataLink::ECommanderTag> unlockedTags = VitalsData->getUnlockedCommanderTags();
 
                     if (isCommanderUnlocked && !unlockedTags.empty())
                     {
                         const VitalSignsDataLink::ECommanderTag currentTag = VitalsData->getCommanderTag();
-                        const CommanderTagIcon_t* currentIcon = FindCommanderTagIcon(currentTag);
-
-                        auto isTagUnlocked = [&unlockedTags](const VitalSignsDataLink::ECommanderTag tag)
-                        {
-                            return std::find(unlockedTags.begin(), unlockedTags.end(), tag) != unlockedTags.end();
-                        };
 
                         ImGui::Text("Commander tag");
 
@@ -556,14 +526,14 @@ namespace UI::Widget {
                         ImGui::SetNextItemWidth(previewSide + (ImGui::GetStyle().FramePadding.x * 2.0f) + arrowWidth);
                         const bool isComboOpen = ImGui::BeginCombo("##CommanderTag", "");
 
-                        if (currentIcon)
+                        if (VitalSignsDataLink::ECommanderTag::None != currentTag)
                         {
                             const ImRect comboRect = panelWindow->DC.LastItemRect;
                             const ImVec2 previewMin(
                                 IM_FLOOR(comboRect.Min.x + ((comboRect.GetWidth() - arrowWidth - previewSide) * 0.5f)),
                                 IM_FLOOR(comboRect.Min.y + ((comboRect.GetHeight() - previewSide) * 0.5f)));
 
-                            DrawTextureInSquare(panelWindow->DrawList, UI::GetOrCreateTextureFromResource(currentIcon->TextureId, currentIcon->ResourceId), previewMin, previewSide);
+                            DrawCommanderTag(panelWindow->DrawList, currentTag, previewMin, previewSide);
                         }
 
                         if (isComboOpen)
@@ -573,53 +543,34 @@ namespace UI::Widget {
                             /* Sized after the font scale, so the grid scales with the popup */
                             const float cellSide = ImGui::GetFrameHeight();
 
-                            for (const auto& row : COMMANDER_TAG_GRID)
+                            /* A row per shape: tags are unlocked a whole shape at a time, and
+                             * listed by shape then colour, so each row starts with red */
+                            for (const VitalSignsDataLink::ECommanderTag tag : unlockedTags)
                             {
-                                /* A shape with no unlocked tags takes no space */
-                                if (std::none_of(std::begin(row), std::end(row),
-                                    [&isTagUnlocked](const CommanderTagIcon_t& icon) { return isTagUnlocked(icon.Tag); }))
+                                const int COMMANDER_TAG_COLOUR_COUNT = 9;
+                                const int index = static_cast<int>(tag);
+
+                                if ((index % COMMANDER_TAG_COLOUR_COUNT) != 0)
                                 {
-                                    continue;
+                                    ImGui::SameLine();
                                 }
 
-                                for (int column = 0; column < COMMANDER_TAG_GRID_COLUMNS; column++)
+                                ImGui::PushID(index);
+
+                                if (ImGui::Selectable("##Tag", tag == currentTag, ImGuiSelectableFlags_None, ImVec2(cellSide, cellSide)))
                                 {
-                                    const CommanderTagIcon_t& icon = row[column];
-
-                                    if (column > 0)
-                                    {
-                                        ImGui::SameLine();
-                                    }
-
-                                    /* Locked tags are hidden, their cell kept so the columns line up */
-                                    if (!isTagUnlocked(icon.Tag))
-                                    {
-                                        ImGui::Dummy(ImVec2(cellSide, cellSide));
-                                        continue;
-                                    }
-
-                                    ImGui::PushID(icon.TextureId);
-
-                                    if (ImGui::Selectable("##Tag", icon.Tag == currentTag, ImGuiSelectableFlags_None, ImVec2(cellSide, cellSide)))
-                                    {
-                                        VitalsData->setCommanderTag(icon.Tag);
-                                    }
-
-                                    /* The selectable's rect is padded by half the item spacing on each
-                                     * side, so the icon is centred in it rather than at its corner. */
-                                    const ImVec2 cellMin(
-                                        IM_FLOOR(ImGui::GetItemRectMin().x + ((ImGui::GetItemRectSize().x - cellSide) * 0.5f)),
-                                        IM_FLOOR(ImGui::GetItemRectMin().y + ((ImGui::GetItemRectSize().y - cellSide) * 0.5f)));
-
-                                    DrawTextureInSquare(ImGui::GetWindowDrawList(), UI::GetOrCreateTextureFromResource(icon.TextureId, icon.ResourceId), cellMin, cellSide);
-
-                                    if (ImGui::IsItemHovered())
-                                    {
-                                        ImGui::SetTooltip("%s", icon.Tooltip);
-                                    }
-
-                                    ImGui::PopID();
+                                    VitalsData->setCommanderTag(tag);
                                 }
+
+                                /* The selectable's rect is padded by half the item spacing on each
+                                 * side, so the icon is centred in it rather than at its corner. */
+                                const ImVec2 cellMin(
+                                    IM_FLOOR(ImGui::GetItemRectMin().x + ((ImGui::GetItemRectSize().x - cellSide) * 0.5f)),
+                                    IM_FLOOR(ImGui::GetItemRectMin().y + ((ImGui::GetItemRectSize().y - cellSide) * 0.5f)));
+
+                                DrawCommanderTag(ImGui::GetWindowDrawList(), tag, cellMin, cellSide);
+
+                                ImGui::PopID();
                             }
 
                             ImGui::EndCombo();

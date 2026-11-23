@@ -106,9 +106,13 @@
     <ClInclude Include="src\data_link\gw2re\Game\Dialog\DialogManager.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Frame\Frame.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Frame\FrameApi.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Graphics\BgfxRendererD3D11.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Graphics\GrTexture.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Map\EMapFlags.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Map\EMapType.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Map\MapDef.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\Marker\MarkerDef.h" />
+    <ClInclude Include="src\data_link\gw2re\Game\MaterialCache\McMaterial.h" />
     <ClInclude Include="src\data_link\gw2re\Game\MissionContext.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Player\EPlayerFlags.h" />
     <ClInclude Include="src\data_link\gw2re\Game\Portal\PlChannel.h" />
@@ -188,6 +192,9 @@
     <ClCompile Include="src\data_link\gw2re\Game\Dialog\DialogManager.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Frame\Frame.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Frame\FrameApi.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Graphics\BgfxRendererD3D11.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\Graphics\GrTexture.cpp" />
+    <ClCompile Include="src\data_link\gw2re\Game\MaterialCache\McMaterial.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Portal\PlChannel.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Portal\PlContact.cpp" />
     <ClCompile Include="src\data_link\gw2re\Game\Squad\SquadContext.cpp" />
@@ -204,6 +211,7 @@
     <ClCompile Include="src\data_link\data_link_social.cpp" />
     <ClCompile Include="src\data_link\data_link_stubs.cpp" />
     <ClCompile Include="src\data_link\data_link_targeting.cpp" />
+    <ClCompile Include="src\data_link\data_link_textures.cpp" />
     <ClCompile Include="src\data_link\data_link_users.cpp" />
     <ClCompile Include="src\entry.cpp" />
     <ClCompile Include="src\forms\bar.cpp" />
