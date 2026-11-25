@@ -229,47 +229,69 @@ namespace UI {
         return ImColor();
     }
 
-    Texture* GetOrCreateTexture(const std::string& textureSource, const std::string& texturePath)
+    bool HasGameIcon(const Trigger_t& trigger)
     {
-        Texture* texture = nullptr;
-        
-        if (APIDefs)
+        if ((trigger.category != "Boons") && (trigger.category != "Conditions"))
         {
-            texture = APIDefs->Textures.Get(texturePath.c_str());
+            return false;
+        }
 
-            // Create the Texture if it does not exist.
-            if (texture == nullptr && !texturePath.empty())
+        return VitalSignsDataLink::hasEffectIcon(trigger.effect);
+    }
+
+    Texture GetOrCreateTexture(const Icon_t& icon)
+    {
+        Texture texture{};
+
+        if (icon.source == "Game")
+        {
+            /* The game's icon is resolved every frame, it may move to another device texture */
+            if ((nullptr != VitalsData) && HasGameIcon(icon.trigger))
             {
-                if (textureSource == "File")
-                {
-                    if (texturePath != "")
-                    {
-                        if (std::filesystem::path(texturePath).is_relative())
-                        {
-                            texture = APIDefs->Textures.GetOrCreateFromFile(texturePath.c_str(), (GameDir / texturePath).string().c_str());
-                        }
-                        else
-                        {
-                            texture = APIDefs->Textures.GetOrCreateFromFile(texturePath.c_str(), texturePath.c_str());
-                        }
-                    }
-                }
-                else if (textureSource == "URL")
-                {
-                    if (texturePath != "")
-                    {
-                        std::string url = texturePath;
-                        std::string scheme = url_utils::getScheme(url);
-                        std::string domain = url_utils::getDomain(url);
-                        std::string path = url_utils::getPath(url);
+                texture = VitalsData->getEffectIconTexture(icon.trigger.effect);
+            }
 
-                        if ((scheme.length() != 0) && (domain.length() != 0) && (path.length() != 0))
-                        {
-                            texture = APIDefs->Textures.GetOrCreateFromURL(url.c_str(), std::string(scheme + domain).c_str(), path.c_str());
-                        }
-                    }
+            return texture;
+        }
+
+        if (!APIDefs || icon.path.empty())
+        {
+            return texture;
+        }
+
+        Texture* nexusTexture = APIDefs->Textures.Get(icon.path.c_str());
+
+        // Create the Texture if it does not exist.
+        if (nexusTexture == nullptr)
+        {
+            if (icon.source == "File")
+            {
+                if (std::filesystem::path(icon.path).is_relative())
+                {
+                    nexusTexture = APIDefs->Textures.GetOrCreateFromFile(icon.path.c_str(), (GameDir / icon.path).string().c_str());
+                }
+                else
+                {
+                    nexusTexture = APIDefs->Textures.GetOrCreateFromFile(icon.path.c_str(), icon.path.c_str());
                 }
             }
+            else if (icon.source == "URL")
+            {
+                std::string url = icon.path;
+                std::string scheme = url_utils::getScheme(url);
+                std::string domain = url_utils::getDomain(url);
+                std::string path = url_utils::getPath(url);
+
+                if ((scheme.length() != 0) && (domain.length() != 0) && (path.length() != 0))
+                {
+                    nexusTexture = APIDefs->Textures.GetOrCreateFromURL(url.c_str(), std::string(scheme + domain).c_str(), path.c_str());
+                }
+            }
+        }
+
+        if (nexusTexture != nullptr)
+        {
+            texture = *nexusTexture;
         }
 
         return texture;

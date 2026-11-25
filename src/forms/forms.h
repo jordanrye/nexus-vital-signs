@@ -36,7 +36,7 @@ void form_StyleFontPreset(StylePreset_t& style);
 void form_StyleSizesPreset(StylePreset_t& style);
 void form_TextDataSource(std::string& textType, std::string& textCustom);
 void form_TextLimit(std::string& limitType, float& limitValue);
-void form_Texture(std::string& textureSource, std::string& texturePath);
+void form_Texture(Icon_t& icon);
 void form_Threshold(float& percentage, bool& stretchToFitHeight, Line_t& line);
 void form_Trigger(Trigger_t& trigger);
 void form_Visibility(std::string& visibility);

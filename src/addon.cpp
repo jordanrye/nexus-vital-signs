@@ -1100,6 +1100,12 @@ namespace Addon {
 
         if ("Icon" == indicator.type)
         {
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.iconSingle.icon.trigger);
+            }
+
             ImGui::TextDisabled("Position");
             ImGui::Separator();
             {
@@ -1109,7 +1115,7 @@ namespace Addon {
             ImGui::TextDisabled("Icon");
             ImGui::Separator();
             {
-                form_Texture(indicator.iconSingle.icon.source, indicator.iconSingle.icon.path);
+                form_Texture(indicator.iconSingle.icon);
                 form_Size(indicator.iconSingle.size);
                 
                 ImGui::PushID("DurationText");
@@ -1117,6 +1123,8 @@ namespace Addon {
                 {
                     if (ImGui::CheckableCollapsingHeader("Duration", &(indicator.iconSingle.showDuration)))
                     {
+                        form_IconTextTriggerDuration(indicator.iconSingle.durationText.trigger);
+
                         ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Position(indicator.iconSingle.durationText.positionSource, indicator.iconSingle.durationText.position);
@@ -1138,8 +1146,6 @@ namespace Addon {
                                 indicator.iconSingle.durationText.textStyle.outlineColor);
                         }
                         ImGui::EndGroupPanel();
-
-                        form_IconTextTriggerDuration(indicator.iconSingle.durationText.trigger);
                     }
                 }
                 else
@@ -1153,6 +1159,8 @@ namespace Addon {
                 {
                     if (ImGui::CheckableCollapsingHeader("Stacks", &(indicator.iconSingle.showStacks)))
                     {
+                        form_IconTextTriggerStacks(indicator.iconSingle.stacksText.trigger);
+
                         ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Position(indicator.iconSingle.stacksText.positionSource, indicator.iconSingle.stacksText.position);
@@ -1172,8 +1180,6 @@ namespace Addon {
                                 indicator.iconSingle.stacksText.textStyle.outlineColor);
                         }
                         ImGui::EndGroupPanel();
-
-                        form_IconTextTriggerStacks(indicator.iconSingle.stacksText.trigger);
                     }
                 }
                 else
@@ -1181,12 +1187,6 @@ namespace Addon {
                     ImGui::Checkbox("Show Stacks", &indicator.iconSingle.showStacks);
                 }
                 ImGui::PopID();
-            }
-            
-            ImGui::TextDisabled("Trigger");
-            ImGui::Separator();
-            {
-                form_Trigger(indicator.iconSingle.icon.trigger);
             }
         }
 
@@ -1216,6 +1216,8 @@ namespace Addon {
                 {
                     if (ImGui::CheckableCollapsingHeader("Duration", &(indicator.iconList.showDuration)))
                     {
+                        form_IconTextTriggerDuration(indicator.iconList.durationText.trigger);
+
                         ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Position(indicator.iconList.durationText.positionSource, indicator.iconList.durationText.position);
@@ -1237,8 +1239,6 @@ namespace Addon {
                                 indicator.iconList.durationText.textStyle.outlineColor);   
                         }
                         ImGui::EndGroupPanel();
-
-                        form_IconTextTriggerDuration(indicator.iconList.durationText.trigger);
                     }
                 }
                 else
@@ -1252,6 +1252,8 @@ namespace Addon {
                 {
                     if (ImGui::CheckableCollapsingHeader("Stacks", &(indicator.iconList.showStacks)))
                     {
+                        form_IconTextTriggerStacks(indicator.iconList.stacksText.trigger);
+
                         ImGui::BeginGroupPanel("Position", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Position(indicator.iconList.stacksText.positionSource, indicator.iconList.stacksText.position);
@@ -1271,8 +1273,6 @@ namespace Addon {
                                 indicator.iconList.stacksText.textStyle.outlineColor);
                         }
                         ImGui::EndGroupPanel();
-
-                        form_IconTextTriggerStacks(indicator.iconList.stacksText.trigger);
                     }
                 }
                 else
@@ -1316,15 +1316,15 @@ namespace Addon {
                     {
                         ImGui::PushID(idx);
 
-                        ImGui::BeginGroupPanel("Icon Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
-                        {
-                            form_Texture(icon.source, icon.path);
-                        }
-                        ImGui::EndGroupPanel();
-
                         ImGui::BeginGroupPanel("Trigger", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
                         {
                             form_Trigger(icon.trigger);
+                        }
+                        ImGui::EndGroupPanel();
+
+                        ImGui::BeginGroupPanel("Icon Properties", ImVec2(ImGui::GetContentRegionMax().x, 0.f));
+                        {
+                            form_Texture(icon);
                         }
                         ImGui::EndGroupPanel();
 
@@ -1350,6 +1350,12 @@ namespace Addon {
 
         if ("Group" == indicator.type)
         {
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.group.trigger);
+            }
+
             ImGui::TextDisabled("Group Properties");
             ImGui::Separator();
             {
@@ -1359,47 +1365,47 @@ namespace Addon {
                 ImGui::TooltipGeneric("Only the first triggered item in the\n" \
                     "group will be rendered.");
             }
-            
-            ImGui::TextDisabled("Trigger");
-            ImGui::Separator();
-            {
-                form_Trigger(indicator.group.trigger);
-            }
         }
 
         if ("Border" == indicator.type)
         {
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.border.trigger);
+            }
+
             ImGui::TextDisabled("Border Properties");
             ImGui::Separator();
             {
                 ImGui::ColorEdit4("Color##BORDER_COLOR", (float*)&indicator.border.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 ImGui::InputInt("Thickness##BORDER_THICKNESS", &indicator.border.thickness, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue);
             }
-            
-            ImGui::TextDisabled("Trigger");
-            ImGui::Separator();
-            {
-                form_Trigger(indicator.border.trigger);
-            }
         }
 
         if ("Colour" == indicator.type)
         {
-            ImGui::TextDisabled("Color Properties");
-            ImGui::Separator();
-            {
-                ImGui::ColorEdit4("Color##COLOUR_COLOR", (float*)&indicator.colour.color, ImGuiColorEditFlags_AlphaPreviewHalf);
-            }
-            
             ImGui::TextDisabled("Trigger");
             ImGui::Separator();
             {
                 form_Trigger(indicator.colour.trigger);
             }
+
+            ImGui::TextDisabled("Color Properties");
+            ImGui::Separator();
+            {
+                ImGui::ColorEdit4("Color##COLOUR_COLOR", (float*)&indicator.colour.color, ImGuiColorEditFlags_AlphaPreviewHalf);
+            }
         }
 
         if ("Glow" == indicator.type)
         {
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.glow.trigger);
+            }
+
             static const char* positionOptions[] {
                 "Inner",
                 "Outer"
@@ -1445,16 +1451,16 @@ namespace Addon {
                 ImGui::SameLine();
                 ImGui::Checkbox("Right##GLOW_RIGHT", &indicator.glow.directionRight);
             }
-            
-            ImGui::TextDisabled("Trigger");
-            ImGui::Separator();
-            {
-                form_Trigger(indicator.glow.trigger);
-            }
         }
 
         if ("Text" == indicator.type)
         {
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.text.trigger);
+            }
+
             ImGui::TextDisabled("Position");
             ImGui::Separator();
             {
@@ -1476,16 +1482,16 @@ namespace Addon {
                 form_FontDecorator(indicator.text.decoratorsType, indicator.text.shadow, indicator.text.shadowColor, indicator.text.outline, indicator.text.outlineColor);
                 form_TextLimit(indicator.text.widthType, indicator.text.widthValue);
             }
-            
-            ImGui::TextDisabled("Trigger");
-            ImGui::Separator();
-            {
-                form_Trigger(indicator.text.trigger);
-            }
         }
 
         if ("Bar" == indicator.type)
         {
+            ImGui::TextDisabled("Trigger");
+            ImGui::Separator();
+            {
+                form_Trigger(indicator.bar.trigger);
+            }
+
             ImGui::TextDisabled("Position");
             ImGui::Separator();
             {
@@ -1503,26 +1509,20 @@ namespace Addon {
             {
                 form_BarProperties(indicator.bar.size, indicator.bar.backgroundColor, indicator.bar.foregroundColor, indicator.bar.rounding, indicator.bar.borderThickness, indicator.bar.borderColor);
             }
-
-            ImGui::TextDisabled("Trigger");
-            ImGui::Separator();
-            {
-                form_Trigger(indicator.bar.trigger);
-            }
         }
 
         if ("Threshold" == indicator.type)
         {
-            ImGui::TextDisabled("Threshold Properties");
-            ImGui::Separator();
-            {
-                form_Threshold(indicator.threshold.percentage, indicator.threshold.stretchToFitHeight, indicator.threshold.line);
-            }
-
             ImGui::TextDisabled("Trigger");
             ImGui::Separator();
             {
                 form_Trigger(indicator.threshold.trigger);
+            }
+
+            ImGui::TextDisabled("Threshold Properties");
+            ImGui::Separator();
+            {
+                form_Threshold(indicator.threshold.percentage, indicator.threshold.stretchToFitHeight, indicator.threshold.line);
             }
         }
     }
@@ -1800,6 +1800,10 @@ namespace Addon {
         AddPresetItem(textBranchId, "Text", "Icon (Duration)", []() {
             ImGui::PushID("Text/Icon/Duration");
             {
+                ImGui::TextDisabled("Trigger");
+                ImGui::Separator();
+                form_IconTextTriggerDuration(ConfigIconDuration.trigger, false);
+
                 ImGui::TextDisabled("Position");
                 ImGui::Separator();
                 form_Position(ConfigIconDuration.position);
@@ -1815,10 +1819,6 @@ namespace Addon {
                 form_FontSizePreset(ConfigIconDuration.textStyle.fontSizeSource, ConfigIconDuration.textStyle.fontSize);
                 ImGui::ColorEdit4("Color##ICON_DURATION_COLOR", (float*)&ConfigIconDuration.textStyle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 form_FontDecoratorPreset(ConfigIconDuration.textStyle.shadow, ConfigIconDuration.textStyle.shadowColor, ConfigIconDuration.textStyle.outline, ConfigIconDuration.textStyle.outlineColor);
-
-                ImGui::TextDisabled("Trigger");
-                ImGui::Separator();
-                form_IconTextTriggerDuration(ConfigIconDuration.trigger, false);
             }
             ImGui::PopID();
         });
@@ -1826,6 +1826,10 @@ namespace Addon {
         AddPresetItem(textBranchId, "Text", "Icon (Stacks)", []() {
             ImGui::PushID("Text/Icon/Stacks");
             {
+                ImGui::TextDisabled("Trigger");
+                ImGui::Separator();
+                form_IconTextTriggerStacks(ConfigIconStacks.trigger, false);
+
                 ImGui::TextDisabled("Position");
                 ImGui::Separator();
                 form_Position(ConfigIconStacks.position);
@@ -1836,10 +1840,6 @@ namespace Addon {
                 form_FontSizePreset(ConfigIconStacks.textStyle.fontSizeSource, ConfigIconStacks.textStyle.fontSize);
                 ImGui::ColorEdit4("Color##ICON_STACKS_COLOR", (float*)&ConfigIconStacks.textStyle.color, ImGuiColorEditFlags_AlphaPreviewHalf);
                 form_FontDecoratorPreset(ConfigIconStacks.textStyle.shadow, ConfigIconStacks.textStyle.shadowColor, ConfigIconStacks.textStyle.outline, ConfigIconStacks.textStyle.outlineColor);
-
-                ImGui::TextDisabled("Trigger");
-                ImGui::Separator();
-                form_IconTextTriggerStacks(ConfigIconStacks.trigger, false);
             }
             ImGui::PopID();
         });

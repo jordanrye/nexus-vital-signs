@@ -210,14 +210,14 @@ namespace UI::Grid {
         }
     }
 
-    void DrawIcon(ImDrawList * const drawList, DrawProperties_t properties, Texture* icon, const Size_t& size, std::string anchor, Coordinate_t offset, bool showDuration, float duration, const IconText_t& durationConfig, bool showStacks, unsigned int stacks, const IconText_t& stacksConfig)
+    void DrawIcon(ImDrawList * const drawList, DrawProperties_t properties, const Texture& icon, const Size_t& size, std::string anchor, Coordinate_t offset, bool showDuration, float duration, const IconText_t& durationConfig, bool showStacks, unsigned int stacks, const IconText_t& stacksConfig)
     {
-        if (icon != nullptr)
+        if (icon.Resource != nullptr)
         {
             ImVec2 iconSize = ImVec2((float)size.width, (float)size.height);
             ImVec2 iconPosition = CalcItemPosition(properties, iconSize, anchor, offset);
 
-            drawList->AddImage(icon->Resource, iconPosition, ImVec2(iconPosition.x + iconSize.x, iconPosition.y + iconSize.y));
+            drawList->AddImage(icon.Resource, iconPosition, ImVec2(iconPosition.x + iconSize.x, iconPosition.y + iconSize.y));
 
             bool isDurationVisible = showDuration;
             if (isDurationVisible)
@@ -939,7 +939,7 @@ namespace UI::Grid {
     {
         if (indicator->type == "Icon")
         {
-            Texture* texture = UI::GetOrCreateTexture(indicator->iconSingle.icon.source, indicator->iconSingle.icon.path);
+            const Texture texture = UI::GetOrCreateTexture(indicator->iconSingle.icon);
             float duration = userData.Effects[indicator->iconSingle.icon.trigger.effect].duration;
             unsigned int stacks = userData.Effects[indicator->iconSingle.icon.trigger.effect].stacks;
             DrawIcon(drawList, parentProperties, texture, indicator->iconSingle.size, indicator->iconSingle.position.anchor, indicator->iconSingle.position.offset, indicator->iconSingle.showDuration, duration, indicator->iconSingle.durationText, indicator->iconSingle.showStacks, stacks, indicator->iconSingle.stacksText);
@@ -972,7 +972,7 @@ namespace UI::Grid {
                 {
                     Coordinate_t iconOffset((iconSpacing.x * i + indicator->iconList.position.offset.x), (iconSpacing.y * i + indicator->iconList.position.offset.y));
                         
-                    Texture* texture = UI::GetOrCreateTexture(icon.source, icon.path);
+                    const Texture texture = UI::GetOrCreateTexture(icon);
                     float duration = userData.Effects[icon.trigger.effect].duration;
                     unsigned int stacks = userData.Effects[icon.trigger.effect].stacks;
                     DrawIcon(drawList, parentProperties, texture, indicator->iconList.size, indicator->iconList.position.anchor, iconOffset, indicator->iconList.showDuration, duration, indicator->iconList.durationText, indicator->iconList.showStacks, stacks, indicator->iconList.stacksText);
